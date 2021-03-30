@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
+import 'package:picsim/simscreen.dart';
 
 var programmSpeicher = [];
+List<String> storage = List.filled(256, "00");
+String wReg = "00000000"; 
 
 void main() {
   runApp(MyApp());
@@ -31,12 +34,12 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   void readProgramCode(var data) {
     programmSpeicher = [];
     data.forEach((String part) {
       if (RegExp(r"^[A-Fa-f0-9]{4}\s[A-Fa-f0-9]{4}").hasMatch(part)) {
-        programmSpeicher.add(int.parse(part.substring(5,8),radix: 16).toRadixString(2));
+        programmSpeicher
+            .add(int.parse(part.substring(5, 9), radix: 16).toRadixString(2));
       }
     });
     print(programmSpeicher);
@@ -68,6 +71,10 @@ class _MyHomePageState extends State<MyHomePage> {
               print(input.toString());
               print(result.path);
               readProgramCode(input);
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SimScreen()),
+              );
             }
           },
         )));
