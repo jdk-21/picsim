@@ -24,7 +24,7 @@ class _SimScreenState extends State<SimScreen> {
               alignment: MainAxisAlignment.center,
               children: [
                 OutlinedButton(
-                    onPressed: () => instructionRecognizer.recognize("11111000100101"),
+                    onPressed: () => instructionRecognizer.recognize("01011111111111"),
                     child: Text("Start"),
                     style: OutlinedButton.styleFrom(
                         primary: Colors.white, backgroundColor: Colors.green)),
