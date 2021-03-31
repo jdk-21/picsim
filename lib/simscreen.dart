@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:picsim/instructionRecognizer.dart';
 import 'package:picsim/main.dart';
 
 class SimScreen extends StatefulWidget {
@@ -8,7 +7,7 @@ class SimScreen extends StatefulWidget {
 }
 
 class _SimScreenState extends State<SimScreen> {
-  InstructionRecognizer instructionRecognizer = InstructionRecognizer();
+  
 
   @override
   Widget build(BuildContext context) {
@@ -24,14 +23,17 @@ class _SimScreenState extends State<SimScreen> {
               alignment: MainAxisAlignment.center,
               children: [
                 OutlinedButton(
-                    onPressed: () => instructionRecognizer.recognize("01011111111111"),
+                    onPressed: () {
+                      if (cycler.run) cycler.pause();
+                      else cycler.start();
+                    },
                     child: Text("Start"),
                     style: OutlinedButton.styleFrom(
                         primary: Colors.white, backgroundColor: Colors.green)),
                 OutlinedButton(
-                    onPressed: () => print("step"), child: Text("Step")),
+                    onPressed: () => cycler.step(), child: Text("Step")),
                 OutlinedButton(
-                  onPressed: () => print("reset"),
+                  onPressed: () => cycler.reset(),
                   child: Text("Reset"),
                   style: OutlinedButton.styleFrom(
                       primary: Colors.white, backgroundColor: Colors.red),
@@ -42,7 +44,7 @@ class _SimScreenState extends State<SimScreen> {
           Container(
             height: 500,
             child: ListView.builder(
-              itemCount: programmSpeicher.length,
+              itemCount: cycler.programStorage.length,
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
                   leading: Checkbox(
@@ -50,7 +52,7 @@ class _SimScreenState extends State<SimScreen> {
                     value: false,
                     onChanged: (value) => print("value changed"),
                   ),
-                  title: Text(programmSpeicher[index]),
+                  title: Text(cycler.programStorage[index]),
                 );
               },
             ),

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
+import 'package:picsim/instructionCycler.dart';
 import 'package:picsim/simscreen.dart';
 
-var programmSpeicher = [];
 List<String> storage = List.filled(256, "00");
 String wReg = "00000000"; 
+
+InstructionCycler cycler = InstructionCycler();
 
 void main() {
   runApp(MyApp());
@@ -35,14 +37,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   void readProgramCode(var data) {
-    programmSpeicher = [];
+  	cycler.programStorage = [];
     data.forEach((String part) {
       if (RegExp(r"^[A-Fa-f0-9]{4}\s[A-Fa-f0-9]{4}").hasMatch(part)) {
-        programmSpeicher
+        cycler.programStorage
             .add(int.parse(part.substring(5, 9), radix: 16).toRadixString(2));
       }
     });
-    print(programmSpeicher);
+    print(cycler.programStorage);
   }
 
   @override
