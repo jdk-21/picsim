@@ -3,6 +3,7 @@ import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:picsim/instructionCycler.dart';
 import 'package:picsim/simscreen.dart';
 
+List<Map> program = [];
 List<String> storage = List.filled(256, "00");
 String wReg = "00000000"; 
 
@@ -42,7 +43,9 @@ class _MyHomePageState extends State<MyHomePage> {
       if (RegExp(r"^[A-Fa-f0-9]{4}\s[A-Fa-f0-9]{4}").hasMatch(part)) {
         cycler.programStorage
             .add(int.parse(part.substring(5, 9), radix: 16).toRadixString(2));
+        program.add({'index': cycler.programStorage.length-1, 'content': part, 'isSelected': false});
       }
+      else program.add({'content': part, 'isSelected': false});
     });
     print(cycler.programStorage);
   }
@@ -68,11 +71,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
             final result = file.getFile();
             if (result != null) {
-              var input = await result.readAsLines();
+              var data = await result.readAsLines();
 
-              print(input.toString());
+              print(data.toString());
               print(result.path);
-              readProgramCode(input);
+              readProgramCode(data);
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => SimScreen()),

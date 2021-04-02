@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:picsim/main.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class SimScreen extends StatefulWidget {
   @override
@@ -7,7 +8,30 @@ class SimScreen extends StatefulWidget {
 }
 
 class _SimScreenState extends State<SimScreen> {
-  
+  var lastIndex = 0;
+
+  Future<void> lineHighlighter() async {
+    while (cycler.run) {
+      setState(() {
+        // c counts index
+        var c = 0;
+        print(program.length);
+        for (var element in program) {
+          print(element);
+          if (element['index'] == cycler.programCounter) {
+            program[lastIndex]['isSelected'] = false;
+            element['isSelected'] = true;
+            lastIndex = c;
+            print("lbubl"+ element.toString());
+            break;
+          }
+          c++;
+        };
+      });
+      await Future.delayed(const Duration(milliseconds: 100));
+    }
+    return;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,11 +48,14 @@ class _SimScreenState extends State<SimScreen> {
               children: [
                 OutlinedButton(
                     onPressed: () {
-                      if (cycler.run) cycler.pause();
-                      else cycler.start();
+                      if (cycler.run)
+                        cycler.pause();
+                      else {
+                        cycler.start();
+                        lineHighlighter();
+                      }
                     },
                     child: Text("Start"),
-                    
                     style: OutlinedButton.styleFrom(
                         primary: Colors.white, backgroundColor: Colors.green)),
                 OutlinedButton(
@@ -42,18 +69,31 @@ class _SimScreenState extends State<SimScreen> {
               ],
             ),
           ),
-          Container(
-            height: 500,
+          Expanded(
             child: ListView.builder(
-              itemCount: cycler.programStorage.length,
+              itemCount: program.length,
               itemBuilder: (BuildContext context, int index) {
-                return ListTile(
-                  leading: Checkbox(
-                    activeColor: Colors.redAccent,
-                    value: false,
-                    onChanged: (value) => print("value changed"),
+                return Padding(
+                  padding: const EdgeInsets.only(left: 15, right: 15),
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10)),
+                    margin: EdgeInsets.all(2),
+                    color: program[index]['isSelected'] == true
+                        ? Colors.amber
+                        : Colors.white,
+                    child: ListTile(
+                        dense: true,
+                        leading: Checkbox(
+                          activeColor: Colors.redAccent,
+                          value: false,
+                          onChanged: (value) => print("value changed"),
+                        ),
+                        title: Text(
+                          program[index]['content'],
+                          style: GoogleFonts.robotoMono(),
+                        )),
                   ),
-                  title: Text(cycler.programStorage[index]),
                 );
               },
             ),

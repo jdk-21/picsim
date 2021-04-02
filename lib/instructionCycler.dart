@@ -13,7 +13,8 @@ class InstructionCycler {
     while (run) {
       programCounter =
           recognizer.recognize(programCounter, programStorage[programCounter]);
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 500));
+      
     }
     
   }
