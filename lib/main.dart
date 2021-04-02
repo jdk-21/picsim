@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'PicSim'),
+      home: MyHomePage(title: 'PicSim'), 
     );
   }
 }

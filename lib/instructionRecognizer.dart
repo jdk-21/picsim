@@ -26,6 +26,10 @@ class InstructionRecognizer {
     else if (instruction.startsWith("0101")) {
       return bsf(index, instruction);
     }
+    // BTFSC
+    else if (instruction.startsWith("0110")) {
+      return btfsc(index, instruction);
+    }
     return 0;
     // add new instruction with else if
   }
@@ -94,7 +98,6 @@ class InstructionRecognizer {
   int bsf(int index, String instruction) {
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
-    storage[address] = "10";
     String d =
         "00000000" + int.parse(storage[address], radix: 16).toRadixString(2);
     String data = d.substring(d.length - 8);
@@ -105,5 +108,15 @@ class InstructionRecognizer {
     storage[address] = result.substring(result.length - 2);
     print(storage[address]);
     return index++;
+  }
+
+  int btfsc(int index, String instruction) {
+    int bit = int.parse(instruction.substring(4, 7), radix: 2);
+    int address = int.parse(instruction.substring(7), radix: 2);
+    if (int.parse(storage[address],radix: 16).toRadixString(2)[bit] == "1"){
+      return (index + 2);
+    }else{
+      return index++;
+    }    
   }
 }

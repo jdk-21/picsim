@@ -1,15 +1,15 @@
                     00001           ;TPicSim4
                     00002           ;Programm zum Test des 16F84-Simulators.
-                    00003           ;Es werden die Befehle DECFSZ, INCFSZ, RLF, RRF geprüft
+                    00003           ;Es werden die Befehle DECFSZ, INCFSZ, RLF, RRF geprï¿½ft
                     00004           ;(c) St. Lehmann
                     00005           ;Ersterstellung: 23.03.2016
-                    00006           ;Korrektur und ergänzt 09.05.2017 durch: Dominik Vogel
-                    00007           ;mod. 18.10.2018 für HSO
+                    00006           ;Korrektur und ergï¿½nzt 09.05.2017 durch: Dominik Vogel
+                    00007           ;mod. 18.10.2018 fï¿½r HSO
                     00008           ;
-                    00009           list c=132          ;Zeilenlänge im LST auf 132 Zeichen setzen
+                    00009           list c=132          ;Zeilenlï¿½nge im LST auf 132 Zeichen setzen
                     00010           
-                    00011           ;Definition einiger Symbole
-                    00012           ;für den Benutzer frei verwendbare Register
+                    00011           ;Definition einiger Symbole 
+                    00012           ;fï¿½r den Benutzer frei verwendbare Register
                     00013           wert1    equ 0ch             ;Variable Nr.1
                     00014           wert2    equ 0dh             ;Variable Nr.2
                     00015           ergeb    equ 0eh             ;Variable Nr.3
@@ -22,7 +22,7 @@
                     00022  loop     
 0000 3011           00023           movlw 11h           ;in W steht nun 11h, DC=?, C=?, Z=?
 0001 008C           00024           movwf wert1         ;diesen Wert abspeichern, DC=?, C=?, Z=?
-0002 3E11           00025           addlw 11h           ;löscht u.a. das Carry-Flag,  DC=0, C=0, Z=0
+0002 3E11           00025           addlw 11h           ;lï¿½scht u.a. das Carry-Flag,  DC=0, C=0, Z=0
 0003 0D8C           00026           rlf wert1           ;W=22h, wert1=22h, wert2=?? , DC=0, C=0, Z=0
 0004 0D8C           00027           rlf wert1           ;W=22h, wert1=44h, wert2=?? , DC=0, C=0, Z=0
 0005 0D8C           00028           rlf wert1           ;W=22h, wert1=88h, wert2=?? , DC=0, C=0, Z=0
@@ -56,10 +56,10 @@
                     00056           ;wert2=ADh, DC=0, C=0, Z=0
                     00057           ;wert2=B5h, DC=1, C=0, Z=0
                     00058           ;wert2=BEh, DC=0, C=0, Z=0
-0012 0B8C           00059           decfsz wert1        ;wert1=08h, wert1=07h, ... DC,C und Z bleiben unverändert
+0012 0B8C           00059           decfsz wert1        ;wert1=08h, wert1=07h, ... DC,C und Z bleiben unverï¿½ndert
 0013 2810           00060           goto loop1
                     00061             
-0014 30F0           00062           movlw 0f0h          ;Wert wird bis 00h (über FFh) hochgezählt
+0014 30F0           00062           movlw 0f0h          ;Wert wird bis 00h (ï¿½ber FFh) hochgezï¿½hlt
 0015 008C           00063           movwf wert1
 0016 018D           00064           clrf wert2
 0017 0100           00065           clrw
@@ -98,7 +98,7 @@
                     00098           ;W=7Bh, wert1=FDh, wert2=0Eh, DC=1, C=1, Z=0
                     00099           ;W=79h, wert1=FEh, wert2=0Fh, DC=1, C=1, Z=0
                     00100           ;W=78h, wert1=FFh, wert2=10h, DC=1, C=1, Z=0
-001A 0F8C           00101           incfsz wert1        ;wert1=F1h, F2h, F3h .. FFh, 00h, wert2 und Flags bleiben unverändert
+001A 0F8C           00101           incfsz wert1        ;wert1=F1h, F2h, F3h .. FFh, 00h, wert2 und Flags bleiben unverï¿½ndert
 001B 2818           00102           goto loop2         
                     00103             
                     00104  ende     

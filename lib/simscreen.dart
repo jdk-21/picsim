@@ -1,5 +1,7 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:picsim/main.dart';
+import 'package:picsim/instructionRecognizer.dart';
 
 class SimScreen extends StatefulWidget {
   @override
@@ -8,6 +10,7 @@ class SimScreen extends StatefulWidget {
 
 class _SimScreenState extends State<SimScreen> {
   
+  InstructionRecognizer recognizer = InstructionRecognizer();
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +34,7 @@ class _SimScreenState extends State<SimScreen> {
                     style: OutlinedButton.styleFrom(
                         primary: Colors.white, backgroundColor: Colors.green)),
                 OutlinedButton(
-                    onPressed: () => cycler.step(), child: Text("Step")),
+                    onPressed: () => recognizer.recognize(0, "01100000000001"), child: Text("Step")),
                 OutlinedButton(
                   onPressed: () => cycler.reset(),
                   child: Text("Reset"),

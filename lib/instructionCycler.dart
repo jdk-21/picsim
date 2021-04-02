@@ -36,6 +36,7 @@ class InstructionCycler {
   void step() {
     if (!run) {
       programCounter = recognizer.recognize(programCounter, programStorage[programCounter]);
+      print("step");
     }
   }
 }
