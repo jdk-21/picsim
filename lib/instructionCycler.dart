@@ -18,10 +18,6 @@ class InstructionCycler {
     
   }
 
-  Future<void> startasync(int blah) async {
-    
-  }
-
   void pause() {
     run = false;
     print("stopped");
@@ -36,6 +32,7 @@ class InstructionCycler {
   void step() {
     if (!run) {
       programCounter = recognizer.recognize(programCounter, programStorage[programCounter]);
+      print ("step");
     }
   }
 }
