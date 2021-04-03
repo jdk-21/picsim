@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:picsim/main.dart';
 import 'package:picsim/instructionRecognizer.dart';

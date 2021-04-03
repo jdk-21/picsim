@@ -17,7 +17,7 @@
                     00017           
                     00018           ;Definition des Prozessors
                     00019           device 16F84
-                    00020           ;Festlegen des Codebeginns
+                    00020           ;Festlegen des Codebeginns 
                     00021           org 0
                     00022  start    
                     00023           ;zuerst Timer0 intern durch den Befehlstakt erh�hen VT = 1:4

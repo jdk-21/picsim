@@ -3,7 +3,12 @@ import 'main.dart';
 class InstructionRecognizer {
   int recognize(int index, String instruction) {
     // ANDLW
-    if (instruction.startsWith("111001")) {
+    // CALL
+    if (instruction.startsWith("00000000001000")) {
+      return ret(index, instruction);
+    }
+
+    else if (instruction.startsWith("111001")) {
       return andlw(index, instruction);
     }
     // ADDWF
@@ -34,6 +39,11 @@ class InstructionRecognizer {
     else if (instruction.startsWith("0111")) {
       return btfss(index, instruction);
     }
+    // CALL
+    else if (instruction.startsWith("100")) {
+      return call(index, instruction);
+    }
+
     return 0;
     // add new instruction with else if
   }
@@ -120,7 +130,7 @@ class InstructionRecognizer {
     if (int.parse(storage[address],radix: 16).toRadixString(2)[bit] == "1"){//next instruction if bit b at register f is 1
       return index++;
     }else{
-      return (index+2);//the next instruction is skiped when b is a 0
+      return (index+2);//the next instruction is skiped when bit is a 0
     }    
   }
 
@@ -132,7 +142,26 @@ class InstructionRecognizer {
       return index++;
     }else{
       print(index+2);
-      return (index+2);//the next instruction is skiped when b is a 1
+      return (index+2);//the next instruction is skiped when bit is a 1
     }    
+  }
+
+  int call(int index, String instruction){
+    print("Call");
+    stack.push(index+1);//index+1 auf Stack (return adresse)
+    print("Stack: " + stack.top().toString());
+    int address = int.parse((int.parse(storage[2].substring(3,5), radix: 16).toRadixString(2) + (instruction.substring(3))), radix: 2);//PCLATH(Bit3,4) + Adresse
+    print(address);
+    return address;
+  }
+
+  int ret(int index, String instruction){
+    if(stack.isNotEmpty){
+      index = stack.top();
+      stack.pop();
+    }else{
+      index++;
+    }
+    return index;
   }
 }

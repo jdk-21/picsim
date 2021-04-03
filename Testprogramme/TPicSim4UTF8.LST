@@ -11,7 +11,7 @@
                     00011           ;Definition einiger Symbole 
                     00012           ;f�r den Benutzer frei verwendbare Register
                     00013           wert1    equ 0ch             ;Variable Nr.1
-                    00014           wert2    equ 0dh             ;Variable Nr.2
+                    00014           wert2    equ 0dh             ;Variable Nr.2 
                     00015           ergeb    equ 0eh             ;Variable Nr.3
                     00016           
                     00017           ;Definition des Prozessors

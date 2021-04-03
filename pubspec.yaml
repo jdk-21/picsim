@@ -24,6 +24,7 @@ dependencies:
   flutter:
     sdk: flutter
   filepicker_windows: ^2.0.0
+  stack: ^0.1.5
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -32,7 +33,7 @@ dependencies:
 
 dev_dependencies:
   flutter_test:
-    sdk: flutter
+    sdk: flutter  
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

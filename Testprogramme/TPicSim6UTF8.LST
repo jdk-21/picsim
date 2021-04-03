@@ -18,7 +18,7 @@
                     00018           ;auch auf Bank 1 zugreifen ohne das RP0-Bit zu setzen. 
                     00019           ;
                     00020           ;Bei diesen Befehlen entscheidet das d-Bit (Destination), ob das Ergebnis
-                    00021           ;dieser Operation ins W- oder File-Register geschrieben wird. Wird im
+                    00021           ;dieser Operation ins W- oder File-Register geschrieben wird. Wird im 
                     00022           ;Assemblercode der Befehl mit ",W" geschrieben, bedeutet dies, dass das
                     00023           ;d-Bit 0 ist und das Ergebnis ins W-Register kommt. Fehlt ",W" ist das 
                     00024           ;d-Bit 1 und das Ergebnis wird ins Fileregister geschrieben.
