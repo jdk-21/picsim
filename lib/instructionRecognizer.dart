@@ -30,6 +30,10 @@ class InstructionRecognizer {
     else if (instruction.startsWith("0110")) {
       return btfsc(index, instruction);
     }
+    // BTFSS
+    else if (instruction.startsWith("0111")) {
+      return btfss(index, instruction);
+    }
     return 0;
     // add new instruction with else if
   }
@@ -113,10 +117,22 @@ class InstructionRecognizer {
   int btfsc(int index, String instruction) {
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
-    if (int.parse(storage[address],radix: 16).toRadixString(2)[bit] == "1"){
-      return (index + 2);
-    }else{
+    if (int.parse(storage[address],radix: 16).toRadixString(2)[bit] == "1"){//next instruction if bit b at register f is 1
       return index++;
+    }else{
+      return (index+2);//the next instruction is skiped when b is a 0
+    }    
+  }
+
+  int btfss(int index, String instruction) {
+    int bit = int.parse(instruction.substring(4, 7), radix: 2);
+    int address = int.parse(instruction.substring(7), radix: 2);
+    if (int.parse(storage[address],radix: 16).toRadixString(2)[bit] == "0"){//next instruction if bit b at register f is 0
+      print(index+1);
+      return index++;
+    }else{
+      print(index+2);
+      return (index+2);//the next instruction is skiped when b is a 1
     }    
   }
 }
