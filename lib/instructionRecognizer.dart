@@ -188,6 +188,7 @@ class InstructionRecognizer {
       pclath = "0" + pclath;
     }
     int address = int.parse((pclath.substring(3,5) + instruction.substring(3)), radix: 2);
+    print("New Adresse: " + address.toString()); //TEST
     return address;
   }
 }

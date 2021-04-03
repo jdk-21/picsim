@@ -30,6 +30,7 @@ class _SimScreenState extends State<SimScreen> {
                       else cycler.start();
                     },
                     child: Text("Start"),
+                    
                     style: OutlinedButton.styleFrom(
                         primary: Colors.white, backgroundColor: Colors.green)),
                 OutlinedButton(
