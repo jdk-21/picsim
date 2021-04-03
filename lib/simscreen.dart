@@ -33,7 +33,7 @@ class _SimScreenState extends State<SimScreen> {
                     style: OutlinedButton.styleFrom(
                         primary: Colors.white, backgroundColor: Colors.green)),
                 OutlinedButton(
-                    onPressed: () => recognizer.recognize(0, "01110000000001"), child: Text("Step")),
+                    onPressed: () => recognizer.recognize(0, "10000000000001"), child: Text("Step")),
                 OutlinedButton(
                   onPressed: () => cycler.reset(),
                   child: Text("Reset"),

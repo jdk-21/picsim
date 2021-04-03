@@ -3,7 +3,7 @@ import 'main.dart';
 class InstructionRecognizer {
   int recognize(int index, String instruction) {
     // ANDLW
-    // CALL
+    // RETURN
     if (instruction.startsWith("00000000001000")) {
       return ret(index, instruction);
     }
@@ -49,6 +49,7 @@ class InstructionRecognizer {
   }
 
   int addlw(int index, String instruction) {
+    print("ADDLW");
     // convert to base 10 than back to hex and string
     int sum = int.tryParse(((int.parse(instruction.substring(6), radix: 2))
             .toRadixString(10)))! +
@@ -60,6 +61,7 @@ class InstructionRecognizer {
   }
 
   int andlw(int index, String instruction) {
+    print("ANDLW");
     int sum = int.parse(instruction.substring(6), radix: 2) &
         int.parse(wReg, radix: 2);
     String binSum = "00000000" + sum.toRadixString(2);
@@ -68,6 +70,7 @@ class InstructionRecognizer {
   }
 
   int addwf(int index, String instruction) {
+    print("ADDWF");
     int address = int.parse(instruction.substring(7), radix: 2);
     int sum =
         int.parse(storage[address], radix: 16) + int.parse(wReg, radix: 2);
@@ -82,6 +85,7 @@ class InstructionRecognizer {
   }
 
   int andwf(int index, String instruction) {
+    print("ANDWF");
     int address = int.parse(instruction.substring(7), radix: 2);
     int sum =
         int.parse(storage[address], radix: 16) & int.parse(wReg, radix: 2);
@@ -96,6 +100,7 @@ class InstructionRecognizer {
   }
 
   int bcf(int index, String instruction) {
+    print("BCF");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
     String d =
@@ -110,6 +115,7 @@ class InstructionRecognizer {
   }
 
   int bsf(int index, String instruction) {
+    print("BSF");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
     String d =
@@ -125,6 +131,7 @@ class InstructionRecognizer {
   }
 
   int btfsc(int index, String instruction) {
+    print("BTFSC");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
     if (int.parse(storage[address],radix: 16).toRadixString(2)[bit] == "1"){//next instruction if bit b at register f is 1
@@ -135,6 +142,7 @@ class InstructionRecognizer {
   }
 
   int btfss(int index, String instruction) {
+    print("BTFSS");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
     if (int.parse(storage[address],radix: 16).toRadixString(2)[bit] == "0"){//next instruction if bit b at register f is 0
@@ -147,15 +155,18 @@ class InstructionRecognizer {
   }
 
   int call(int index, String instruction){
-    print("Call");
+    print("CALL");
     stack.push(index+1);//index+1 auf Stack (return adresse)
-    print("Stack: " + stack.top().toString());
-    int address = int.parse((int.parse(storage[2].substring(3,5), radix: 16).toRadixString(2) + (instruction.substring(3))), radix: 2);//PCLATH(Bit3,4) + Adresse
-    print(address);
+    String pclath = int.parse(storage[2], radix: 16).toRadixString(2);
+    while(pclath.length < 8){
+      pclath = "0" + pclath;
+    }
+    int address = int.parse((pclath.substring(3,5) + instruction.substring(3)), radix: 2);
     return address;
   }
 
   int ret(int index, String instruction){
+    print("RETURN");
     if(stack.isNotEmpty){
       index = stack.top();
       stack.pop();
