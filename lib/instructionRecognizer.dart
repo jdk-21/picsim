@@ -165,7 +165,6 @@ class InstructionRecognizer {
       pclath = "0" + pclath;
     }
     int address = int.parse((pclath.substring(3,5) + instruction.substring(3)), radix: 2);
-    print("New Adresse: " + address.toString()); //TEST
     return address;
   }
 
@@ -177,18 +176,16 @@ class InstructionRecognizer {
     }else{
       index++;
     }
-    print("New Adresse: " + index.toString()); //TEST
     return index;
   }
 
   int goto(int index, String instruction){
-    print("GOTO");
+    print("GOTO");    
     String pclath = int.parse(storage[2], radix: 16).toRadixString(2);
     while(pclath.length < 8){
       pclath = "0" + pclath;
     }
     int address = int.parse((pclath.substring(3,5) + instruction.substring(3)), radix: 2);
-    print("New Adresse: " + address.toString()); //TEST
     return address;
   }
 }
