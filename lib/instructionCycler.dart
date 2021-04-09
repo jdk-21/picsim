@@ -1,5 +1,6 @@
 
 import 'package:picsim/instructionRecognizer.dart';
+import 'main.dart';
 
 class InstructionCycler {
   InstructionRecognizer recognizer = InstructionRecognizer();
@@ -13,6 +14,7 @@ class InstructionCycler {
     while (run) {
       programCounter =
           recognizer.recognize(programCounter, programStorage[programCounter]);
+      storage.notifyListeners();
       await Future.delayed(const Duration(milliseconds: 500));
       
     }

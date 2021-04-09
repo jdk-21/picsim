@@ -4,7 +4,7 @@ import 'package:picsim/instructionCycler.dart';
 import 'package:picsim/simscreen.dart';
 
 List<Map> program = [];
-List<String> storage = List.filled(256, "00");
+var storage = ValueNotifier<List<String>>(List.filled(256, "00"));
 String wReg = "00000000"; 
 
 InstructionCycler cycler = InstructionCycler();
