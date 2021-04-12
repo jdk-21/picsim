@@ -2,12 +2,16 @@ import 'main.dart';
 
 class InstructionRecognizer {
   int recognize(int index, String instruction) {
-    // ANDLW
+    
     // RETURN
     if (instruction.startsWith("00000000001000")) {
       return ret(index, instruction);
     }
-
+    ///NOP
+    else if (instruction.startsWith("0000000") && instruction.endsWith("00000")) {
+      return nop(index);
+    }
+  	// ANDLW
     else if (instruction.startsWith("111001")) {
       return andlw(index, instruction);
     }
@@ -38,6 +42,10 @@ class InstructionRecognizer {
     // BTFSS
     else if (instruction.startsWith("0111")) {
       return btfss(index, instruction);
+    }
+    // MOVLW
+    else if (instruction.startsWith("1100")) {
+      return movlw(index, instruction);
     }
     // CALL
     else if (instruction.startsWith("100")) {
@@ -188,4 +196,16 @@ class InstructionRecognizer {
     int address = int.parse((pclath.substring(3,5) + instruction.substring(3)), radix: 2);
     return address;
   }
+
+  int nop(int index){
+    print("NOP");
+    return index++;
+  }
+
+  int movlw(int index, String instruction){
+    print("MOVLW");
+    wReg = "00" + instruction.substring(5);
+    return index++;
+  }
+
 }
