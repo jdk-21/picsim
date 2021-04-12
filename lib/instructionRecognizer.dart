@@ -5,7 +5,7 @@ class InstructionRecognizer {
     
     // RETURN
     if (instruction.startsWith("00000000001000")) {
-      return ret(index, instruction);
+      return ret(index);
     }
     ///NOP
     else if (instruction.startsWith("0000000") && instruction.endsWith("00000")) {
@@ -27,13 +27,13 @@ class InstructionRecognizer {
     else if (instruction.startsWith("11111")) {
       return addlw(index, instruction);
     }
-    // BCF
-    else if (instruction.startsWith("0100")) {
-      return bcf(index, instruction);
+    // RETLW
+    else if (instruction.startsWith("1101")) {
+      return retlw(index, instruction);
     }
-    // BSF
-    else if (instruction.startsWith("0101")) {
-      return bsf(index, instruction);
+    // MOVLW
+    else if (instruction.startsWith("1100")) {
+      return movlw(index, instruction);
     }
     // BTFSC
     else if (instruction.startsWith("0110")) {
@@ -43,18 +43,22 @@ class InstructionRecognizer {
     else if (instruction.startsWith("0111")) {
       return btfss(index, instruction);
     }
-    // MOVLW
-    else if (instruction.startsWith("1100")) {
-      return movlw(index, instruction);
-    }
-    // CALL
-    else if (instruction.startsWith("100")) {
-      return call(index, instruction);
+    // BSF
+    else if (instruction.startsWith("0101")) {
+      return bsf(index, instruction);
+    }   
+    // BCF
+    else if (instruction.startsWith("0100")) {
+      return bcf(index, instruction);
     }
     // GOTO
     else if (instruction.startsWith("101")) {
       return goto(index, instruction);
     }
+    // CALL
+    else if (instruction.startsWith("100")) {
+      return call(index, instruction);
+    }    
     return 0;
     // add new instruction with else if
   }
@@ -176,7 +180,7 @@ class InstructionRecognizer {
     return address;
   }
 
-  int ret(int index, String instruction){
+  int ret(int index){
     print("RETURN");
     if(stack.isNotEmpty){
       index = stack.top();
@@ -208,4 +212,10 @@ class InstructionRecognizer {
     return index++;
   }
 
+  int retlw(int index, String instruction){
+    print("RETLW");
+    wReg = "00" + instruction.substring(5);
+    index = ret(index);
+    return index;
+  }
 }
