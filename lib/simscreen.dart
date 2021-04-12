@@ -11,13 +11,11 @@ class _SimScreenState extends State<SimScreen> {
   var lastIndex = 0;
 
   Future<void> highlighter() async {
-    while (cycler.run) {
+    do {
       setState(() {
         // line highlighting
         // c counts index
         var c = 0;
-        print(program.length);
-        print(cycler.programCounter);
         for (var element in program) {
           print(element);
           if (element['index'] == cycler.programCounter) {
@@ -28,14 +26,10 @@ class _SimScreenState extends State<SimScreen> {
           }
           c++;
         }
-
         // show changes in storage
       });
       await Future.delayed(const Duration(milliseconds: 100));
-    }
-    setState(() {
-      program[lastIndex]['isSelected'] = false;
-    });
+    } while (cycler.run);
     return;
   }
 
@@ -269,9 +263,16 @@ class _SimScreenState extends State<SimScreen> {
                               primary: Colors.white,
                               backgroundColor: Colors.green)),
                       OutlinedButton(
-                          onPressed: () => cycler.step(), child: Text("Step")),
+                          onPressed: () {
+                            cycler.step();
+                            highlighter();
+                          },
+                          child: Text("Step")),
                       OutlinedButton(
-                        onPressed: () => cycler.reset(),
+                        onPressed: () {
+                          cycler.reset();
+                          highlighter();
+                        },
                         child: Text("Reset"),
                         style: OutlinedButton.styleFrom(
                             primary: Colors.white, backgroundColor: Colors.red),
