@@ -4,8 +4,9 @@ import 'package:picsim/instructionCycler.dart';
 import 'package:picsim/simscreen.dart';
 import 'package:stack/stack.dart' as st;
 
-List<String> storage = List.filled(256, "00");
 st.Stack<int> stack = st.Stack();
+List<Map> program = [];
+var storage = ValueNotifier<List<String>>(List.filled(256, "00"));
 String wReg = "00000000"; 
 
 InstructionCycler cycler = InstructionCycler();
@@ -42,9 +43,13 @@ class _MyHomePageState extends State<MyHomePage> {
   	cycler.programStorage = [];
     data.forEach((String part) {
       if (RegExp(r"^[A-Fa-f0-9]{4}\s[A-Fa-f0-9]{4}").hasMatch(part)) {
+        String m = "00000000000000" + int.parse(part.substring(5, 9), radix: 16).toRadixString(2);
+        m = m.substring(m.length-14);
         cycler.programStorage
-            .add(int.parse(part.substring(5, 9), radix: 16).toRadixString(2));
+            .add(m);
+        program.add({'index': cycler.programStorage.length-1, 'content': part, 'isSelected': false});
       }
+      else program.add({'content': part, 'isSelected': false});
     });
     print(cycler.programStorage);
   }
@@ -70,11 +75,11 @@ class _MyHomePageState extends State<MyHomePage> {
 
             final result = file.getFile();
             if (result != null) {
-              var input = await result.readAsLines();
+              var data = await result.readAsLines();
 
-              print(input.toString());
+              print(data.toString());
               print(result.path);
-              readProgramCode(input);
+              readProgramCode(data);
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => SimScreen()),
