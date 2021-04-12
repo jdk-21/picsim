@@ -25,7 +25,7 @@
 0002 1283           00025           bcf       status,rp0          ;zur�ck auf Bank 0
 0003 0186           00026           clrf      rb
                     00027  loop       
-0004 1403           00028           bsf       status,0            ;Carry auf 1 setzen
+0004 1403           00028           bsf       status,0            ;Carry auf 1 setzen 
 0005 1C05           00029           btfss     ra,0                ;in welche Richtung?
 0006 280B           00030           goto      links
                     00031  rechts   

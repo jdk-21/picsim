@@ -24,6 +24,6 @@
                     00024             
                     00025           
                     00026  ende     
-0006 2806           00027           goto ende           ;Endlosschleife, verhindert Nirwana
+0006 2806           00027           goto ende           ;Endlosschleife, verhindert Nirwana 
                     00028           
                     00029             

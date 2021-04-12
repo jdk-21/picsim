@@ -4,9 +4,9 @@
                     00004           ;eines Tabellenzugriffs getestet
                     00005           ;(c) St. Lehmann  
                     00006           ;19.04.2014 
-                    00007           ;18.10.2018 mod. für HSO
+                    00007           ;18.10.2018 mod. fï¿½r HSO
                     00008           
-                    00009           list c=132          ;Zeilenlänge im LST auf 132 Zeichen setzen
+                    00009           list c=132          ;Zeilenlï¿½nge im LST auf 132 Zeichen setzen
                     00010             
                     00011           ;Definition einiger Symbole
                     00012           indirect equ 0
@@ -23,7 +23,7 @@
                     00023           ;Festlegen des Codebeginns
                     00024           org 0
                     00025  start    
-0000 3000           00026           movlw 0             ;Index für Tabellenzugriff in 0FH
+0000 3000           00026           movlw 0             ;Index fï¿½r Tabellenzugriff in 0FH 
 0001 008F           00027           movwf 0fh
 0002 3005           00028           movlw 5             ;insgesamt 5 Tabellenzugriffe
 0003 008E           00029           movwf 0eh
@@ -45,7 +45,7 @@
                     00045           ;im PC 109 bzw. nach dem Fetch 10A. Zu diesem Wert wird 5 addiert und
                     00046           ;die oberen Bits auf 0 gesetzt (PCLATH=0). Damit steht im PC der Wert
                     00047           ;0Fh. Dorthin springt der PIC durch den ADDWF-Befehl. Hier verweilt
-                    00048           ;das Programm während der Stack immer weiter wächst.
+                    00048           ;das Programm wï¿½hrend der Stack immer weiter wï¿½chst.
                     00049             
                     00050           
                     00051  ende     

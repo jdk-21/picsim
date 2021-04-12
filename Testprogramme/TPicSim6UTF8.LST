@@ -1,7 +1,7 @@
                     00001           ;TPicSim6
                     00002           ;Programm zum Test des 16F84-Simulators.
                     00003           ;Es werden die Byte-orientieren File-Register-Befehle im 
-                    00004           ;Zusammenhang mit der indirekten Adressierung geprüft
+                    00004           ;Zusammenhang mit der indirekten Adressierung geprï¿½ft
                     00005           ;
                     00006           ;(c) St. Lehmann
                     00007           ;Ersterstellung: 23.03.2016
@@ -11,19 +11,19 @@
                     00011           ;"indirect" bezeichnet und das Register FSR (File Select Register)
                     00012           ;benutzt. Dabei beinhaltet das FSR-Register die Zieladresse in die etwas
                     00013           ;geschrieben oder von der etwas gelesen werden soll. Der eigentliche 
-                    00014           ;Zugriff erfolgt über das Ansprechen der Registeradresse 0 (IND). Der PIC
+                    00014           ;Zugriff erfolgt ï¿½ber das Ansprechen der Registeradresse 0 (IND). Der PIC
                     00015           ;ersetzt in dem Falle die Adresse 0 durch die Adresse im FSR-Register.
                     00016           ;Da die Adresse im FSR-Register 8-Bit umfasst, die Adresse bei der direkten
                     00017           ;Adressierung jedoch nur 7 Bit, kann man durch die indirekte Adressierung
-                    00018           ;auch auf Bank 1 zugreifen ohne das RP0-Bit zu setzen.
+                    00018           ;auch auf Bank 1 zugreifen ohne das RP0-Bit zu setzen. 
                     00019           ;
                     00020           ;Bei diesen Befehlen entscheidet das d-Bit (Destination), ob das Ergebnis
-                    00021           ;dieser Operation ins W- oder File-Register geschrieben wird. Wird im
+                    00021           ;dieser Operation ins W- oder File-Register geschrieben wird. Wird im 
                     00022           ;Assemblercode der Befehl mit ",W" geschrieben, bedeutet dies, dass das
                     00023           ;d-Bit 0 ist und das Ergebnis ins W-Register kommt. Fehlt ",W" ist das 
                     00024           ;d-Bit 1 und das Ergebnis wird ins Fileregister geschrieben.
                     00025           ;
-                    00026           list c=132          ;Zeilenlänge im LST auf 132 Zeichen setzen
+                    00026           list c=132          ;Zeilenlï¿½nge im LST auf 132 Zeichen setzen
                     00027           
                     00028           ;Definition einiger Symbole
                     00029           ;zuerst Hardware-Register
@@ -33,7 +33,7 @@
                     00033           ra       equ 05h
                     00034           rb       equ 06h
                     00035           
-                    00036           ;für den Benutzer frei verwendbare Register
+                    00036           ;fï¿½r den Benutzer frei verwendbare Register
                     00037           wert1    equ 0ch             ;Variable Nr.1
                     00038           wert2    equ 0dh             ;Variable Nr.2
                     00039           ergeb    equ 0eh             ;Variable Nr.3
@@ -50,7 +50,7 @@
 0003 0084           00050           movwf fsr           ;W=10h, FSR=10h, wert1=20h, wert2=?? , DC=?, C=?, Z=?
 0004 008D           00051           movwf wert2         ;W=10h, FSR=10h, wert1=20h, wert2=10h, DC=?, C=?, Z=?
 0005 080C           00052           movf wert1,w        ;W=20h
-                    00053           ;der Speicherbereich von 10h bis 1Fh wird mit Zahlen 20h, 21h, etc. gefüllt
+                    00053           ;der Speicherbereich von 10h bis 1Fh wird mit Zahlen 20h, 21h, etc. gefï¿½llt
                     00054  loop1      
 0006 0080           00055           movwf indirect      ;W=20h, FSR=10h, F10=20h
 0007 3E01           00056           addlw 1             ;W=20h, 21h, 22h, etc

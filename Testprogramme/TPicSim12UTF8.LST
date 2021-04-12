@@ -25,7 +25,7 @@
                     00025           ;Festlegen des Codebeginns
                     00026           org       0
                     00027  start      
-0000 3000           00028           movlw     0                   ;der EEPROM-Speicher von 0 bis 3FH (63) gef�llt          
+0000 3000           00028           movlw     0                   ;der EEPROM-Speicher von 0 bis 3FH (63) gef�llt           
 0001 008C           00029           movwf     count
                     00030  schreiben 
 0002 080C           00031           movf      count,w

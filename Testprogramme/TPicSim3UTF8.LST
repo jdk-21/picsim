@@ -22,7 +22,7 @@
                     00022           
                     00023           ;Definition einiger Symbole
                     00024           ;f�r den Benutzer frei verwendbare Register
-                    00025           wert1    equ 0ch             ;Variable Nr.1
+                    00025           wert1    equ 0ch             ;Variable Nr.1 
                     00026           wert2    equ 0dh             ;Variable Nr.2
                     00027           ergeb    equ 0eh             ;Variable Nr.3
                     00028           

@@ -18,7 +18,7 @@
                     00018           wert2    equ 0dh             ;Variable Nr.2
                     00019           ergeb    equ 0eh             ;Variable Nr.3
                     00020           
-                    00021           ;Definition des Prozessors
+                    00021           ;Definition des Prozessors 
                     00022           device 16F84
                     00023             
                     00024           ;Festlegen des Codebeginns

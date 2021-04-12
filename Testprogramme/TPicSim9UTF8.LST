@@ -5,7 +5,7 @@
                     00005           ;19.05.2020
                     00006           ;Definition einiger Symbole
                     00007           
-                    00008           list c=132          ;Zeilenlänge im LST auf 132 Zeichen setzen
+                    00008           list c=132          ;Zeilenlï¿½nge im LST auf 132 Zeichen setzen
                     00009           
                     00010           status   equ       03h
                     00011           rb       equ       06h
@@ -15,7 +15,7 @@
                     00015           liste3   equ       12h
                     00016           liste4   equ       13h
                     00017           
-                    00018           ;Definition des Prozessors
+                    00018           ;Definition des Prozessors 
                     00019           device    16F84
                     00020             
                     00021           ;Festlegen des Codebeginns
