@@ -3,16 +3,18 @@ import 'main.dart';
 class InstructionRecognizer {
   int recognize(int index, String instruction) {
     //print(instruction);
+    // 14-Stellen
     // RETURN
     if (instruction == "00000000001000") {
       return ret(index);
     }
-
-    ///NOP
+    // 12-Stellen
+    // NOP
     else if (instruction.startsWith("0000000") &&
         instruction.endsWith("00000")) {
       return nop(index);
     }
+    // 6-Stellen
     // ANDLW
     else if (instruction.startsWith("111001")) {
       return andlw(index, instruction);
@@ -25,10 +27,14 @@ class InstructionRecognizer {
     else if (instruction.startsWith("000101")) {
       return andwf(index, instruction);
     }
+    //5-Stellen
     // ADDLW
     else if (instruction.startsWith("11111")) {
       return addlw(index, instruction);
+    } else if (instruction.startsWith("11110")) {
+      return sublw(index, instruction);
     }
+    // 4-Stellen
     // RETLW
     else if (instruction.startsWith("1101")) {
       return retlw(index, instruction);
@@ -53,6 +59,7 @@ class InstructionRecognizer {
     else if (instruction.startsWith("0100")) {
       return bcf(index, instruction);
     }
+    // 3-Stellen
     // GOTO
     else if (instruction.startsWith("101")) {
       return goto(index, instruction);
@@ -69,12 +76,13 @@ class InstructionRecognizer {
   int addlw(int index, String instruction) {
     print(index.toString() + " ADDLW");
     // convert to base 10 than back to hex and string
-    int sum = int.tryParse(((int.parse(instruction.substring(6), radix: 2))
-            .toRadixString(10)))! +
-        int.tryParse(((int.parse(wReg, radix: 2)).toRadixString(10)))!;
+    int sum = int.parse(instruction.substring(6), radix: 2) +
+        int.parse(wReg, radix: 2);
     String binSum = "00000000" + sum.toRadixString(2);
     // substring catches overflow
-    wReg = binSum.substring(binSum.length - 8);
+    binSum = binSum.substring(binSum.length - 8);
+    wReg = binSum;
+    print("Ergebnis: " + binSum.toString());
     return (++index);
   }
 
@@ -83,21 +91,24 @@ class InstructionRecognizer {
     int sum = int.parse(instruction.substring(6), radix: 2) &
         int.parse(wReg, radix: 2);
     String binSum = "00000000" + sum.toRadixString(2);
-    wReg = binSum.substring(binSum.length - 8);
+    binSum = binSum.substring(binSum.length - 8);
+    wReg = binSum;
+    print("Ergebnis: " + binSum.toString());
     return ++index;
   }
 
   int addwf(int index, String instruction) {
     print(index.toString() + " ADDWF");
     int address = int.parse(instruction.substring(7), radix: 2);
-    int sum = int.parse(storage.value[address], radix: 16) +
-        int.parse(wReg, radix: 2);
+    int sum =
+        int.parse(storage.value[address], radix: 2) + int.parse(wReg, radix: 2);
+    String binSum = "00000000" + sum.toRadixString(2);
+    binSum = binSum.substring(binSum.length - 8);
+    print("Ergebnis: " + binSum.toString());
     if (instruction[6] == "0") {
-      String binSum = "00000000" + sum.toRadixString(2);
-      wReg = binSum.substring(binSum.length - 8);
+      wReg = binSum;
     } else {
-      String hexSum = "00" + sum.toRadixString(16);
-      storage.value[address] = hexSum.substring(hexSum.length - 2);
+      storage.value[address] = binSum;
     }
     return ++index;
   }
@@ -105,14 +116,15 @@ class InstructionRecognizer {
   int andwf(int index, String instruction) {
     print(index.toString() + " ANDWF");
     int address = int.parse(instruction.substring(7), radix: 2);
-    int sum = int.parse(storage.value[address], radix: 16) &
-        int.parse(wReg, radix: 2);
+    int sum =
+        int.parse(storage.value[address], radix: 2) & int.parse(wReg, radix: 2);
+    String binSum = "00000000" + sum.toRadixString(2);
+    binSum = binSum.substring(binSum.length - 8);
+    print("Ergebnis: " + binSum.toString());
     if (instruction[6] == "0") {
-      String binSum = "00000000" + sum.toRadixString(2);
-      wReg = binSum.substring(binSum.length - 8);
+      wReg = binSum;
     } else {
-      String hexSum = "00" + sum.toRadixString(16);
-      storage.value[address] = hexSum.substring(hexSum.length - 2);
+      storage.value[address] = binSum;
     }
     return ++index;
   }
@@ -121,14 +133,10 @@ class InstructionRecognizer {
     print(index.toString() + " BCF");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
-    String d = "00000000" +
-        int.parse(storage.value[address], radix: 16).toRadixString(2);
-    String data = d.substring(d.length - 8);
-    String result = int.parse(
-            data.substring(0, bit) + "0" + data.substring(bit + 1),
-            radix: 2)
-        .toRadixString(16);
-    storage.value[address] = result.substring(result.length - 2);
+    String data = storage.value[address];
+    storage.value[address] =
+        data.substring(0, bit) + "0" + data.substring(bit + 1);
+    print("Ergebnis: " + storage.value[address].toString());
     return ++index;
   }
 
@@ -136,15 +144,10 @@ class InstructionRecognizer {
     print(index.toString() + " BSF");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
-    String d = "00000000" +
-        int.parse(storage.value[address], radix: 16).toRadixString(2);
-    String data = d.substring(d.length - 8);
-    String result = "00" +
-        int.parse(data.substring(0, bit) + "1" + data.substring(bit + 1),
-                radix: 2)
-            .toRadixString(16);
-    storage.value[address] = result.substring(result.length - 2);
-    print(storage.value[address]);
+    String data = storage.value[address];
+    storage.value[address] =
+        data.substring(0, bit) + "1" + data.substring(bit + 1);
+    print("Ergebnis: " + storage.value[address].toString());
     return ++index;
   }
 
@@ -152,8 +155,7 @@ class InstructionRecognizer {
     print(index.toString() + " BTFSC");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
-    if (int.parse(storage.value[address], radix: 16).toRadixString(2)[bit] ==
-        "1") {
+    if (storage.value[address][bit] == "1") {
       //next instruction if bit b at register f is 1
       return ++index;
     } else {
@@ -165,8 +167,7 @@ class InstructionRecognizer {
     print(index.toString() + " BTFSS");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
-    if (int.parse(storage.value[address], radix: 16).toRadixString(2)[bit] ==
-        "0") {
+    if (storage.value[address][bit] == "0") {
       //next instruction if bit b at register f is 0
       print(index + 1);
       return ++index;
@@ -179,10 +180,7 @@ class InstructionRecognizer {
   int call(int index, String instruction) {
     print(index.toString() + " CALL");
     stack.push(++index); //index+1 auf Stack (return adresse)
-    String pclath = int.parse(storage.value[2], radix: 16).toRadixString(2);
-    while (pclath.length < 8) {
-      pclath = "0" + pclath;
-    }
+    String pclath = storage.value[2];
     int address = int.parse((pclath.substring(3, 5) + instruction.substring(3)),
         radix: 2);
     return address;
@@ -201,9 +199,7 @@ class InstructionRecognizer {
 
   int goto(int index, String instruction) {
     print(index.toString() + " GOTO");
-    String pclath =
-        "00000000" + int.parse(storage.value[2], radix: 16).toRadixString(2);
-    pclath = pclath.substring(pclath.length - 8);
+    String pclath = storage.value[2];
     int address = int.parse((pclath.substring(3, 5) + instruction.substring(3)),
         radix: 2);
     return address;
@@ -225,5 +221,10 @@ class InstructionRecognizer {
     wReg = "00" + instruction.substring(5);
     index = ret(index);
     return index;
+  }
+
+  int sublw(int index, String instruction) {
+    print(index.toString() + " SUBLW");
+    return (++index);
   }
 }
