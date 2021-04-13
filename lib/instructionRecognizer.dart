@@ -1,9 +1,10 @@
 import 'main.dart';
 
 class InstructionRecognizer {
-
   String replaceCharAt(String oldString, int index, String newChar) {
-    return oldString.substring(0, index) + newChar + oldString.substring(index + 1);
+    return oldString.substring(0, index) +
+        newChar +
+        oldString.substring(index + 1);
   }
 
   int recognize(int index, String instruction) {
@@ -24,6 +25,10 @@ class InstructionRecognizer {
     else if (instruction.startsWith("111001")) {
       return andlw(index, instruction);
     }
+    // IORLW
+    else if (instruction.startsWith("111000")) {
+      return iorlw(index, instruction);
+    }
     // ADDWF
     else if (instruction.startsWith("000111")) {
       return addwf(index, instruction);
@@ -36,7 +41,7 @@ class InstructionRecognizer {
     // ADDLW
     else if (instruction.startsWith("11111")) {
       return addlw(index, instruction);
-    } 
+    }
     // SUBLW
     else if (instruction.startsWith("11110")) {
       return sublw(index, instruction);
@@ -231,32 +236,45 @@ class InstructionRecognizer {
   int sublw(int index, String instruction) {
     print(index.toString() + " SUBLW");
     var zahl1 = int.parse(wReg, radix: 2);
-    print("Zahl1: "+zahl1.toRadixString(2)+"   "+zahl1.toString());
-    var zahl2 = int.parse(instruction.substring(instruction.length - 8), radix: 2);
-    print("Zahl2: "+zahl2.toRadixString(2)+"   "+zahl2.toString());
+    print("Zahl1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
+    var zahl2 =
+        int.parse(instruction.substring(instruction.length - 8), radix: 2);
+    print("Zahl2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
     var sub = zahl1 - zahl2;
     print("Ergebnis int: " + sub.toString());
-    String m ="";
-    if(sub > 0){// result is positive
-      storage.value[3] = replaceCharAt(storage.value[2], 7, "1"); // C-Bit      
-      storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit  
+    String m = "";
+    if (sub > 0) {
+      // result is positive
+      storage.value[3] = replaceCharAt(storage.value[2], 7, "1"); // C-Bit
+      storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit
       m = "00000000" + sub.toRadixString(2);
-    }
-    else if(sub == 0){// result is zero
+    } else if (sub == 0) {
+      // result is zero
       storage.value[3] = replaceCharAt(storage.value[2], 7, "1"); // C-Bit
       storage.value[3] = replaceCharAt(storage.value[2], 5, "1"); // Z-Bit
       m = "00000000";
-    }
-    else if(sub < 0){// result is negative
+    } else if (sub < 0) {
+      // result is negative
       storage.value[3] = replaceCharAt(storage.value[2], 7, "0"); // C-Bit
       storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit
-      sub =  sub & 255;
+      sub = sub & 255; // invertieren
       m = "11111111" + sub.toRadixString(2); //2er Komplement bilden
-      m = m.substring(m.length-8);
-    }     
-    m = m.substring(m.length -8);
+      m = m.substring(m.length - 8);
+    }
+    m = m.substring(m.length - 8);
     print("Ergebnis: " + m + "   " + (int.parse(m, radix: 2)).toString());
     wReg = m;
+    return (++index);
+  }
+
+  int iorlw(int index, String instruction) {
+    print(index.toString() + " IORLW");
+    int ins = int.parse(instruction.substring(instruction.length-8), radix: 2);
+    int w = int.parse(wReg, radix: 2);
+    int ret = w | ins; // Binary OR
+    wReg = "00000000"+ ret.toRadixString(2);
+    wReg = wReg.substring(wReg.length-8);
+    storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit
     return (++index);
   }
 }
