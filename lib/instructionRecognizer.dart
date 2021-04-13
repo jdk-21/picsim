@@ -25,6 +25,10 @@ class InstructionRecognizer {
     else if (instruction.startsWith("111001")) {
       return andlw(index, instruction);
     }
+    // XORLW
+    else if (instruction.startsWith("111010")) {
+      return xorlw(index, instruction);
+    }
     // IORLW
     else if (instruction.startsWith("111000")) {
       return iorlw(index, instruction);
@@ -277,4 +281,14 @@ class InstructionRecognizer {
     storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit
     return (++index);
   }
+
+  int xorlw(int index, String instruction) {
+    print(index.toString() + " IORLW");
+    int ins = int.parse(instruction.substring(instruction.length-8), radix: 2);
+    int w = int.parse(wReg, radix: 2);
+    int ret = w ^ ins; // Binary XOR
+    wReg = "00000000"+ ret.toRadixString(2);
+    wReg = wReg.substring(wReg.length-8);
+    return (++index);
+  }  
 }
