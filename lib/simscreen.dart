@@ -237,6 +237,63 @@ class _SimScreenState extends State<SimScreen> {
                   ),
                 ),
               ),
+              Column(
+                children: [
+                  ValueListenableBuilder(
+                      valueListenable: wReg,
+                      builder: (context, value, child) {
+                        return Text("WReg: " + wReg.value);
+                      }),
+                  ValueListenableBuilder(
+                      valueListenable: storage,
+                      builder: (context, value, child) {
+                        return Column(
+                          children: [
+                            Text("FSR: " + storage.value[4]),
+                            Text("PCL: " + storage.value[2]),
+                            Text("PCLATCH: " + storage.value[10]),
+                            Text("Status: " + storage.value[3]),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                              children: [
+                                Container(
+                                    width: 10, height: 10, child: Text("IRP")),
+                                Container(
+                                    width: 10, height: 10, child: Text("RP0")),
+                                Container(
+                                    width: 10, height: 10, child: Text("RP1")),
+                                Container(
+                                    width: 10, height: 10, child: Text("IRP")),
+                                Container(
+                                    width: 10, height: 10, child: Text("RP0")),
+                                Container(
+                                    width: 10, height: 10, child: Text("RP1")),
+                                Container(
+                                    width: 10, height: 10, child: Text("IRP")),
+                                Container(
+                                    width: 10, height: 10, child: Text("RP0")),
+                                Container(
+                                    width: 10, height: 10, child: Text("RP1")),
+                              ],
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(storage.value[3][0]),
+                                Text(storage.value[3][1]),
+                                Text(storage.value[3][2]),
+                                Text(storage.value[3][3]),
+                                Text(storage.value[3][4]),
+                                Text(storage.value[3][5]),
+                                Text(storage.value[3][6]),
+                                Text(storage.value[3][7]),
+                              ],
+                            ),
+                          ],
+                        );
+                      }),
+                ],
+              ),
             ],
           ),
           Container(

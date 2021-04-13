@@ -7,7 +7,7 @@ import 'package:stack/stack.dart' as st;
 st.Stack<int> stack = st.Stack();
 List<Map> program = [];
 var storage = ValueNotifier<List<String>>(List.filled(256, "00"));
-String wReg = "00000000"; 
+var wReg = ValueNotifier<String>("00000000"); 
 
 InstructionCycler cycler = InstructionCycler();
 
