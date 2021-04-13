@@ -40,7 +40,7 @@ class InstructionCycler {
   void step() {
     if (!run) {
       programCounter =
-          recognizer.recognize(programCounter, programStorage[programCounter]);
+          recognizer.recognize(programCounter, programStorage[programCounter]);      
       print("step: programCounter " + programCounter.toString());
       print("wReg: " + wReg.toString() +"  "+ int.parse(wReg.value, radix: 2).toRadixString(16));
       print("instruction: " +
