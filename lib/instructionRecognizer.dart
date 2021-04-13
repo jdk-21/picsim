@@ -1,6 +1,11 @@
 import 'main.dart';
 
 class InstructionRecognizer {
+
+  String replaceCharAt(String oldString, int index, String newChar) {
+    return oldString.substring(0, index) + newChar + oldString.substring(index + 1);
+  }
+
   int recognize(int index, String instruction) {
     //print(instruction);
     // 14-Stellen
@@ -31,7 +36,9 @@ class InstructionRecognizer {
     // ADDLW
     else if (instruction.startsWith("11111")) {
       return addlw(index, instruction);
-    } else if (instruction.startsWith("11110")) {
+    } 
+    // SUBLW
+    else if (instruction.startsWith("11110")) {
       return sublw(index, instruction);
     }
     // 4-Stellen
@@ -134,8 +141,7 @@ class InstructionRecognizer {
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
     String data = storage.value[address];
-    storage.value[address] =
-        data.substring(0, bit) + "0" + data.substring(bit + 1);
+    storage.value[address] = replaceCharAt(data, bit, "0");
     print("Ergebnis: " + storage.value[address].toString());
     return ++index;
   }
@@ -145,8 +151,7 @@ class InstructionRecognizer {
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
     String data = storage.value[address];
-    storage.value[address] =
-        data.substring(0, bit) + "1" + data.substring(bit + 1);
+    storage.value[address] = replaceCharAt(data, bit, "1");
     print("Ergebnis: " + storage.value[address].toString());
     return ++index;
   }
@@ -199,7 +204,7 @@ class InstructionRecognizer {
 
   int goto(int index, String instruction) {
     print(index.toString() + " GOTO");
-    String pclath = storage.value[2];
+    String pclath = storage.value[10];
     int address = int.parse((pclath.substring(3, 5) + instruction.substring(3)),
         radix: 2);
     return address;
@@ -225,6 +230,33 @@ class InstructionRecognizer {
 
   int sublw(int index, String instruction) {
     print(index.toString() + " SUBLW");
+    var zahl1 = int.parse(wReg, radix: 2);
+    print("Zahl1: "+zahl1.toRadixString(2)+"   "+zahl1.toString());
+    var zahl2 = int.parse(instruction.substring(instruction.length - 8), radix: 2);
+    print("Zahl2: "+zahl2.toRadixString(2)+"   "+zahl2.toString());
+    var sub = zahl1 - zahl2;
+    print("Ergebnis int: " + sub.toString());
+    String m ="";
+    if(sub > 0){// result is positive
+      storage.value[3] = replaceCharAt(storage.value[2], 7, "1"); // C-Bit      
+      storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit  
+      m = "00000000" + sub.toRadixString(2);
+    }
+    else if(sub == 0){// result is zero
+      storage.value[3] = replaceCharAt(storage.value[2], 7, "1"); // C-Bit
+      storage.value[3] = replaceCharAt(storage.value[2], 5, "1"); // Z-Bit
+      m = "00000000";
+    }
+    else if(sub < 0){// result is negative
+      storage.value[3] = replaceCharAt(storage.value[2], 7, "0"); // C-Bit
+      storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit
+      sub =  sub & 255;
+      m = "11111111" + sub.toRadixString(2); //2er Komplement bilden
+      m = m.substring(m.length-8);
+    }     
+    m = m.substring(m.length -8);
+    print("Ergebnis: " + m + "   " + (int.parse(m, radix: 2)).toString());
+    wReg = m;
     return (++index);
   }
 }
