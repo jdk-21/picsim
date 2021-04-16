@@ -56,21 +56,24 @@ class _SimScreenState extends State<SimScreen> {
                   child: OutlinedButton(
                     child: Text("OK"),
                     onPressed: () {
-                      String input = "000000000" + int.parse(txt.text, radix: 16).toRadixString(2);
+                      String input = "000000000" +
+                          int.parse(txt.text, radix: 16).toRadixString(2);
                       if (txt.text.length == 2 &&
                               RegExp(r"[A-Fa-f0-9]{2}").hasMatch(txt.text) ||
                           txt.text.length == 1 &&
                               RegExp(r"[A-Fa-f0-9]{1}").hasMatch(txt.text)) {
                         setState(() {
-                          storage.value[index] = input.substring(input.length - 8);
+                          storage.value[index] =
+                              input.substring(input.length - 8);
                         });
                         Navigator.of(context).pop();
-                      } else if (txt.text.length == 8 && RegExp(r"[0-1]{8}").hasMatch(txt.text)) {
+                      } else if (txt.text.length == 8 &&
+                          RegExp(r"[0-1]{8}").hasMatch(txt.text)) {
                         setState(() {
-                          storage.value[index] = input.substring(input.length - 8);
+                          storage.value[index] =
+                              input.substring(input.length - 8);
                         });
-                      } 
-                      else {
+                      } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text("Not a hex/binary value!")));
                       }
@@ -103,197 +106,230 @@ class _SimScreenState extends State<SimScreen> {
       ),
       body: Column(
         children: [
-          Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Container(
-                  width: 300,
-                  height: 200,
-                  child: ValueListenableBuilder(
-                    valueListenable: storage,
-                    builder: (context, value, child) {
-                      return GridView.builder(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 9),
-                          itemCount: 288,
-                          itemBuilder: (context, index) {
-                            // row calculates the current row
-                            var row = index ~/ 9;
-                            // checks if this is a line start
-                            if (index % 9 == 0) {
-                              return Container(
-                                color: Colors.amber,
-                                child: Center(
-                                    child: Text(
-                                        "0x" + (row * 8).toRadixString(16))),
-                              );
-                            } else {
-                              return InkWell(
-                                onTap: () {
-                                  createStorageDialog(context, index - row - 1);
-                                },
-                                child: Container(
-                                    child: Center(
-                                        child: Text(
-                                            int.parse(storage.value[index - row - 1], radix: 2).toRadixString(16)),),),
-                              );
-                            }
-                          });
-                    },
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(15.0),
-                child: Container(
-                  width: 300,
-                  height: 200,
-                  child: ValueListenableBuilder(
-                    valueListenable: storage,
-                    builder: (context, value, child) {
-                      return GridView.builder(
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 9),
-                          itemCount: 135,
-                          itemBuilder: (context, index) {
-                            // row calculates the current row
-                            var row = index ~/ 9;
-                            var register = row ~/ 3;
-                            var bit = index % 9 - 1;
-                            // checks if this is a line start
-                            String name = "";
-                            if (index % 9 == 0) {
-                              switch (row % 3) {
-                                case 0:
-                                  switch (register) {
-                                    case 0:
-                                      name = "RA";
-                                      break;
-                                    case 1:
-                                      name = "RB";
-                                      break;
-                                    case 2:
-                                      name = "RC";
-                                      break;
-                                    case 3:
-                                      name = "RD";
-                                      break;
-                                    case 4:
-                                      name = "RE";
-                                      break;
-                                  }
-                                  break;
-                                case 1:
-                                  name = "Tris";
-                                  break;
-
-                                case 2:
-                                  name = "Pin";
-                                  break;
-                              }
-
-                              return Container(
-                                color: Colors.amber,
-                                child: Center(child: Text(name)),
-                              );
-                            } else {
-                              switch (row % 3) {
-                                case 0:
-                                  name = (7 - bit).toString();
-                                  break;
-                                case 1:
-                                  name = (7 - bit).toString();
-                                  break;
-                                case 2:
-                                  String temp = storage.value[register + 5];
-                                  name = temp[bit];
-                                  return InkWell(
-                                    onTap: () {
-                                      changeTrisBit(bit, register + 5);
-                                    },
-                                    child: Container(
-                                        decoration: BoxDecoration(
-                                          border: Border(
-                                              bottom: BorderSide(
-                                                  color: Colors.grey,
-                                                  width: 2)),
-                                          color: Colors.blue[100],
-                                        ),
-                                        child: Center(child: Text(name))),
-                                  );
-                              }
-                              return Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey[100],
-                                  ),
-                                  child: Center(child: Text(name)));
-                            }
-                          });
-                    },
-                  ),
-                ),
-              ),
-              Column(
-                children: [
-                  ValueListenableBuilder(
-                      valueListenable: wReg,
-                      builder: (context, value, child) {
-                        return Text("WReg: " + wReg.value);
-                      }),
-                  ValueListenableBuilder(
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Container(
+                    width: 300,
+                    height: 200,
+                    child: ValueListenableBuilder(
                       valueListenable: storage,
                       builder: (context, value, child) {
-                        return Column(
-                          children: [
-                            Text("FSR: " + storage.value[4]),
-                            Text("PCL: " + storage.value[2]),
-                            Text("PCLATCH: " + storage.value[10]),
-                            Text("Status: " + storage.value[3]),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                Container(
-                                    width: 10, height: 10, child: Text("IRP")),
-                                Container(
-                                    width: 10, height: 10, child: Text("RP0")),
-                                Container(
-                                    width: 10, height: 10, child: Text("RP1")),
-                                Container(
-                                    width: 10, height: 10, child: Text("IRP")),
-                                Container(
-                                    width: 10, height: 10, child: Text("RP0")),
-                                Container(
-                                    width: 10, height: 10, child: Text("RP1")),
-                                Container(
-                                    width: 10, height: 10, child: Text("IRP")),
-                                Container(
-                                    width: 10, height: 10, child: Text("RP0")),
-                                Container(
-                                    width: 10, height: 10, child: Text("RP1")),
-                              ],
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(storage.value[3][0]),
-                                Text(storage.value[3][1]),
-                                Text(storage.value[3][2]),
-                                Text(storage.value[3][3]),
-                                Text(storage.value[3][4]),
-                                Text(storage.value[3][5]),
-                                Text(storage.value[3][6]),
-                                Text(storage.value[3][7]),
-                              ],
-                            ),
-                          ],
-                        );
-                      }),
-                ],
-              ),
-            ],
+                        return GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 9),
+                            itemCount: 288,
+                            itemBuilder: (context, index) {
+                              // row calculates the current row
+                              var row = index ~/ 9;
+                              // checks if this is a line start
+                              if (index % 9 == 0) {
+                                return Container(
+                                  color: Colors.amber,
+                                  child: Center(
+                                      child: Text(
+                                          "0x" + (row * 8).toRadixString(16))),
+                                );
+                              } else {
+                                return InkWell(
+                                  onTap: () {
+                                    createStorageDialog(
+                                        context, index - row - 1);
+                                  },
+                                  child: Container(
+                                    child: Center(
+                                      child: Text(int.parse(
+                                              storage.value[index - row - 1],
+                                              radix: 2)
+                                          .toRadixString(16)),
+                                    ),
+                                  ),
+                                );
+                              }
+                            });
+                      },
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Container(
+                    width: 300,
+                    height: 200,
+                    child: ValueListenableBuilder(
+                      valueListenable: storage,
+                      builder: (context, value, child) {
+                        return GridView.builder(
+                            gridDelegate:
+                                SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 9),
+                            itemCount: 135,
+                            itemBuilder: (context, index) {
+                              // row calculates the current row
+                              var row = index ~/ 9;
+                              var register = row ~/ 3;
+                              var bit = index % 9 - 1;
+                              // checks if this is a line start
+                              String name = "";
+                              if (index % 9 == 0) {
+                                switch (row % 3) {
+                                  case 0:
+                                    switch (register) {
+                                      case 0:
+                                        name = "RA";
+                                        break;
+                                      case 1:
+                                        name = "RB";
+                                        break;
+                                      case 2:
+                                        name = "RC";
+                                        break;
+                                      case 3:
+                                        name = "RD";
+                                        break;
+                                      case 4:
+                                        name = "RE";
+                                        break;
+                                    }
+                                    break;
+                                  case 1:
+                                    name = "Tris";
+                                    break;
+
+                                  case 2:
+                                    name = "Pin";
+                                    break;
+                                }
+
+                                return Container(
+                                  color: Colors.amber,
+                                  child: Center(child: Text(name)),
+                                );
+                              } else {
+                                switch (row % 3) {
+                                  case 0:
+                                    name = (7 - bit).toString();
+                                    break;
+                                  case 1:
+                                    name = (7 - bit).toString();
+                                    break;
+                                  case 2:
+                                    String temp = storage.value[register + 5];
+                                    name = temp[bit];
+                                    return InkWell(
+                                      onTap: () {
+                                        changeTrisBit(bit, register + 5);
+                                      },
+                                      child: Container(
+                                          decoration: BoxDecoration(
+                                            border: Border(
+                                                bottom: BorderSide(
+                                                    color: Colors.grey,
+                                                    width: 2)),
+                                            color: Colors.blue[100],
+                                          ),
+                                          child: Center(child: Text(name))),
+                                    );
+                                }
+                                return Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.grey[100],
+                                    ),
+                                    child: Center(child: Text(name)));
+                              }
+                            });
+                      },
+                    ),
+                  ),
+                ),
+                Column(
+                  children: [
+                    ValueListenableBuilder(
+                        valueListenable: wReg,
+                        builder: (context, value, child) {
+                          return Text("WReg: " + wReg.value);
+                        }),
+                    ValueListenableBuilder(
+                        valueListenable: storage,
+                        builder: (context, value, child) {
+                          return Column(
+                            children: [
+                              Text("FSR: " + storage.value[4]),
+                              Text("PCL: " + storage.value[2]),
+                              Text("PCLATCH: " + storage.value[10]),
+                              Text("Status: " + storage.value[3]),
+                              Text(
+                                "Quartz: " +
+                                    "4,000000" +
+                                    " MHz (" +
+                                    "1.000" +
+                                    " µs)",
+                              ),
+                              Text("Runtime: " + "00:13" + " µs"),
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Tooltip(
+                                    message: "Clear runtime counter",
+                                    child: OutlinedButton(
+                                      onPressed: () {},
+                                      child: Text(
+                                        "Reset Runtime",
+                                        style: TextStyle(color: Colors.black),
+                                      ),
+                                    )),
+                              ),
+                            ],
+                          );
+                        }),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text("IRP"),
+                    Text("RP0"),
+                    Text("RP1"),
+                    Text("IRP"),
+                    Text("RP0"),
+                    Text("RP1"),
+                    Text("IRP"),
+                    Text("RP0"),
+                    Text("RP1"),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Text(storage.value[3][0]),
+                    Text(storage.value[3][1]),
+                    Text(storage.value[3][2]),
+                    Text(storage.value[3][3]),
+                    Text(storage.value[3][4]),
+                    Text(storage.value[3][5]),
+                    Text(storage.value[3][6]),
+                    Text(storage.value[3][7]),
+                  ],
+                ),
+                Container(
+                  width: 300,
+                  height: 200,
+                  child: GridView.builder(
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 9),
+                    itemCount: 135,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        child: Text("Blub"),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
           ),
           Container(
             decoration: BoxDecoration(color: Colors.blue[50]),
@@ -335,29 +371,6 @@ class _SimScreenState extends State<SimScreen> {
                       )
                     ],
                   ),
-                ),
-                Column(
-                  children: [
-                    Text(
-                      "Quartz: " + "4,000000" + " MHz (" + "1.000" + " µs)",
-                    ),
-                    Row(
-                      children: [
-                        Text("Runtime: " + "00:13" + " µs"),
-                        Tooltip(
-                            message: "Clear runtime counter",
-                            child: IconButton(
-                              onPressed: () {},
-                              icon: Icon(
-                                Icons.clear,
-                                size: 15,
-                              ),
-                              color: Colors.red[600],
-                              hoverColor: Colors.transparent,
-                            )),
-                      ],
-                    ),
-                  ],
                 ),
               ],
             ),
