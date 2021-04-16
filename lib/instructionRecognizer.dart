@@ -141,11 +141,11 @@ class InstructionRecognizer {
     print(index.toString() + " ADDLW");
     // convert to base 10 than back to hex and string
     int sum = int.parse(instruction.substring(6), radix: 2) +
-        int.parse(wReg, radix: 2);
+        int.parse(wReg.value, radix: 2);
     String binSum = "00000000" + sum.toRadixString(2);
     // substring catches overflow
     binSum = binSum.substring(binSum.length - 8);
-    wReg = binSum;
+    wReg.value = binSum;
     print("Ergebnis: " + binSum.toString());
     //TODO: Z,C,DC-Flag
     return (++index);
@@ -154,10 +154,10 @@ class InstructionRecognizer {
   int andlw(int index, String instruction) {
     print(index.toString() + " ANDLW");
     int sum = int.parse(instruction.substring(6), radix: 2) &
-        int.parse(wReg, radix: 2);
+        int.parse(wReg.value, radix: 2);
     String binSum = "00000000" + sum.toRadixString(2);
     binSum = binSum.substring(binSum.length - 8);
-    wReg = binSum;
+    wReg.value = binSum;
     print("Ergebnis: " + binSum.toString());
     return ++index;
   }
@@ -166,12 +166,12 @@ class InstructionRecognizer {
     print(index.toString() + " ADDWF");
     int address = int.parse(instruction.substring(7), radix: 2);
     int sum =
-        int.parse(storage.value[address], radix: 2) + int.parse(wReg, radix: 2);
+        int.parse(storage.value[address], radix: 2) + int.parse(wReg.value, radix: 2);
     String binSum = "00000000" + sum.toRadixString(2);
     binSum = binSum.substring(binSum.length - 8);
     print("Ergebnis: " + binSum.toString());
     if (instruction[6] == "0") {
-      wReg = binSum;
+      wReg.value = binSum;
     } else {
       storage.value[address] = binSum;
     }
@@ -182,12 +182,12 @@ class InstructionRecognizer {
     print(index.toString() + " ANDWF");
     int address = int.parse(instruction.substring(7), radix: 2);
     int sum =
-        int.parse(storage.value[address], radix: 2) & int.parse(wReg, radix: 2);
+        int.parse(storage.value[address], radix: 2) & int.parse(wReg.value, radix: 2);
     String binSum = "00000000" + sum.toRadixString(2);
     binSum = binSum.substring(binSum.length - 8);
     print("Ergebnis: " + binSum.toString());
     if (instruction[6] == "0") {
-      wReg = binSum;
+      wReg.value = binSum;
     } else {
       storage.value[address] = binSum;
     }
@@ -275,13 +275,13 @@ class InstructionRecognizer {
 
   int movlw(int index, String instruction) {
     print(index.toString() + " MOVLW");
-    wReg = instruction.substring(6);
+    wReg.value = instruction.substring(6);
     return (++index);
   }
 
   int retlw(int index, String instruction) {
     print(index.toString() + " RETLW");
-    wReg = "00" + instruction.substring(5);
+    wReg.value = "00" + instruction.substring(5);
     index = ret(index);
     return index;
   }
@@ -290,7 +290,7 @@ class InstructionRecognizer {
     // 1 Word 1 Cycle
     // TODO: C und DC Bit nicht korrekt gesetzt
     print(index.toString() + " SUBLW");
-    var zahl1 = int.parse(wReg, radix: 2);
+    var zahl1 = int.parse(wReg.value, radix: 2);
     print("Zahl1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
     var zahl2 =
         int.parse(instruction.substring(instruction.length - 8), radix: 2);
@@ -331,18 +331,17 @@ class InstructionRecognizer {
     print(out);
     m = m.substring(m.length - 8);
     print("Ergebnis: " + m + "   " + (int.parse(m, radix: 2)).toString());
-    wReg = m;
+    wReg.value = m;
     return (++index);
   }
 
   int iorlw(int index, String instruction) {
     print(index.toString() + " IORLW");
-    int ins =
-        int.parse(instruction.substring(instruction.length - 8), radix: 2);
-    int w = int.parse(wReg, radix: 2);
+    int ins = int.parse(instruction.substring(instruction.length-8), radix: 2);
+    int w = int.parse(wReg.value, radix: 2);
     int ret = w | ins; // Binary OR
-    wReg = "00000000" + ret.toRadixString(2);
-    wReg = wReg.substring(wReg.length - 8);
+    wReg.value = "00000000"+ ret.toRadixString(2);
+    wReg.value = wReg.value.substring(wReg.value.length-8);
     storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit
     print("wReg: " +
         wReg +
@@ -359,12 +358,12 @@ class InstructionRecognizer {
     print(index.toString() + " IORLW");
     int ins =
         int.parse(instruction.substring(instruction.length - 8), radix: 2);
-    int w = int.parse(wReg, radix: 2);
+    int w = int.parse(wReg.value, radix: 2);
     int ret = w ^ ins; // Binary XOR
-    wReg = "00000000" + ret.toRadixString(2);
-    wReg = wReg.substring(wReg.length - 8);
+    wReg.value = "00000000" + ret.toRadixString(2);
+    wReg.value = wReg.value.substring(wReg.value.length - 8);
     print("wReg: " +
-        wReg +
+        wReg.value +
         " Int: " +
         ret.toString() +
         " Hex: " +
