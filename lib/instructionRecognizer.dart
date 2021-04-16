@@ -7,6 +7,54 @@ class InstructionRecognizer {
         oldString.substring(index + 1);
   }
 
+  int statustoBit(String ch) {
+    ch = ch.toUpperCase();
+    switch (ch) {
+      case "IRP":
+        return 0;
+      case "RP1":
+        return 1;
+      case "RP0":
+        return 2;
+      case "TO":
+        return 3;
+      case "Z":
+        return 4;
+      case "IRP":
+        return 5;
+      case "DC":
+        return 6;
+      case "C":
+        return 7;
+      default:
+        return 8;
+    }
+  }
+
+  void clearStatusBit(String ch) {
+    int bit = statustoBit(ch);
+    if (bit < 8) {
+      storage.value[3] = replaceCharAt(storage.value[3], bit, "0");
+    } else {
+      print("Wrong StatusBit");
+    }
+  }
+
+  void clearFlags() {
+    clearStatusBit("C"); // C-Bit
+    clearStatusBit("Z"); // Z-Bit
+    clearStatusBit("DC"); // DC-Bit
+  }
+
+  void setStatusBit(String ch) {
+    int bit = statustoBit(ch);
+    if (bit < 8) {
+      storage.value[3] = replaceCharAt(storage.value[3], bit, "1");
+    } else {
+      print("Wrong StatusBit");
+    }
+  }
+
   int recognize(int index, String instruction) {
     //print(instruction);
     // 14-Stellen
@@ -99,6 +147,7 @@ class InstructionRecognizer {
     binSum = binSum.substring(binSum.length - 8);
     wReg.value = binSum;
     print("Ergebnis: " + binSum.toString());
+    //TODO: Z,C,DC-Flag
     return (++index);
   }
 
@@ -238,33 +287,48 @@ class InstructionRecognizer {
   }
 
   int sublw(int index, String instruction) {
+    // 1 Word 1 Cycle
+    // TODO: C und DC Bit nicht korrekt gesetzt
     print(index.toString() + " SUBLW");
     var zahl1 = int.parse(wReg.value, radix: 2);
     print("Zahl1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
     var zahl2 =
         int.parse(instruction.substring(instruction.length - 8), radix: 2);
     print("Zahl2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
-    var sub = zahl1 - zahl2;
+    var sub = zahl2 - zahl1;
     print("Ergebnis int: " + sub.toString());
     String m = "";
+    String out = "";
+    if ((sub > 16) || (sub < -16) || (sub == 0)) {
+      // Overflow der ersten 4 Bit
+      setStatusBit("DC");
+      out = "DC-Bit: 1 ";
+    } else {
+      clearStatusBit("DC");
+      out = "DC-Bit: 0 ";
+    }
     if (sub > 0) {
       // result is positive
-      storage.value[3] = replaceCharAt(storage.value[2], 7, "1"); // C-Bit
-      storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit
+      setStatusBit("C"); // C-Bit
+      clearStatusBit("Z"); // Z-Bit
       m = "00000000" + sub.toRadixString(2);
+      out += "C-Bit: 1 Z-Bit: 0";
     } else if (sub == 0) {
       // result is zero
-      storage.value[3] = replaceCharAt(storage.value[2], 7, "1"); // C-Bit
-      storage.value[3] = replaceCharAt(storage.value[2], 5, "1"); // Z-Bit
+      setStatusBit("C"); // C-Bit
+      setStatusBit("Z"); // Z-Bit
       m = "00000000";
+      out += ("C-Bit: 1 Z-Bit: 1");
     } else if (sub < 0) {
       // result is negative
-      storage.value[3] = replaceCharAt(storage.value[2], 7, "0"); // C-Bit
-      storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit
-      sub = sub & 255; // invertieren
+      clearStatusBit("C"); // C-Bit
+      clearStatusBit("Z"); // Z-Bit
+      sub = (sub & 255); // invertieren
       m = "11111111" + sub.toRadixString(2); //2er Komplement bilden
       m = m.substring(m.length - 8);
+      out += ("C-Bit: 0 Z-Bit: 0");
     }
+    print(out);
     m = m.substring(m.length - 8);
     print("Ergebnis: " + m + "   " + (int.parse(m, radix: 2)).toString());
     wReg.value = m;
@@ -279,16 +343,31 @@ class InstructionRecognizer {
     wReg.value = "00000000"+ ret.toRadixString(2);
     wReg.value = wReg.value.substring(wReg.value.length-8);
     storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit
+    print("wReg: " +
+        wReg +
+        " Int: " +
+        ret.toString() +
+        " Hex: " +
+        ret.toRadixString(16) +
+        "   zBit: 0");
     return (++index);
   }
 
   int xorlw(int index, String instruction) {
+    // 1 Word 1 Cycle
     print(index.toString() + " IORLW");
-    int ins = int.parse(instruction.substring(instruction.length-8), radix: 2);
+    int ins =
+        int.parse(instruction.substring(instruction.length - 8), radix: 2);
     int w = int.parse(wReg.value, radix: 2);
     int ret = w ^ ins; // Binary XOR
-    wReg.value = "00000000"+ ret.toRadixString(2);
-    wReg.value = wReg.value.substring(wReg.value.length-8);
+    wReg.value = "00000000" + ret.toRadixString(2);
+    wReg.value = wReg.value.substring(wReg.value.length - 8);
+    print("wReg: " +
+        wReg.value +
+        " Int: " +
+        ret.toString() +
+        " Hex: " +
+        ret.toRadixString(16));
     return (++index);
-  }  
+  }
 }

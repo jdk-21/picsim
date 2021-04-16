@@ -79,6 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
               print(data.toString());
               print(result.path);
+              program = [];
               readProgramCode(data);
               Navigator.push(
                 context,
