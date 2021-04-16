@@ -6,7 +6,7 @@ import 'package:stack/stack.dart' as st;
 
 st.Stack<int> stack = st.Stack();
 List<Map> program = [];
-var storage = ValueNotifier<List<String>>(List.filled(256, "00"));
+var storage = ValueNotifier<List<String>>(List.filled(256, "00000000"));
 String wReg = "00000000"; 
 
 InstructionCycler cycler = InstructionCycler();
@@ -79,6 +79,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
               print(data.toString());
               print(result.path);
+              program = [];
               readProgramCode(data);
               Navigator.push(
                 context,

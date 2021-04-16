@@ -56,18 +56,23 @@ class _SimScreenState extends State<SimScreen> {
                   child: OutlinedButton(
                     child: Text("OK"),
                     onPressed: () {
+                      String input = "000000000" + int.parse(txt.text, radix: 16).toRadixString(2);
                       if (txt.text.length == 2 &&
                               RegExp(r"[A-Fa-f0-9]{2}").hasMatch(txt.text) ||
                           txt.text.length == 1 &&
                               RegExp(r"[A-Fa-f0-9]{1}").hasMatch(txt.text)) {
-                        String a = "00" + txt.text;
                         setState(() {
-                          storage.value[index] = a.substring(a.length - 2);
+                          storage.value[index] = input.substring(input.length - 8);
                         });
                         Navigator.of(context).pop();
-                      } else {
+                      } else if (txt.text.length == 8 && RegExp(r"[0-1]{8}").hasMatch(txt.text)) {
+                        setState(() {
+                          storage.value[index] = input.substring(input.length - 8);
+                        });
+                      } 
+                      else {
                         ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Not an hex value!")));
+                            SnackBar(content: Text("Not a hex/binary value!")));
                       }
                     },
                   ),
@@ -78,9 +83,7 @@ class _SimScreenState extends State<SimScreen> {
     }
 
     changeTrisBit(int bit, int index) {
-      String temp = "00000000" +
-          int.parse(storage.value[index], radix: 16).toRadixString(2);
-      temp = temp.substring(temp.length - 8);
+      String temp = storage.value[index];
       switch (int.parse(temp[bit])) {
         case 0:
           temp = temp.substring(0, bit) + "1" + temp.substring(bit + 1);
@@ -89,9 +92,8 @@ class _SimScreenState extends State<SimScreen> {
           temp = temp.substring(0, bit) + "0" + temp.substring(bit + 1);
           break;
       }
-      temp = "00" + int.parse(temp, radix: 2).toRadixString(16);
       setState(() {
-        storage.value[index] = temp.substring(temp.length - 2);
+        storage.value[index] = temp;
       });
     }
 
@@ -135,7 +137,7 @@ class _SimScreenState extends State<SimScreen> {
                                 child: Container(
                                     child: Center(
                                         child: Text(
-                                            storage.value[index - row - 1]))),
+                                            int.parse(storage.value[index - row - 1], radix: 2).toRadixString(16)),),),
                               );
                             }
                           });
@@ -206,11 +208,8 @@ class _SimScreenState extends State<SimScreen> {
                                   name = (7 - bit).toString();
                                   break;
                                 case 2:
-                                  String temp = "00000000" +
-                                      int.parse(storage.value[register + 5],
-                                              radix: 16)
-                                          .toRadixString(2);
-                                  name = temp.substring(temp.length - 8)[bit];
+                                  String temp = storage.value[register + 5];
+                                  name = temp[bit];
                                   return InkWell(
                                     onTap: () {
                                       changeTrisBit(bit, register + 5);
