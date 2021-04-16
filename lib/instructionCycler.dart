@@ -45,6 +45,7 @@ class InstructionCycler {
       print("instruction: " +
           int.parse(programStorage[programCounter], radix: 2)
               .toRadixString(16));
+      storage.notifyListeners();
     }
   }
 }
