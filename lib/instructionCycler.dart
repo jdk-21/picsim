@@ -11,8 +11,8 @@ class InstructionCycler {
     print("started");
     run = true;
     while (run) {
-      programCounter=
-        recognizer.recognize(programCounter, programStorage[programCounter]);
+      programCounter =
+          recognizer.recognize(programCounter, programStorage[programCounter]);
       print("programCounter: " + programCounter.toString());
       print("step: programCounter " + programCounter.toString());
       print("wReg: " + wReg.toString());
@@ -40,12 +40,16 @@ class InstructionCycler {
   void step() {
     if (!run) {
       programCounter =
-          recognizer.recognize(programCounter, programStorage[programCounter]);      
+          recognizer.recognize(programCounter, programStorage[programCounter]);
       print("step: programCounter " + programCounter.toString());
-      print("wReg: " + wReg.toString() +"  "+ int.parse(wReg.value, radix: 2).toRadixString(16));
+      print("wReg: " +
+          wReg.toString() +
+          "  " +
+          int.parse(wReg.value, radix: 2).toRadixString(16));
       print("instruction: " +
           int.parse(programStorage[programCounter], radix: 2)
               .toRadixString(16));
+      // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
       storage.notifyListeners();
     }
   }

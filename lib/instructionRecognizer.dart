@@ -344,7 +344,7 @@ class InstructionRecognizer {
     wReg.value = wReg.value.substring(wReg.value.length-8);
     storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit
     print("wReg: " +
-        wReg +
+        wReg.value +
         " Int: " +
         ret.toString() +
         " Hex: " +
