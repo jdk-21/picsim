@@ -1,6 +1,7 @@
 import 'main.dart';
 
 class InstructionRecognizer {
+
   String replaceCharAt(String oldString, int index, String newChar) {
     return oldString.substring(0, index) +
         newChar +
@@ -18,9 +19,9 @@ class InstructionRecognizer {
         return 2;
       case "TO":
         return 3;
-      case "Z":
+      case "PD":
         return 4;
-      case "IRP":
+      case "Z":
         return 5;
       case "DC":
         return 6;
@@ -332,6 +333,7 @@ class InstructionRecognizer {
     m = m.substring(m.length - 8);
     print("Ergebnis: " + m + "   " + (int.parse(m, radix: 2)).toString());
     wReg.value = m;
+    print(wReg.value);
     return (++index);
   }
 
@@ -344,7 +346,7 @@ class InstructionRecognizer {
     wReg.value = wReg.value.substring(wReg.value.length-8);
     storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit
     print("wReg: " +
-        wReg +
+        wReg.value +
         " Int: " +
         ret.toString() +
         " Hex: " +
@@ -355,7 +357,7 @@ class InstructionRecognizer {
 
   int xorlw(int index, String instruction) {
     // 1 Word 1 Cycle
-    print(index.toString() + " IORLW");
+    print(index.toString() + " XORLW");
     int ins =
         int.parse(instruction.substring(instruction.length - 8), radix: 2);
     int w = int.parse(wReg.value, radix: 2);

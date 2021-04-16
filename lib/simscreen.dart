@@ -17,7 +17,7 @@ class _SimScreenState extends State<SimScreen> {
         // c counts index
         var c = 0;
         for (var element in program) {
-          print(element);
+          //print(element);
           if (element['index'] == cycler.programCounter) {
             program[lastIndex]['isSelected'] = false;
             element['isSelected'] = true;
