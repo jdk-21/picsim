@@ -8,6 +8,8 @@ st.Stack<int> stack = st.Stack();
 List<Map> program = [];
 var storage = ValueNotifier<List<String>>(List.filled(256, "00000000"));
 var wReg = ValueNotifier<String>("00000000"); 
+double runtime = 0;
+double cycleDuration = 1;
 
 InstructionCycler cycler = InstructionCycler();
 
@@ -23,6 +25,7 @@ class MyApp extends StatelessWidget {
       title: 'PicSim',
       theme: ThemeData(
         primarySwatch: Colors.blue,
+        textTheme: TextTheme(bodyText2: TextStyle(fontSize: 11)),
       ),
       home: MyHomePage(title: 'PicSim'), 
     );

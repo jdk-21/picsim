@@ -149,6 +149,7 @@ class InstructionRecognizer {
     wReg.value = binSum;
     print("Ergebnis: " + binSum.toString());
     //TODO: Z,C,DC-Flag
+    ++runtime;
     return (++index);
   }
 
@@ -160,6 +161,7 @@ class InstructionRecognizer {
     binSum = binSum.substring(binSum.length - 8);
     wReg.value = binSum;
     print("Ergebnis: " + binSum.toString());
+    ++runtime;
     return ++index;
   }
 
@@ -176,6 +178,7 @@ class InstructionRecognizer {
     } else {
       storage.value[address] = binSum;
     }
+    ++runtime;
     return ++index;
   }
 
@@ -192,6 +195,7 @@ class InstructionRecognizer {
     } else {
       storage.value[address] = binSum;
     }
+    ++runtime;
     return ++index;
   }
 
@@ -202,6 +206,7 @@ class InstructionRecognizer {
     String data = storage.value[address];
     storage.value[address] = replaceCharAt(data, bit, "0");
     print("Ergebnis: " + storage.value[address].toString());
+    ++runtime;
     return ++index;
   }
 
@@ -212,6 +217,7 @@ class InstructionRecognizer {
     String data = storage.value[address];
     storage.value[address] = replaceCharAt(data, bit, "1");
     print("Ergebnis: " + storage.value[address].toString());
+    ++runtime;
     return ++index;
   }
 
@@ -221,8 +227,10 @@ class InstructionRecognizer {
     int address = int.parse(instruction.substring(7), radix: 2);
     if (storage.value[address][bit] == "1") {
       //next instruction if bit b at register f is 1
+      ++runtime;
       return ++index;
     } else {
+      runtime = runtime+2;
       return (index + 2); //the next instruction is skiped when bit is a 0
     }
   }
@@ -234,9 +242,11 @@ class InstructionRecognizer {
     if (storage.value[address][bit] == "0") {
       //next instruction if bit b at register f is 0
       print(index + 1);
+      ++runtime;
       return ++index;
     } else {
       print(index + 2);
+      runtime += 2;
       return (index + 2); //the next instruction is skiped when bit is a 1
     }
   }
@@ -247,6 +257,7 @@ class InstructionRecognizer {
     String pclath = storage.value[2];
     int address = int.parse((pclath.substring(3, 5) + instruction.substring(3)),
         radix: 2);
+    runtime += 2;
     return address;
   }
 
@@ -258,6 +269,7 @@ class InstructionRecognizer {
     } else {
       ++index;
     }
+    ++runtime;
     return index;
   }
 
@@ -266,17 +278,20 @@ class InstructionRecognizer {
     String pclath = storage.value[10];
     int address = int.parse((pclath.substring(3, 5) + instruction.substring(3)),
         radix: 2);
+    runtime += 2;
     return address;
   }
 
   int nop(int index) {
     print(index.toString() + " NOP");
+    ++runtime;
     return (++index);
   }
 
   int movlw(int index, String instruction) {
     print(index.toString() + " MOVLW");
     wReg.value = instruction.substring(6);
+    ++runtime;
     return (++index);
   }
 
@@ -284,6 +299,7 @@ class InstructionRecognizer {
     print(index.toString() + " RETLW");
     wReg.value = "00" + instruction.substring(5);
     index = ret(index);
+    runtime += 2;
     return index;
   }
 
@@ -334,6 +350,7 @@ class InstructionRecognizer {
     print("Ergebnis: " + m + "   " + (int.parse(m, radix: 2)).toString());
     wReg.value = m;
     print(wReg.value);
+    ++runtime;
     return (++index);
   }
 
@@ -352,6 +369,7 @@ class InstructionRecognizer {
         " Hex: " +
         ret.toRadixString(16) +
         "   zBit: 0");
+    ++runtime;
     return (++index);
   }
 
@@ -370,6 +388,7 @@ class InstructionRecognizer {
         ret.toString() +
         " Hex: " +
         ret.toRadixString(16));
+    ++runtime;
     return (++index);
   }
 }

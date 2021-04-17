@@ -1,15 +1,7 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-//import 'package:test/test.dart';
 
 import 'package:picsim/instructionRecognizer.dart';
 import 'package:picsim/main.dart';
-import 'package:stack/stack.dart' as st;
-
-//st.Stack<int> stack = st.Stack();
-//List<Map> program = [];
-//var storage = ValueNotifier<List<String>>(List.filled(256, "00000000"));
-//var wReg = ValueNotifier<String>("00000000");
 
 
 String hexToBin8(String hex) {

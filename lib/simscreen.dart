@@ -8,7 +8,8 @@ class SimScreen extends StatefulWidget {
 }
 
 class _SimScreenState extends State<SimScreen> {
-  var lastIndex = 0;
+  int lastIndex = 0;
+  String quartzFrequency = "4.000000";
 
   Future<void> highlighter() async {
     do {
@@ -26,80 +27,171 @@ class _SimScreenState extends State<SimScreen> {
           }
           c++;
         }
-        // show changes in storage
+        // shows updated runtime; a bit hacky
+        runtime = runtime;
       });
       await Future.delayed(const Duration(milliseconds: 100));
     } while (cycler.run);
     return;
   }
 
+  // shows dialog to change storage values
+  createStorageDialog(BuildContext context, int index) {
+    var txt = TextEditingController();
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return SimpleDialog(
+            contentPadding: EdgeInsets.all(25),
+            title: Text('Set value'),
+            children: [
+              Text("Set a hex/bin value"),
+              TextField(
+                controller: txt,
+                autofocus: true,
+                maxLength: 8,
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: OutlinedButton(
+                  child: Text("OK"),
+                  onPressed: () {
+                    String input = "000000000" +
+                        int.parse(txt.text, radix: 16).toRadixString(2);
+                    if (txt.text.length == 2 &&
+                            RegExp(r"[A-Fa-f0-9]{2}").hasMatch(txt.text) ||
+                        txt.text.length == 1 &&
+                            RegExp(r"[A-Fa-f0-9]{1}").hasMatch(txt.text)) {
+                      setState(() {
+                        storage.value[index] =
+                            input.substring(input.length - 8);
+                      });
+                      Navigator.of(context).pop();
+                    } else if (txt.text.length == 8 &&
+                        RegExp(r"[0-1]{8}").hasMatch(txt.text)) {
+                      setState(() {
+                        storage.value[index] =
+                            input.substring(input.length - 8);
+                      });
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Not a hex/binary value!")));
+                    }
+                  },
+                ),
+              ),
+            ],
+          );
+        });
+  }
+  
+  createQuartzDialog(BuildContext context, String dropdownValue) {
+    return showDialog(
+        context: context,
+        builder: (context) {
+          return SimpleDialog(
+            contentPadding: EdgeInsets.all(25),
+            title: Text('Set quartz frequency'),
+            children: [
+              Text("Select a quartz frequency (MHz)"),
+              Center(
+                child: DropdownButton<String>(
+                  value: dropdownValue,
+                  //icon: const Icon(Icons.arrow_downward),
+                  iconSize: 24,
+                  //elevation: 16,
+                  style: const TextStyle(color: Colors.deepPurple),
+                  underline: Container(
+                    height: 2,
+                    color: Colors.deepPurpleAccent,
+                  ),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      dropdownValue = newValue!;
+                    });
+                  },
+                  items: <String>[
+                    "0.032768",
+                    "0.100000",
+                    "0.455000",
+                    "0.500000",
+                    "1.000000",
+                    "2.000000",
+                    "2.457600",
+                    "3.000000",
+                    "3.276800",
+                    "3.680000",
+                    "3.686411",
+                    "4.000000",
+                    "4.096000",
+                    "4.194304",
+                    "4.433619",
+                    "4.915200",
+                    "5.000000",
+                    "6.000000",
+                    "6.144000",
+                    "6.250000",
+                    "6.553600",
+                    "8.000000",
+                    "10.00000",
+                    "12.00000",
+                    "16.00000",
+                    "20.00000",
+                    "24.00000",
+                    "32.00000",
+                    "40.00000",
+                    "80.00000"
+                  ].map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: OutlinedButton(
+                  child: Text("OK"),
+                  onPressed: () {
+                    double temp = double.parse(dropdownValue);
+                    setState(() {
+                      quartzFrequency = dropdownValue;
+                      cycleDuration = temp * (1 / (temp*temp)) * 4;
+                    });
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ),
+            ],
+          );
+        });
+  }
+
+  changeTrisBit(int bit, int index) {
+    String temp = storage.value[index];
+    switch (int.parse(temp[bit])) {
+      case 0:
+        temp = temp.substring(0, bit) + "1" + temp.substring(bit + 1);
+        break;
+      case 1:
+        temp = temp.substring(0, bit) + "0" + temp.substring(bit + 1);
+        break;
+    }
+    setState(() {
+      storage.value[index] = temp;
+    });
+  }
+
+  @override
+  initState() {
+    super.initState();
+    cycler.resetRegisters(true);
+  }
+
   @override
   Widget build(BuildContext context) {
-    // shows dialog to change the storage
-    createStorageDialog(BuildContext context, int index) {
-      var txt = TextEditingController();
-      return showDialog(
-          context: context,
-          builder: (context) {
-            return SimpleDialog(
-              contentPadding: EdgeInsets.all(25),
-              title: Text('Set value'),
-              children: [
-                Text("Set a hex value"),
-                TextField(
-                  controller: txt,
-                  autofocus: true,
-                  maxLength: 2,
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: OutlinedButton(
-                    child: Text("OK"),
-                    onPressed: () {
-                      String input = "000000000" +
-                          int.parse(txt.text, radix: 16).toRadixString(2);
-                      if (txt.text.length == 2 &&
-                              RegExp(r"[A-Fa-f0-9]{2}").hasMatch(txt.text) ||
-                          txt.text.length == 1 &&
-                              RegExp(r"[A-Fa-f0-9]{1}").hasMatch(txt.text)) {
-                        setState(() {
-                          storage.value[index] =
-                              input.substring(input.length - 8);
-                        });
-                        Navigator.of(context).pop();
-                      } else if (txt.text.length == 8 &&
-                          RegExp(r"[0-1]{8}").hasMatch(txt.text)) {
-                        setState(() {
-                          storage.value[index] =
-                              input.substring(input.length - 8);
-                        });
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text("Not a hex/binary value!")));
-                      }
-                    },
-                  ),
-                ),
-              ],
-            );
-          });
-    }
-
-    changeTrisBit(int bit, int index) {
-      String temp = storage.value[index];
-      switch (int.parse(temp[bit])) {
-        case 0:
-          temp = temp.substring(0, bit) + "1" + temp.substring(bit + 1);
-          break;
-        case 1:
-          temp = temp.substring(0, bit) + "0" + temp.substring(bit + 1);
-          break;
-      }
-      setState(() {
-        storage.value[index] = temp;
-      });
-    }
-
+    highlighter();
     return Scaffold(
       appBar: AppBar(
         title: Text("PicSim"),
@@ -215,7 +307,10 @@ class _SimScreenState extends State<SimScreen> {
                                     name = (7 - bit).toString();
                                     break;
                                   case 1:
-                                    name = (7 - bit).toString();
+                                    name = storage.value[133 + register][bit] ==
+                                            "1"
+                                        ? "i"
+                                        : "o";
                                     break;
                                   case 2:
                                     String temp = storage.value[register + 5];
@@ -246,85 +341,173 @@ class _SimScreenState extends State<SimScreen> {
                     ),
                   ),
                 ),
-                Column(
-                  children: [
-                    ValueListenableBuilder(
-                        valueListenable: wReg,
-                        builder: (context, value, child) {
-                          return Text("WReg: " + wReg.value);
-                        }),
-                    ValueListenableBuilder(
-                        valueListenable: storage,
-                        builder: (context, value, child) {
-                          return Column(
-                            children: [
-                              Text("FSR: " + storage.value[4]),
-                              Text("PCL: " + storage.value[2]),
-                              Text("PCLATCH: " + storage.value[10]),
-                              Text("Status: " + storage.value[3]),
-                              Text(
-                                "Quartz: " +
-                                    "4,000000" +
-                                    " MHz (" +
-                                    "1.000" +
-                                    " µs)",
-                              ),
-                              Text("Runtime: " + "00:13" + " µs"),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Tooltip(
-                                    message: "Clear runtime counter",
-                                    child: OutlinedButton(
-                                      onPressed: () {},
-                                      child: Text(
-                                        "Reset Runtime",
-                                        style: TextStyle(color: Colors.black),
-                                      ),
-                                    )),
-                              ),
-                            ],
-                          );
-                        }),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text("IRP"),
-                    Text("RP0"),
-                    Text("RP1"),
-                    Text("IRP"),
-                    Text("RP0"),
-                    Text("RP1"),
-                    Text("IRP"),
-                    Text("RP0"),
-                    Text("RP1"),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Text(storage.value[3][0]),
-                    Text(storage.value[3][1]),
-                    Text(storage.value[3][2]),
-                    Text(storage.value[3][3]),
-                    Text(storage.value[3][4]),
-                    Text(storage.value[3][5]),
-                    Text(storage.value[3][6]),
-                    Text(storage.value[3][7]),
-                  ],
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Column(
+                    children: [
+                      ValueListenableBuilder(
+                          valueListenable: wReg,
+                          builder: (context, value, child) {
+                            return InkWell(
+                              onTap: () => createStorageDialog(context, 4),
+                              child: Text("WReg: " +
+                                  wReg.value +
+                                  " (" +
+                                  int.parse(wReg.value, radix: 2)
+                                      .toRadixString(16) +
+                                  ")"),
+                            );
+                          }),
+                      ValueListenableBuilder(
+                          valueListenable: storage,
+                          builder: (context, value, child) {
+                            return Column(
+                              children: [
+                                InkWell(
+                                    onTap: () =>
+                                        createStorageDialog(context, 4),
+                                    child: Text("FSR: " +
+                                        storage.value[4] +
+                                        " (" +
+                                        int.parse(storage.value[4], radix: 2)
+                                            .toRadixString(16) +
+                                        ")")),
+                                InkWell(
+                                    onTap: () =>
+                                        createStorageDialog(context, 2),
+                                    child: Text("PCL: " +
+                                        storage.value[2] +
+                                        " (" +
+                                        int.parse(storage.value[2], radix: 2)
+                                            .toRadixString(16) +
+                                        ")")),
+                                InkWell(
+                                    onTap: () =>
+                                        createStorageDialog(context, 10),
+                                    child: Text("PCLATCH: " +
+                                        storage.value[10] +
+                                        " (" +
+                                        int.parse(storage.value[10], radix: 2)
+                                            .toRadixString(16) +
+                                        ")")),
+                                InkWell(
+                                    onTap: () =>
+                                        createStorageDialog(context, 3),
+                                    child: Text("Status: " +
+                                        storage.value[3] +
+                                        " (" +
+                                        int.parse(storage.value[3], radix: 2)
+                                            .toRadixString(16) +
+                                        ")")),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: InkWell(
+                                    onTap: () =>
+                                        createQuartzDialog(context, quartzFrequency),
+                                    child: Text(
+                                      "Quartz: " +
+                                          quartzFrequency +
+                                          " MHz (" +
+                                          cycleDuration.toStringAsPrecision(4) +
+                                          " µs)",
+                                    ),
+                                  ),
+                                ),
+                                Text("Runtime: " +
+                                    (cycleDuration * runtime)
+                                        .toStringAsPrecision(3) +
+                                    " µs"),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Tooltip(
+                                      message: "Clear runtime counter",
+                                      child: OutlinedButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            runtime = 0;
+                                          });
+                                        },
+                                        child: Text("Reset Runtime",
+                                            style: TextStyle(
+                                              color: Colors.black,
+                                              fontSize: 12,
+                                            )),
+                                      )),
+                                ),
+                              ],
+                            );
+                          }),
+                    ],
+                  ),
                 ),
                 Container(
                   width: 300,
                   height: 200,
                   child: GridView.builder(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 9),
-                    itemCount: 135,
+                        crossAxisCount: 8),
+                    itemCount: 48,
                     itemBuilder: (context, index) {
-                      return Container(
-                        child: Text("Blub"),
-                      );
+                      int row = index ~/ 8;
+                      int bit = index % 8;
+                      List statusReg = [
+                        "IRP",
+                        "RP1",
+                        "RP0",
+                        "TO",
+                        "PD",
+                        "Z",
+                        "DC",
+                        "C",
+                        "RBP",
+                        "IntEd",
+                        "T0CS",
+                        "T0SE",
+                        "PSA",
+                        "PS2",
+                        "PS1",
+                        "PS0",
+                        "GIE",
+                        "PIE",
+                        "T0IE",
+                        "INTE",
+                        "RBIB",
+                        "T01F",
+                        "INTF",
+                        "RBIF"
+                      ];
+                      if (row == 0 || row == 2 || row == 4) {
+                        return Container(
+                            child: Container(
+                          color: Colors.deepOrange,
+                          alignment: Alignment.center,
+                          child: Text(
+                            statusReg[(row * 4) + (bit)],
+                            style: TextStyle(fontSize: 11),
+                          ),
+                        ));
+                      } else if (row == 1) {
+                        return InkWell(
+                          onTap: () => changeTrisBit(bit, 3),
+                          child: Container(
+                              alignment: Alignment.center,
+                              child: Text(storage.value[3][bit])),
+                        );
+                      } else if (row == 3) {
+                        return InkWell(
+                          onTap: () => changeTrisBit(bit, 129),
+                          child: Container(
+                              alignment: Alignment.center,
+                              child: Text(storage.value[129][bit])),
+                        );
+                      } else {
+                        return InkWell(
+                          onTap: () => changeTrisBit(bit, 11),
+                          child: Container(
+                              alignment: Alignment.center,
+                              child: Text(storage.value[11][bit])),
+                        );
+                      }
                     },
                   ),
                 ),
