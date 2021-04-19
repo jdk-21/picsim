@@ -57,6 +57,22 @@ void main() {
       expect(wReg.value, hexToBin8("f0"));
       expect(storage.value[3].substring(5), "011");
     });
+    test("0h-1h", (){
+      final InstructionRecognizer rec = InstructionRecognizer();
+      wReg.value = hexToBin8("1");
+      int index = rec.sublw(0, hexToBin14("0"));
+      expect(index , 1);
+      expect(wReg.value, hexToBin8("ff"));
+      expect(storage.value[3].substring(5), "000");
+    });
+    test("0h-f1h", (){
+      final InstructionRecognizer rec = InstructionRecognizer();
+      wReg.value = hexToBin8("f1");
+      int index = rec.sublw(0, hexToBin14("0"));
+      expect(index , 1);
+      expect(wReg.value, hexToBin8("0f"));
+      expect(storage.value[3].substring(5), "000");
+    });
     test("f0h-1h", (){
       final InstructionRecognizer rec = InstructionRecognizer();
       wReg.value = hexToBin8("1");

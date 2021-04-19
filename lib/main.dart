@@ -4,7 +4,7 @@ import 'package:picsim/instructionCycler.dart';
 import 'package:picsim/simscreen.dart';
 import 'package:stack/stack.dart' as st;
 
-st.Stack<int> stack = st.Stack();
+var stack = List<dynamic>.filled(8, null);
 List<Map> program = [];
 var storage = ValueNotifier<List<String>>(List.filled(256, "00000000"));
 var wReg = ValueNotifier<String>("00000000"); 
