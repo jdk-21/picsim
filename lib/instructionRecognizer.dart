@@ -9,6 +9,22 @@ class InstructionRecognizer {
         oldString.substring(index + 1);
   }
 
+  int complement(int number) {
+    String i = normalize8(number);
+    i = i.replaceAll("1", "a");
+    i = i.replaceAll("0", "1");
+    i = i.replaceAll("a", "0");
+    return int.parse(i, radix: 2);
+  }
+
+  int complement4(int number) {
+    String i = normalize4(number);
+    i = i.replaceAll("1", "a");
+    i = i.replaceAll("0", "1");
+    i = i.replaceAll("a", "0");
+    return int.parse(i, radix: 2);
+  }
+
   int statustoBit(String ch) {
     ch = ch.toUpperCase();
     switch (ch) {
@@ -57,14 +73,14 @@ class InstructionRecognizer {
     }
   }
 
-  String normalize8(int number){
+  String normalize8(int number) {
     var m = "00000000" + number.toRadixString(2);
-    return m.substring(m.length-8);
+    return m.substring(m.length - 8);
   }
-  
-  String normalize4(int number){
+
+  String normalize4(int number) {
     var m = "0000" + number.toRadixString(2);
-    return m.substring(m.length-4);
+    return m.substring(m.length - 4);
   }
 
   int recognize(int index, String instruction) {
@@ -321,61 +337,73 @@ class InstructionRecognizer {
     // 1 Word 1 Cycle
     // TODO: DC Bit nicht korrekt gesetzt Z DC C
     print(index.toString() + " SUBLW");
-    String out ="";
+    String out = "";
     var zahl1 =
         int.parse(instruction.substring(instruction.length - 8), radix: 2);
     print("Zahl 1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
     var zahl2 = int.parse(wReg.value, radix: 2);
     print("Zahl 2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
 
-    var komplement = ~zahl2 +1;
-    print("Komplement: "+komplement.toRadixString(2));
-    var komplement4 = ~zahl2 +1;
-    String komplementBin8 = komplement.toRadixString(2);
-    String komplementBin4 = komplement.toRadixString(2);
+    int komplement = int.parse(normalize8(complement(zahl2) + 1), radix: 2);
+    print("Komplement: " +
+        komplement.toRadixString(2) +
+        "  " +
+        ((zahl2 & 255) + 1).toRadixString(2));
+    int komplement4 = int.parse(normalize4(complement4(zahl2) + 1), radix: 2);
+    /*String komplement = komplement.toRadixString(2);
+    String komplementBin4 = komplement4.toRadixString(2);
 
-    if(komplementBin8.length > 8){  
-      // if zahl2=0 resolve overflow    
-      komplement = int.parse(komplementBin8.substring(komplementBin8.length-8));
+    if (komplementBin8.length > 8) {
+      // if zahl2=0 resolve overflow
+      komplement =
+          int.parse(komplementBin8.substring(komplementBin8.length - 8));
       komplementBin8 = normalize8(int.parse(komplementBin8, radix: 2));
-    }   
-    if(komplementBin4.length > 4){  
-      // if zahl2=0 resolve overflow    
-      komplement4 = int.parse(komplementBin4.substring(komplementBin4.length-4));
-      komplementBin4 = normalize4(int.parse(komplementBin4, radix: 2));
     }
+    if (komplementBin4.length > 4) {
+      // if zahl2=0 resolve overflow
+      komplement4 =
+          int.parse(komplementBin4.substring(komplementBin4.length - 4));
+      komplementBin4 = normalize4(int.parse(komplementBin4, radix: 2));
+    }*/
     var sub = zahl1 + komplement;
-    var sub4 = zahl1 + komplement4;
+    var sub4 =
+        int.parse(instruction.substring(instruction.length - 4), radix: 2) +
+            komplement4;
     var subBin = sub.toRadixString(2);
     var subBin4 = sub4.toRadixString(2);
-    if(sub == 0){
+    if (sub == 0 || sub == 256) {
       setStatusBit("Z");
       out += "Z-Bit: 1  ";
       setStatusBit("C");
-      out += "C-Bit: 1  ";   
-    }else{
+      out += "C-Bit: 1  ";
+    } else {
       clearStatusBit("Z");
       out += "Z-Bit: 0  ";
     }
 
-    if(subBin4.length > 4){
+    if (subBin4.length > 4) {
       setStatusBit("DC");
       out += "DC-Bit: 1  ";
-    }else{
+    } else {
       clearStatusBit("DC");
       out += "DC-Bit: 0  ";
     }
 
-    if(subBin.length > 8){
+    if (subBin.length > 8) {
       setStatusBit("C");
       out += "C-Bit: 1  ";
-    }else if(!out.contains("C-Bit")){
-        clearStatusBit("C");
-        out += "C-Bit: 0  ";   
-    } 
+    } else {
+        out += "C-Bit: 0  ";
+      clearStatusBit("C");
+    }
     var m = "00000000" + sub.toRadixString(2);
-    wReg.value = m.substring(m.length-8);
-    print("Ergebnis: "+wReg.value +"   "+sub.toRadixString(16) +"   "+ sub.toString());
+    wReg.value = m.substring(m.length - 8);
+    print("Ergebnis: " +
+        wReg.value +
+        "   " +
+        sub.toRadixString(16) +
+        "   " +
+        sub.toString());
     print(out);
 
     ++runtime;
