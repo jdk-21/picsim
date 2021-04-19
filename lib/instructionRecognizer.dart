@@ -328,11 +328,11 @@ class InstructionRecognizer {
     var zahl2 = int.parse(wReg.value, radix: 2);
     print("Zahl 2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
 
-    var komplement = (zahl2 & 255)+1;
+    var komplement = ~zahl2 +1;
     print("Komplement: "+komplement.toRadixString(2));
-    var komplement4 = (zahl2 & 15)+1;
+    var komplement4 = ~zahl2 +1;
     String komplementBin8 = komplement.toRadixString(2);
-    String komplementBin4 = komplement4.toRadixString(2);
+    String komplementBin4 = komplement.toRadixString(2);
 
     if(komplementBin8.length > 8){  
       // if zahl2=0 resolve overflow    
@@ -357,6 +357,7 @@ class InstructionRecognizer {
       clearStatusBit("Z");
       out += "Z-Bit: 0  ";
     }
+
     if(subBin4.length > 4){
       setStatusBit("DC");
       out += "DC-Bit: 1  ";
@@ -364,6 +365,7 @@ class InstructionRecognizer {
       clearStatusBit("DC");
       out += "DC-Bit: 0  ";
     }
+
     if(subBin.length > 8){
       setStatusBit("C");
       out += "C-Bit: 1  ";
