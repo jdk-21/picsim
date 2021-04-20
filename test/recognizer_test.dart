@@ -183,4 +183,13 @@ void main() {
      expect(wReg.value, hexToBin8("AA"));
      expect(storage.value[3][rec.statustoBit("Z")], "0");
   });
+
+  test("movwf", () {
+   final InstructionRecognizer rec = InstructionRecognizer();
+   storage.value[26] = hexToBin8("FF");
+   wReg.value = hexToBin8("AA");
+   expect(rec.movwf(0, hexToBin14("9A")), 1);
+   expect(storage.value[26], hexToBin8("AA"));
+   expect(wReg.value, hexToBin8("AA"));
+  });
 }

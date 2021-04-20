@@ -123,6 +123,10 @@ class InstructionRecognizer {
     else if (instruction.startsWith("0000010")) {
       return clrw(index, instruction);
     }
+    // MOVWF
+    else if (instruction.startsWith("0000001")) {
+      return movwf(index, instruction);
+    }
     // 6-Stellen
     // ANDLW
     else if (instruction.startsWith("111001")) {
@@ -135,7 +139,7 @@ class InstructionRecognizer {
     // IORLW
     else if (instruction.startsWith("111000")) {
       return iorlw(index, instruction);
-    }    
+    }
     // INCFSZ
     else if (instruction.startsWith("001111")) {
       return incfsz(index, instruction);
@@ -567,10 +571,19 @@ class InstructionRecognizer {
     if (storage.value[3][statustoBit("Z")] != "1") {
       return index; // Nächster Befehl
     } else {
-      return nop(index); // Cycle 2 - Überspringen des nächsten Befehls, wurde durch NOP ersetzt
+      return nop(
+          index); // Cycle 2 - Überspringen des nächsten Befehls, wurde durch NOP ersetzt
     }
+  }
+
+  int movwf(int index, String instruction) {
+    print(index.toString() + " MOVWF");
+    int adresse =
+        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    storage.value[adresse] = wReg.value;
+    return ++index;
   }
 }
 
-//Testprog 3: movwf, clrf, comf, decf, incf, movf, iorwf, subwf, swapf, xorwf, clrw
-//Testprog 4: incfsz
+//Testprog 3: movwf, comf, decf, movf, iorwf, subwf, swapf, xorwf
+//Testprog 4: movwf
