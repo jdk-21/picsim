@@ -66,15 +66,12 @@ class InstructionRecognizer {
   }
 
   String normalize(int stellen, int number) {
-    print("Normelize: " + number.toRadixString(2));
     String m = "";
     for (int i = 0; i < stellen; i++) {
       m += "0";
     }
     m += number.toRadixString(2);
-    print(m);
     m = m.substring(m.length - stellen);
-    print(m);
     return m;
   }
 
@@ -150,7 +147,7 @@ class InstructionRecognizer {
     // ANDWF
     else if (instruction.startsWith("000101")) {
       return andwf(index, instruction);
-    }    
+    }
     //5-Stellen
     // ADDLW
     else if (instruction.startsWith("11111")) {
@@ -199,6 +196,7 @@ class InstructionRecognizer {
     // add new instruction with else if
   }
 
+  
   int addlw(int index, String instruction) {
     print(index.toString() + " ADDLW");
     // convert to base 10 than back to hex and string
@@ -513,9 +511,40 @@ class InstructionRecognizer {
 
   int clrf(int index, String instruction) {
     print(index.toString() + " CLRF");
-    int adresse = int.parse(instruction.substring(instruction.length-7),radix: 2);
+    int adresse =
+        int.parse(instruction.substring(instruction.length - 7), radix: 2);
     storage.value[adresse] = "00000000"; //clear
     setStatusBit("Z");
+    return ++index;
+  }
+
+  int incf(int index, String instruction) {
+    print(index.toString() + " INCF");
+    int adresse =
+        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    int reg = int.parse(storage.value[adresse], radix: 2);
+    print("Register: " +
+        reg.toRadixString(2) +
+        " Int: " +
+        reg.toString() +
+        " Hex: " +
+        reg.toRadixString(16));
+    reg = complement(8, reg);
+    String res = normalize(8, reg);
+    // Speichern
+    if (instruction[instruction.length - 8] == "0") {
+      wReg.value = res;
+    } else {
+      storage.value[adresse] = res;
+    }
+    // Z-Bit setzen
+    if (reg == 0) {
+      setStatusBit("Z");
+      print("Z-Bit: 1");
+    } else {
+      clearStatusBit("Z");
+      print("Z-Bit: 0");
+    }
     return ++index;
   }
 }
