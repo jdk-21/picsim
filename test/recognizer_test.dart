@@ -86,25 +86,47 @@ void main() {
     test("9x call 2x return", (){
       final InstructionRecognizer rec = InstructionRecognizer();
       expect(rec.call(0, hexToBin14("7ff")), int.parse("7ff", radix: 16));
-      expect(stack[0], hexToBin8("1"));
+      expect(stack[0], 1);
       expect(rec.stackPointer, 1);
       int i = rec.call(1, hexToBin14("7fe"));
-      i = rec.call(i, hexToBin14("7fd"));
-      i = rec.call(i, hexToBin14("7fc"));
-      i = rec.call(i, hexToBin14("7fb"));
-      i = rec.call(i, hexToBin14("7fa"));
-      i = rec.call(i, hexToBin14("7f9"));
-      i = rec.call(i, hexToBin14("7f8"));
-      i = rec.call(i, hexToBin14("7f7"));
-      expect(rec.stackPointer, 0);
-      expect(i, 9);
+      i = rec.call(1, hexToBin14("7fd"));
+      i = rec.call(2, hexToBin14("7fc"));
+      i = rec.call(3, hexToBin14("7fb"));
+      i = rec.call(4, hexToBin14("7fa"));
+      i = rec.call(5, hexToBin14("7f9"));
+      i = rec.call(6, hexToBin14("7f8"));
+      i = rec.call(7, hexToBin14("7f7"));
       expect(rec.stackPointer, 1);
-      expect(rec.ret(0), int.parse("7f7"));
-      expect(rec.ret(0), int.parse("7f8"));
-      //expect(rec.stackPointer,)
+      expect(i, int.parse("7f7", radix: 16));
+      expect(rec.ret(0), 8);
+      expect(rec.stackPointer, 0);
+      expect(rec.ret(0), 7);
+      expect(rec.stackPointer, 7);
+    });
+    test("Call with PCLATH", () {
+      final InstructionRecognizer rec = InstructionRecognizer();
+      storage.value[10] = "00001000";
+      expect(rec.call(0, hexToBin14("1")), 2049);
     });
 
-    // TODO addwf PCL
+    test("GOTO with PCLATH", () {
+      final InstructionRecognizer rec = InstructionRecognizer();
+      storage.value[10] = "00001000";
+      expect(rec.goto(0, hexToBin14("12")), 2066);
+    });
+
+    // TODO addwf, incf ... with PCL
+  });
+  test("andlw", (){
+    final InstructionRecognizer rec  = InstructionRecognizer();
+    wReg.value=hexToBin8("ff");
+    rec.andlw(0, hexToBin8("0"));
+    expect(wReg.value, hexToBin8("0"));
+    expect(storage.value[3][5], "1");
+    
+  });
+  test("", () {
+
   });
 }
 
