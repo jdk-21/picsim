@@ -153,4 +153,34 @@ void main() {
      expect(wReg.value, hexToBin8("AA"));
      expect(storage.value[3][rec.statustoBit("Z")], "0");
   });
+
+  test("incfsz", () {
+    // gleiche Testfälle wie incf + Skip bei 00h
+     final InstructionRecognizer rec = InstructionRecognizer();
+     // FF --> 00
+     storage.value[26] = hexToBin8("FF");
+     expect(rec.incfsz(0, hexToBin14("9A")), 2);
+     expect(storage.value[26], hexToBin8("00"));
+     expect(storage.value[3][rec.statustoBit("Z")], "1");
+     // FF --> 00 (wReg)
+     storage.value[26] = hexToBin8("FF");
+     expect(rec.incfsz(0, hexToBin14("1A")), 2);
+     expect(wReg.value, hexToBin8("00"));
+     expect(storage.value[3][rec.statustoBit("Z")], "1");
+     // 00 --> FF
+     storage.value[26] = hexToBin8("00");
+     expect(rec.incfsz(0, hexToBin14("9A")), 1);
+     expect(storage.value[26], hexToBin8("FF"));
+     expect(storage.value[3][rec.statustoBit("Z")], "0");
+     // AA --> 55
+     storage.value[26] = hexToBin8("AA");
+     expect(rec.incfsz(0, hexToBin14("9A")), 1);
+     expect(storage.value[26], hexToBin8("55"));
+     expect(storage.value[3][rec.statustoBit("Z")], "0");
+     // 55 --> AA (wReg)
+     storage.value[26] = hexToBin8("55");
+     expect(rec.incfsz(0, hexToBin14("1A")), 1);
+     expect(wReg.value, hexToBin8("AA"));
+     expect(storage.value[3][rec.statustoBit("Z")], "0");
+  });
 }

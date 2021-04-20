@@ -135,10 +135,14 @@ class InstructionRecognizer {
     // IORLW
     else if (instruction.startsWith("111000")) {
       return iorlw(index, instruction);
-    }
+    }    
     // INCFSZ
     else if (instruction.startsWith("001111")) {
       return incfsz(index, instruction);
+    }
+    // INCF
+    else if (instruction.startsWith("001010")) {
+      return incf(index, instruction);
     }
     // RLF
     else if (instruction.startsWith("001101")) {
@@ -557,11 +561,11 @@ class InstructionRecognizer {
 
   int incfsz(int index, String instruction) {
     print(index.toString() + " INCFSZ");
-    incf(index, instruction); // Cycle 1
+    index = incf(index, instruction); // Cycle 1
 
     // Ergebnis auf 0 prüfen
-    if (storage.value[3][statustoBit("Z")] != "0") {
-      return ++index; // Nächster Befehl
+    if (storage.value[3][statustoBit("Z")] != "1") {
+      return index; // Nächster Befehl
     } else {
       return nop(index); // Cycle 2 - Überspringen des nächsten Befehls, wurde durch NOP ersetzt
     }
