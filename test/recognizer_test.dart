@@ -66,6 +66,14 @@ void main() {
       expect(storage.value[3].substring(5), "001");
     });
   });
+  group("test jumps", () {
+    test("9 calls 1 return", (){
+      final InstructionRecognizer rec = InstructionRecognizer();
+      expect(rec.call(0, hexToBin14("7ff")), int.parse("7ff", radix: 16));
+      expect(stack[rec.stackPointer], 1);
+      expect(rec.stackPointer, 1);
+    });
+  });
 }
 
 
