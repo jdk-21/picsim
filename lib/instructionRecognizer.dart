@@ -280,12 +280,11 @@ class InstructionRecognizer {
 
   int call(int index, String instruction) {
     print(index.toString() + " CALL");
-    if (stackPointer == 8) {
-      stackPointer = 0;
-    } else {
-      stackPointer++;
-    }
+
     stack[stackPointer] = index + 1; //index+1 auf Stack (return adresse)
+    stackPointer++;
+    if (stackPointer > 7) stackPointer = 0;
+
     String pclath = storage.value[2];
     int address = int.parse((pclath.substring(3, 5) + instruction.substring(3)),
         radix: 2);
@@ -345,8 +344,7 @@ class InstructionRecognizer {
     print("Zahl 2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
 
     int komplement = int.parse(normalize8(complement(zahl2) + 1), radix: 2);
-    print("Komplement: " +
-        komplement.toRadixString(2) );
+    print("Komplement: " + komplement.toRadixString(2));
     int komplement4 = int.parse(normalize4(complement4(zahl2) + 1), radix: 2);
     /*String komplement = komplement.toRadixString(2);
     String komplementBin4 = komplement4.toRadixString(2);

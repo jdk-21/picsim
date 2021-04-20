@@ -83,12 +83,28 @@ void main() {
     });
   });
   group("test jumps", () {
-    test("9 calls 1 return", (){
+    test("9x call 2x return", (){
       final InstructionRecognizer rec = InstructionRecognizer();
       expect(rec.call(0, hexToBin14("7ff")), int.parse("7ff", radix: 16));
-      expect(stack[rec.stackPointer], 1);
+      expect(stack[0], hexToBin8("1"));
       expect(rec.stackPointer, 1);
+      int i = rec.call(1, hexToBin14("7fe"));
+      i = rec.call(i, hexToBin14("7fd"));
+      i = rec.call(i, hexToBin14("7fc"));
+      i = rec.call(i, hexToBin14("7fb"));
+      i = rec.call(i, hexToBin14("7fa"));
+      i = rec.call(i, hexToBin14("7f9"));
+      i = rec.call(i, hexToBin14("7f8"));
+      i = rec.call(i, hexToBin14("7f7"));
+      expect(rec.stackPointer, 0);
+      expect(i, 9);
+      expect(rec.stackPointer, 1);
+      expect(rec.ret(0), int.parse("7f7"));
+      expect(rec.ret(0), int.parse("7f8"));
+      //expect(rec.stackPointer,)
     });
+
+    // TODO addwf PCL
   });
 }
 
