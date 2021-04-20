@@ -148,6 +148,10 @@ class InstructionRecognizer {
     else if (instruction.startsWith("001111")) {
       return incfsz(index, instruction);
     }
+    // RRF
+    else if (instruction.startsWith("001100")) {
+      return rrf(index, instruction);
+    }
     // INCF
     else if (instruction.startsWith("001010")) {
       return incf(index, instruction);
@@ -596,8 +600,8 @@ class InstructionRecognizer {
     reg = cBit + reg; // C-Bit voranstellen
     print(reg);
     storage.value[3] = replaceCharAt(storage.value[3], statustoBit("C"),
-        reg[reg.length-1]); // Register letzte Stelle in C-Bit verschieben
-    reg = reg.substring(0, reg.length-1); // verschobenes Bit löschen
+        reg[reg.length - 1]); // Register letzte Stelle in C-Bit verschieben
+    reg = reg.substring(0, reg.length - 1); // verschobenes Bit löschen
     print(reg);
     cBit = storage.value[3][statustoBit("C")];
     print("New Reister: " + binToHex(reg) + "h New C-Bit: " + cBit);
@@ -612,4 +616,4 @@ class InstructionRecognizer {
   }
 }
 //Testprog 3: comf, decf, movf, iorwf, subwf, swapf, xorwf
-//Testprog 4: rrf
+//Testprog 4:

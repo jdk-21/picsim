@@ -25,10 +25,10 @@ class InstructionCycler {
   }
 
   void programm() {
+     print("Instruction: Hex "+ int.parse(programStorage[programCounter], radix: 2).toRadixString(16));
     programCounter =
         recognizer.recognize(programCounter, programStorage[programCounter]);
-    print("wReg: " + wReg.value.toString() +" Int: "+ int.parse(wReg.value, radix: 2).toString()+" Hex: " + int.parse(wReg.value, radix: 2).toRadixString(16));
-    print("Instruction: Hex "+ int.parse(programStorage[programCounter-1], radix: 2).toRadixString(16));
+    print("wReg: " + wReg.value.toString() +" Int: "+ int.parse(wReg.value, radix: 2).toString()+" Hex: " + int.parse(wReg.value, radix: 2).toRadixString(16));   
     String dc = storage.value[3][recognizer.statustoBit("DC")];
     String c = storage.value[3][recognizer.statustoBit("C")];
     String z = storage.value[3][recognizer.statustoBit("Z")];
