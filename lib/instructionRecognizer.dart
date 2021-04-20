@@ -136,6 +136,10 @@ class InstructionRecognizer {
     else if (instruction.startsWith("111000")) {
       return iorlw(index, instruction);
     }
+    // INCFSZ
+    else if (instruction.startsWith("001111")) {
+      return incfsz(index, instruction);
+    }
     // RLF
     else if (instruction.startsWith("001101")) {
       return rlf(index, instruction);
@@ -196,7 +200,6 @@ class InstructionRecognizer {
     // add new instruction with else if
   }
 
-  
   int addlw(int index, String instruction) {
     print(index.toString() + " ADDLW");
     // convert to base 10 than back to hex and string
@@ -499,6 +502,7 @@ class InstructionRecognizer {
     } else {
       storage.value[adresse] = reg;
     }
+    ++runtime;
     return ++index;
   }
 
@@ -506,6 +510,7 @@ class InstructionRecognizer {
     print(index.toString() + " CLRW");
     wReg.value = "00000000"; //clear
     setStatusBit("Z");
+    ++runtime;
     return ++index;
   }
 
@@ -515,6 +520,7 @@ class InstructionRecognizer {
         int.parse(instruction.substring(instruction.length - 7), radix: 2);
     storage.value[adresse] = "00000000"; //clear
     setStatusBit("Z");
+    ++runtime;
     return ++index;
   }
 
@@ -545,9 +551,22 @@ class InstructionRecognizer {
       clearStatusBit("Z");
       print("Z-Bit: 0");
     }
+    ++runtime;
     return ++index;
+  }
+
+  int incfsz(int index, String instruction) {
+    print(index.toString() + " INCFSZ");
+    incf(index, instruction); // Cycle 1
+
+    // Ergebnis auf 0 prüfen
+    if (storage.value[3][statustoBit("Z")] != "0") {
+      return ++index; // Nächster Befehl
+    } else {
+      return nop(index); // Cycle 2 - Überspringen des nächsten Befehls, wurde durch NOP ersetzt
+    }
   }
 }
 
 //Testprog 3: movwf, clrf, comf, decf, incf, movf, iorwf, subwf, swapf, xorwf, clrw
-//Testprog 4: incf, incfsz
+//Testprog 4: incfsz
