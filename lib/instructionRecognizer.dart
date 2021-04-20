@@ -121,7 +121,7 @@ class InstructionRecognizer {
     // ANDLW
     else if (instruction.startsWith("111001")) {
       return andlw(index, instruction);
-    }
+    }    
     // XORLW
     else if (instruction.startsWith("111010")) {
       return xorlw(index, instruction);
@@ -129,6 +129,10 @@ class InstructionRecognizer {
     // IORLW
     else if (instruction.startsWith("111000")) {
       return iorlw(index, instruction);
+    }
+    // RLF
+    else if (instruction.startsWith("001101")) {
+      return rlf(index, instruction);
     }
     // ADDWF
     else if (instruction.startsWith("000111")) {
@@ -466,4 +470,32 @@ class InstructionRecognizer {
     ++runtime;
     return (++index);
   }
+
+ int rlf(int index, String instruction){
+  print(index.toString() + " RLF");
+  int adresse =int.parse(instruction.substring(instruction.length - 7), radix: 2);
+  String reg = storage.value[adresse];
+  String cBit = storage.value[3][statustoBit("C")];
+  print("Register: "+reg);
+  print("C-Bit: "+ cBit);
+  reg = reg + cBit; // C-Bit anhängen
+  storage.value[3] = replaceCharAt(storage.value[3], statustoBit("C"), reg[0]); // Register stelle 0 in C-Bit verschieben
+  reg = reg.substring(1); // verschobenes Bit löschen
+  cBit = storage.value[3][statustoBit("C")];  
+  print("New Reister: "+reg);
+  print("New C-Bit: "+ cBit);
+  //speichern
+  if (instruction[instruction.length-8] == "0"){
+    wReg.value = reg;
+  }else{
+    storage.value[adresse] = reg;
+  }
+  return ++index;
+ }
+
+
 }
+
+
+//Testprog 3: movwf, clrf, comf, decf, incf, movf, iorwf, subwf, swapf, xorwf, clrw
+//Testprog 4: rlf, clrw, clrf, incf, incfsz
