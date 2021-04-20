@@ -84,8 +84,8 @@ void main() {
   });
 
    test("rlf", () {
-    // C-Bit = 1 Register beginnt mit 1
     final InstructionRecognizer rec = InstructionRecognizer();
+    // C-Bit = 1 Register beginnt mit 1
     storage.value[26] = hexToBin8("80");
     storage.value[3] = rec.replaceCharAt(storage.value[3], rec.statustoBit("C"), "1");
     expect(rec.rlf(0, hexToBin14("9A")), 1);
@@ -112,5 +112,13 @@ void main() {
     expect(rec.rlf(0, hexToBin14("9A")), 1);
     expect(storage.value[26], hexToBin8("A7"));
     expect(storage.value[3][rec.statustoBit("C")], "0");
+  });
+
+   test("clrw", () {
+     final InstructionRecognizer rec = InstructionRecognizer();
+     wReg.value = hexToBin8("FF");
+     expect(rec.clrw(0, hexToBin14("00")), 1);
+     expect(wReg.value, hexToBin8("00"));
+     expect(storage.value[3][rec.statustoBit("Z")], "1");
   });
 }
