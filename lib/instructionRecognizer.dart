@@ -3,6 +3,10 @@ import 'main.dart';
 class InstructionRecognizer {
   int stackPointer = 0;
 
+  String binToHex(String s) {
+    return int.parse(s, radix: 2).toRadixString(16);
+  }
+
   String replaceCharAt(String oldString, int index, String newChar) {
     return oldString.substring(0, index) +
         newChar +
@@ -495,15 +499,13 @@ class InstructionRecognizer {
         int.parse(instruction.substring(instruction.length - 7), radix: 2);
     String reg = storage.value[adresse];
     String cBit = storage.value[3][statustoBit("C")];
-    print("Register: " + reg);
-    print("C-Bit: " + cBit);
+    print("Register: " + binToHex(reg) + "h C-Bit: " + cBit);
     reg = reg + cBit; // C-Bit anhängen
     storage.value[3] = replaceCharAt(storage.value[3], statustoBit("C"),
         reg[0]); // Register stelle 0 in C-Bit verschieben
     reg = reg.substring(1); // verschobenes Bit löschen
     cBit = storage.value[3][statustoBit("C")];
-    print("New Reister: " + reg);
-    print("New C-Bit: " + cBit);
+    print("New Reister: " + binToHex(reg) + "h New C-Bit: " + cBit);
     //speichern
     if (instruction[instruction.length - 8] == "0") {
       wReg.value = reg;
@@ -583,7 +585,31 @@ class InstructionRecognizer {
     storage.value[adresse] = wReg.value;
     return ++index;
   }
-}
 
-//Testprog 3: movwf, comf, decf, movf, iorwf, subwf, swapf, xorwf
-//Testprog 4: movwf
+  int rrf(int index, String instruction) {
+    print(index.toString() + " RRF");
+    int adresse =
+        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    String reg = storage.value[adresse];
+    String cBit = storage.value[3][statustoBit("C")];
+    print("Register: " + binToHex(reg) + "h C-Bit: " + cBit);
+    reg = cBit + reg; // C-Bit voranstellen
+    print(reg);
+    storage.value[3] = replaceCharAt(storage.value[3], statustoBit("C"),
+        reg[reg.length-1]); // Register letzte Stelle in C-Bit verschieben
+    reg = reg.substring(0, reg.length-1); // verschobenes Bit löschen
+    print(reg);
+    cBit = storage.value[3][statustoBit("C")];
+    print("New Reister: " + binToHex(reg) + "h New C-Bit: " + cBit);
+    //speichern
+    if (instruction[instruction.length - 8] == "0") {
+      wReg.value = reg;
+    } else {
+      storage.value[adresse] = reg;
+    }
+    ++runtime;
+    return ++index;
+  }
+}
+//Testprog 3: comf, decf, movf, iorwf, subwf, swapf, xorwf
+//Testprog 4: rrf
