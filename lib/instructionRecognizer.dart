@@ -9,16 +9,8 @@ class InstructionRecognizer {
         oldString.substring(index + 1);
   }
 
-  int complement(int number) {
-    String i = normalize8(number);
-    i = i.replaceAll("1", "a");
-    i = i.replaceAll("0", "1");
-    i = i.replaceAll("a", "0");
-    return int.parse(i, radix: 2);
-  }
-
-  int complement4(int number) {
-    String i = normalize4(number);
+  int complement(int stellen, int number) {
+    String i = normalize(stellen,number);
     i = i.replaceAll("1", "a");
     i = i.replaceAll("0", "1");
     i = i.replaceAll("a", "0");
@@ -73,14 +65,17 @@ class InstructionRecognizer {
     }
   }
 
-  String normalize8(int number) {
-    var m = "00000000" + number.toRadixString(2);
-    return m.substring(m.length - 8);
-  }
-
-  String normalize4(int number) {
-    var m = "0000" + number.toRadixString(2);
-    return m.substring(m.length - 4);
+  String normalize(int stellen, int number) {
+    print("Normelize: " + number.toRadixString(2));
+    String m = "";
+    for (int i = 0; i < stellen; i++){
+      m += "0";
+    }
+    m += number.toRadixString(2);
+    print(m);
+    m = m.substring(m.length - stellen);
+    print(m);
+    return m;
   }
 
   int recognize(int index, String instruction) {
@@ -298,6 +293,8 @@ class InstructionRecognizer {
       ++index;
     } else {
       index = stack[stackPointer];
+      stack[stackPointer] = null;
+      --stackPointer;
     }
     runtime += 2;
     return index;
@@ -343,9 +340,10 @@ class InstructionRecognizer {
     var zahl2 = int.parse(wReg.value, radix: 2);
     print("Zahl 2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
 
-    int komplement = int.parse(normalize8(complement(zahl2) + 1), radix: 2);
-    print("Komplement: " + komplement.toRadixString(2));
-    int komplement4 = int.parse(normalize4(complement4(zahl2) + 1), radix: 2);
+    int komplement = int.parse(normalize(8,complement(8, zahl2) + 1), radix: 2);
+    print("Komplement: " +
+        komplement.toRadixString(2) );
+    int komplement4 = int.parse(normalize(4,complement(4, zahl2) + 1), radix: 2);
     /*String komplement = komplement.toRadixString(2);
     String komplementBin4 = komplement4.toRadixString(2);
 
