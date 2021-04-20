@@ -17,23 +17,31 @@ class InstructionCycler {
     storage.value[10] = "00000000"; //PCLatch
     storage.value[11] = "0000000" + storage.value[11][7]; //INTCON
     storage.value[129] = "11111111"; //Option
-    storage.value[133] = "00011111"; //TrisA first three digits undefined -> read as 0
+    storage.value[133] =
+        "00011111"; //TrisA first three digits undefined -> read as 0
     storage.value[134] = "11111111"; //TrisB
     storage.value[138] = "00000000"; //PCLATH
     storage.value[139] = "0000000" + storage.value[139][7]; //INTCON
+  }
+
+  void programm() {
+    programCounter =
+        recognizer.recognize(programCounter, programStorage[programCounter]);
+    print("wReg: " + wReg.value.toString() +" Int: "+ int.parse(wReg.value, radix: 2).toString()+" Hex: " + int.parse(wReg.value, radix: 2).toRadixString(16));
+    print("Instruction: Hex "+ int.parse(programStorage[programCounter-1], radix: 2).toRadixString(16));
+    String dc = storage.value[3][recognizer.statustoBit("DC")];
+    String c = storage.value[3][recognizer.statustoBit("C")];
+    String z = storage.value[3][recognizer.statustoBit("Z")];
+    print("DC= "+dc+" C= "+c+" Z= "+z);
+    print("---");
   }
 
   void start() async {
     print("started");
     run = true;
     while (run) {
-      programCounter =
-          recognizer.recognize(programCounter, programStorage[programCounter]);
-      print("start: programCounter " + programCounter.toString());
-      print("wReg: " + wReg.value.toString());
-      print("instruction: " +
-          int.parse(programStorage[programCounter], radix: 2)
-              .toRadixString(16));
+      print("start: PC " + programCounter.toString());
+      programm();
       // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
       storage.notifyListeners();
       await Future.delayed(const Duration(milliseconds: 200));
@@ -55,16 +63,8 @@ class InstructionCycler {
 
   void step() {
     if (!run) {
-      programCounter =
-          recognizer.recognize(programCounter, programStorage[programCounter]);
-      print("step: programCounter " + programCounter.toString());
-      print("wReg: " +
-          wReg.value.toString() +
-          "  " +
-          int.parse(wReg.value, radix: 2).toRadixString(16));
-      print("instruction: " +
-          int.parse(programStorage[programCounter], radix: 2)
-              .toRadixString(16));
+      print("step: PC " + programCounter.toString());
+      programm();
       // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
       storage.notifyListeners();
     }
