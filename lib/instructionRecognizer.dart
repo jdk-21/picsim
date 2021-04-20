@@ -346,9 +346,7 @@ class InstructionRecognizer {
 
     int komplement = int.parse(normalize8(complement(zahl2) + 1), radix: 2);
     print("Komplement: " +
-        komplement.toRadixString(2) +
-        "  " +
-        ((zahl2 & 255) + 1).toRadixString(2));
+        komplement.toRadixString(2) );
     int komplement4 = int.parse(normalize4(complement4(zahl2) + 1), radix: 2);
     /*String komplement = komplement.toRadixString(2);
     String komplementBin4 = komplement4.toRadixString(2);
@@ -374,8 +372,6 @@ class InstructionRecognizer {
     if (sub == 0 || sub == 256) {
       setStatusBit("Z");
       out += "Z-Bit: 1  ";
-      setStatusBit("C");
-      out += "C-Bit: 1  ";
     } else {
       clearStatusBit("Z");
       out += "Z-Bit: 0  ";
@@ -393,7 +389,7 @@ class InstructionRecognizer {
       setStatusBit("C");
       out += "C-Bit: 1  ";
     } else {
-        out += "C-Bit: 0  ";
+      out += "C-Bit: 0  ";
       clearStatusBit("C");
     }
     var m = "00000000" + sub.toRadixString(2);
