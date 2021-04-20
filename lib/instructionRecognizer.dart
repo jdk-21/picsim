@@ -78,7 +78,7 @@ class InstructionRecognizer {
     return m;
   }
 
-  String setZDcCBit(int ergebnis, int ergebnis4){
+  String setZDcCBit(int ergebnis, int ergebnis4) {
     String out = "";
     if (ergebnis == 0 || ergebnis == 256) {
       setStatusBit("Z");
@@ -94,7 +94,7 @@ class InstructionRecognizer {
       clearStatusBit("DC");
       out += "DC-Bit: 0  ";
     }
-    if(ergebnis.toRadixString(2).length > 8) {
+    if (ergebnis.toRadixString(2).length > 8) {
       setStatusBit("C");
       out += "C-Bit: 1  ";
     } else {
@@ -201,9 +201,14 @@ class InstructionRecognizer {
     String binSum = normalize(8, sum);
     wReg.value = binSum;
 
-    setZDcCBit(sum,sum4);
+    setZDcCBit(sum, sum4);
 
-    print("Ergebnis: " + binSum.toString() +"   "+sum.toString()+"   "+sum.toRadixString(16));
+    print("Ergebnis: " +
+        binSum.toString() +
+        "   " +
+        sum.toString() +
+        "   " +
+        sum.toRadixString(16));
     ++runtime;
     return (++index);
   }
@@ -212,10 +217,16 @@ class InstructionRecognizer {
     print(index.toString() + " ANDLW");
     int sum = int.parse(instruction.substring(6), radix: 2) &
         int.parse(wReg.value, radix: 2);
+    if (sum == 0) {
+      setStatusBit("Z");
+      print("Z-Bit: 1");
+    } else {
+      clearStatusBit("Z");
+      print("Z-Bit: 0");
+    }
     String binSum = normalize(8, sum);
     wReg.value = binSum;
     print("Ergebnis: " + binSum.toString());
-    // TODO: Z
     ++runtime;
     return ++index;
   }
@@ -224,14 +235,12 @@ class InstructionRecognizer {
     print(index.toString() + " ADDWF");
     String out = "";
     int address = int.parse(instruction.substring(7), radix: 2);
-    var zahl1 =
-        int.parse(storage.value[address], radix: 2);
+    var zahl1 = int.parse(storage.value[address], radix: 2);
     print("Zahl 1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
     var zahl2 = int.parse(wReg.value, radix: 2);
     print("Zahl 2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
 
-
-    int sum =  zahl1 + zahl2;
+    int sum = zahl1 + zahl2;
     var sum4 = int.parse(normalize(4, zahl1)) + int.parse(normalize(4, zahl2));
 
     setZDcCBit(sum, sum4);
@@ -252,15 +261,20 @@ class InstructionRecognizer {
     int address = int.parse(instruction.substring(7), radix: 2);
     int sum = int.parse(storage.value[address], radix: 2) &
         int.parse(wReg.value, radix: 2);
-    String binSum = "00000000" + sum.toRadixString(2);
-    binSum = binSum.substring(binSum.length - 8);
+    if (sum == 0) {
+      setStatusBit("Z");
+      print("Z-Bit: 1");
+    } else {
+      clearStatusBit("Z");
+      print("Z-Bit: 0");
+    }
+    String binSum = normalize(8, sum);
     print("Ergebnis: " + binSum.toString());
     if (instruction[6] == "0") {
       wReg.value = binSum;
     } else {
       storage.value[address] = binSum;
     }
-    // TODO: Z
     ++runtime;
     return ++index;
   }
@@ -389,11 +403,7 @@ class InstructionRecognizer {
         int.parse(normalize(4, complement(4, zahl2) + 1), radix: 2);
 
     var sub = zahl1 + komplement;
-    var sub4 =
-        int.parse(instruction.substring(instruction.length - 4), radix: 2) +
-            komplement4;
-    var subBin = sub.toRadixString(2);
-    var subBin4 = sub4.toRadixString(2);
+    var sub4 = int.parse(normalize(4, zahl1), radix: 2) + komplement4;
 
     setZDcCBit(sub, sub4);
 
@@ -415,35 +425,44 @@ class InstructionRecognizer {
     int w = int.parse(wReg.value, radix: 2);
     int ret = w | ins; // Binary OR
     wReg.value = normalize(8, ret);
-    setStatusBit("Z");
-    print("wReg: " +
-        wReg.value +
-        " Int: " +
-        ret.toString() +
-        " Hex: " +
-        ret.toRadixString(16) +
-        "   zBit: 0");
-    // TODO: Z
-    ++runtime;
-    return (++index);
-  }
-
-  int xorlw(int index, String instruction) {
-    // 1 Word 1 Cycle
-    print(index.toString() + " XORLW");
-    int ins =
-        int.parse(instruction.substring(instruction.length - 8), radix: 2);
-    int w = int.parse(wReg.value, radix: 2);
-    int ret = w ^ ins; // Binary XOR
-    wReg.value = "00000000" + ret.toRadixString(2);
-    wReg.value = wReg.value.substring(wReg.value.length - 8);
     print("wReg: " +
         wReg.value +
         " Int: " +
         ret.toString() +
         " Hex: " +
         ret.toRadixString(16));
-    // TODO: Z
+
+    if (ret == 0) {
+      setStatusBit("Z");
+      print("Z-Bit: 1");
+    } else {
+      clearStatusBit("Z");
+      print("Z-Bit: 0");
+    }
+    ++runtime;
+    return (++index);
+  }
+
+  int xorlw(int index, String instruction) {
+    print(index.toString() + " XORLW");
+    int ins =
+        int.parse(instruction.substring(instruction.length - 8), radix: 2);
+    int w = int.parse(wReg.value, radix: 2);
+    int ret = w ^ ins; // Binary XOR
+    wReg.value = normalize(8, ret);
+    print("wReg: " +
+        wReg.value +
+        " Int: " +
+        ret.toString() +
+        " Hex: " +
+        ret.toRadixString(16));
+    if (ret == 0) {
+      setStatusBit("Z");
+      print("Z-Bit: 1");
+    } else {
+      clearStatusBit("Z");
+      print("Z-Bit: 0");
+    }
     ++runtime;
     return (++index);
   }
