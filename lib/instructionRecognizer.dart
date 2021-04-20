@@ -117,6 +117,15 @@ class InstructionRecognizer {
         instruction.endsWith("00000")) {
       return nop(index);
     }
+    // 7-Stellen
+    // CLRF
+    else if (instruction.startsWith("0000011")) {
+      return clrf(index, instruction);
+    }
+    // CLRW
+    else if (instruction.startsWith("0000010")) {
+      return clrw(index, instruction);
+    }
     // 6-Stellen
     // ANDLW
     else if (instruction.startsWith("111001")) {
@@ -141,11 +150,7 @@ class InstructionRecognizer {
     // ANDWF
     else if (instruction.startsWith("000101")) {
       return andwf(index, instruction);
-    }
-    // CLRW
-    else if (instruction.startsWith("000001")) {
-      return clrw(index, instruction);
-    }
+    }    
     //5-Stellen
     // ADDLW
     else if (instruction.startsWith("11111")) {
@@ -505,7 +510,15 @@ class InstructionRecognizer {
     setStatusBit("Z");
     return ++index;
   }
+
+  int clrf(int index, String instruction) {
+    print(index.toString() + " CLRF");
+    int adresse = int.parse(instruction.substring(instruction.length-7),radix: 2);
+    storage.value[adresse] = "00000000"; //clear
+    setStatusBit("Z");
+    return ++index;
+  }
 }
 
 //Testprog 3: movwf, clrf, comf, decf, incf, movf, iorwf, subwf, swapf, xorwf, clrw
-//Testprog 4: rlf, clrw, clrf, incf, incfsz
+//Testprog 4: incf, incfsz

@@ -121,4 +121,12 @@ void main() {
      expect(wReg.value, hexToBin8("00"));
      expect(storage.value[3][rec.statustoBit("Z")], "1");
   });
+
+  test("clrf", () {
+     final InstructionRecognizer rec = InstructionRecognizer();
+     storage.value[26] = hexToBin8("FF");
+     expect(rec.clrf(0, hexToBin14("9A")), 1);
+     expect(storage.value[26], hexToBin8("00"));
+     expect(storage.value[3][rec.statustoBit("Z")], "1");
+  });
 }
