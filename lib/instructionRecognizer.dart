@@ -299,6 +299,8 @@ class InstructionRecognizer {
       ++index;
     } else {
       index = stack[stackPointer];
+      stack[stackPointer] = null;
+      --stackPointer;
     }
     runtime += 2;
     return index;
