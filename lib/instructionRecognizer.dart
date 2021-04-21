@@ -189,7 +189,6 @@ class InstructionRecognizer {
   int addlw(int index, String instruction) {
     print(index.toString() + " ADDLW");
     // convert to base 10 than back to hex and string
-    String out = "";
     var zahl1 = int.parse(instruction.substring(6), radix: 2);
     print("Zahl 1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
     var zahl2 = int.parse(wReg.value, radix: 2);
@@ -233,7 +232,6 @@ class InstructionRecognizer {
 
   int addwf(int index, String instruction) {
     print(index.toString() + " ADDWF");
-    String out = "";
     int address = int.parse(instruction.substring(7), radix: 2);
     var zahl1 = int.parse(storage.value[address], radix: 2);
     print("Zahl 1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
@@ -388,7 +386,6 @@ class InstructionRecognizer {
 
   int sublw(int index, String instruction) {
     print(index.toString() + " SUBLW");
-    String out = "";
     var zahl1 =
         int.parse(instruction.substring(instruction.length - 8), radix: 2);
     print("Zahl 1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
