@@ -197,7 +197,7 @@ class InstructionRecognizer {
 
     int sum = zahl1 + zahl2;
 
-    var sum4 = int.parse(normalize(4, zahl1)) + int.parse(normalize(4, zahl2));
+    var sum4 = int.parse(normalize(4, zahl1), radix: 2) + int.parse(normalize(4, zahl2), radix: 2);
     String binSum = normalize(8, sum);
     wReg.value = binSum;
 
@@ -241,7 +241,7 @@ class InstructionRecognizer {
     print("Zahl 2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
 
     int sum = zahl1 + zahl2;
-    var sum4 = int.parse(normalize(4, zahl1)) + int.parse(normalize(4, zahl2));
+    var sum4 = int.parse(normalize(4, zahl1), radix: 2) + int.parse(normalize(4, zahl2), radix: 2);
 
     setZDcCBit(sum, sum4);
 
@@ -381,7 +381,7 @@ class InstructionRecognizer {
 
   int retlw(int index, String instruction) {
     print(index.toString() + " RETLW");
-    wReg.value = "00" + instruction.substring(5);
+    wReg.value = instruction.substring(6);
     index = ret(index);
     return index;
   }
