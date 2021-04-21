@@ -233,4 +233,32 @@ void main() {
     expect(wReg.value, hexToBin8("29"));
     expect(storage.value[3][rec.statustoBit("C")], "1");
   });
+
+  test("movf", () {
+  final InstructionRecognizer rec = InstructionRecognizer();
+  // D-Bit 1 Reg FF
+  storage.value[26] = hexToBin8("FF");
+  expect(rec.movf(0, hexToBin14("9A")), 1);
+  expect(storage.value[26], hexToBin8("FF"));
+  expect(storage.value[3][rec.statustoBit("Z")], "0");
+  // D-Bit 0 Reg FF
+  storage.value[26] = hexToBin8("FF");
+  wReg.value = hexToBin8("A5");
+  expect(rec.movf(0, hexToBin14("1A")), 1);
+  expect(wReg.value, hexToBin8("FF"));
+  expect(storage.value[26], hexToBin8("FF"));
+  expect(storage.value[3][rec.statustoBit("Z")], "0");  
+  // D-Bit 1 Reg 00
+  storage.value[26] = hexToBin8("00");
+  expect(rec.movf(0, hexToBin14("9A")), 1);
+  expect(storage.value[26], hexToBin8("00"));
+  expect(storage.value[3][rec.statustoBit("Z")], "1");
+  // D-Bit 0 Reg 00
+  storage.value[26] = hexToBin8("00");
+  wReg.value = hexToBin8("A5");
+  expect(rec.movf(0, hexToBin14("1A")), 1);
+  expect(wReg.value, hexToBin8("00"));
+  expect(storage.value[26], hexToBin8("00"));
+  expect(storage.value[3][rec.statustoBit("Z")], "1");
+  });
 }

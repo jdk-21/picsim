@@ -160,6 +160,10 @@ class InstructionRecognizer {
     else if (instruction.startsWith("001101")) {
       return rlf(index, instruction);
     }
+    // MOVF
+    else if (instruction.startsWith("001000")) {
+      return movf(index, instruction);
+    }
     // ADDWF
     else if (instruction.startsWith("000111")) {
       return addwf(index, instruction);
@@ -614,6 +618,28 @@ class InstructionRecognizer {
     ++runtime;
     return ++index;
   }
+
+  int movf(int index, String instruction) {
+    print(index.toString() + " MOVF");
+    int adresse =
+        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    String reg = storage.value[adresse];
+    int res = int.parse(reg, radix: 2);
+    // destination Bit
+    if(instruction[6] == "0"){
+      wReg.value = reg;      
+    }else{
+      storage.value[adresse] = reg;      
+    }
+    // prüfe Z-Bit
+    if(res == 0){
+      setStatusBit("Z");
+    }else{
+      clearStatusBit("Z");
+    }
+    
+    return ++index;
+  }
 }
-//Testprog 3: comf, decf, movf, iorwf, subwf, swapf, xorwf
+//Testprog 3: comf, decf, iorwf, subwf, swapf, xorwf
 //Testprog 4:
