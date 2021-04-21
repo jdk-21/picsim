@@ -22,6 +22,12 @@ class InstructionCycler {
     storage.value[134] = "11111111"; //TrisB
     storage.value[138] = "00000000"; //PCLATH
     storage.value[139] = "0000000" + storage.value[139][7]; //INTCON
+    if (poReset) {
+      stack.forEach((element) {
+        element = "00000000000000";
+      });
+    }
+    recognizer.stackPointer = 0;
   }
 
   void start() async {

@@ -115,7 +115,9 @@ void main() {
     test('RETLW', () {
       final InstructionRecognizer rec = InstructionRecognizer();
       runtime = 0;
-      expect(rec.call(0, hexToBin14("7ff")), int.parse("7ff", radix: 16));
+      rec.stackPointer = 0;
+      storage.value[10] = hexToBin8("0");
+      expect(rec.call(0, hexToBin14("7f")), int.parse("7f", radix: 16));
       expect(runtime, 2);
       expect(rec.retlw(20, hexToBin14("ff")), 1);
       expect(wReg.value, hexToBin8("ff"));
