@@ -1,6 +1,7 @@
 import 'main.dart';
 
 class InstructionRecognizer {
+  int stackPointer = 0;
 
   String replaceCharAt(String oldString, int index, String newChar) {
     return oldString.substring(0, index) +
@@ -8,24 +9,32 @@ class InstructionRecognizer {
         oldString.substring(index + 1);
   }
 
+  int complement(int stellen, int number) {
+    String i = normalize(stellen, number);
+    i = i.replaceAll("1", "a");
+    i = i.replaceAll("0", "1");
+    i = i.replaceAll("a", "0");
+    return int.parse(i, radix: 2);
+  }
+
   int statustoBit(String ch) {
     ch = ch.toUpperCase();
     switch (ch) {
-      case "IRP":
+      case "IRP": // Register Bank Select
         return 0;
-      case "RP1":
+      case "RP1": // Register Bank Select
         return 1;
-      case "RP0":
+      case "RP0": // Register Bank Select
         return 2;
-      case "TO":
+      case "TO": // Time-out
         return 3;
-      case "PD":
+      case "PD": // Power-down
         return 4;
-      case "Z":
+      case "Z": // Zero bit
         return 5;
-      case "DC":
+      case "DC": // Digit carry
         return 6;
-      case "C":
+      case "C": //
         return 7;
       default:
         return 8;
@@ -54,6 +63,45 @@ class InstructionRecognizer {
     } else {
       print("Wrong StatusBit");
     }
+  }
+
+  String normalize(int stellen, int number) {
+    print("Normelize: " + number.toRadixString(2));
+    String m = "";
+    for (int i = 0; i < stellen; i++) {
+      m += "0";
+    }
+    m += number.toRadixString(2);
+    print(m);
+    m = m.substring(m.length - stellen);
+    print(m);
+    return m;
+  }
+
+  String setZDcCBit(int ergebnis, int ergebnis4) {
+    String out = "";
+    if (ergebnis == 0 || ergebnis == 256) {
+      setStatusBit("Z");
+      out += "Z-Bit: 1  ";
+    } else {
+      clearStatusBit("Z");
+      out += "Z-Bit: 0  ";
+    }
+    if (ergebnis4.toRadixString(2).length > 4) {
+      setStatusBit("DC");
+      out += "DC-Bit: 1  ";
+    } else {
+      clearStatusBit("DC");
+      out += "DC-Bit: 0  ";
+    }
+    if (ergebnis.toRadixString(2).length > 8) {
+      setStatusBit("C");
+      out += "C-Bit: 1  ";
+    } else {
+      out += "C-Bit: 0  ";
+      clearStatusBit("C");
+    }
+    return out;
   }
 
   int recognize(int index, String instruction) {
@@ -141,14 +189,25 @@ class InstructionRecognizer {
   int addlw(int index, String instruction) {
     print(index.toString() + " ADDLW");
     // convert to base 10 than back to hex and string
-    int sum = int.parse(instruction.substring(6), radix: 2) +
-        int.parse(wReg.value, radix: 2);
-    String binSum = "00000000" + sum.toRadixString(2);
-    // substring catches overflow
-    binSum = binSum.substring(binSum.length - 8);
+    var zahl1 = int.parse(instruction.substring(6), radix: 2);
+    print("Zahl 1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
+    var zahl2 = int.parse(wReg.value, radix: 2);
+    print("Zahl 2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
+
+    int sum = zahl1 + zahl2;
+
+    var sum4 = int.parse(normalize(4, zahl1), radix: 2) + int.parse(normalize(4, zahl2), radix: 2);
+    String binSum = normalize(8, sum);
     wReg.value = binSum;
-    print("Ergebnis: " + binSum.toString());
-    //TODO: Z,C,DC-Flag
+
+    setZDcCBit(sum, sum4);
+
+    print("Ergebnis: " +
+        binSum.toString() +
+        "   " +
+        sum.toString() +
+        "   " +
+        sum.toRadixString(16));
     ++runtime;
     return (++index);
   }
@@ -157,8 +216,14 @@ class InstructionRecognizer {
     print(index.toString() + " ANDLW");
     int sum = int.parse(instruction.substring(6), radix: 2) &
         int.parse(wReg.value, radix: 2);
-    String binSum = "00000000" + sum.toRadixString(2);
-    binSum = binSum.substring(binSum.length - 8);
+    if (sum == 0) {
+      setStatusBit("Z");
+      print("Z-Bit: 1");
+    } else {
+      clearStatusBit("Z");
+      print("Z-Bit: 0");
+    }
+    String binSum = normalize(8, sum);
     wReg.value = binSum;
     print("Ergebnis: " + binSum.toString());
     ++runtime;
@@ -168,10 +233,17 @@ class InstructionRecognizer {
   int addwf(int index, String instruction) {
     print(index.toString() + " ADDWF");
     int address = int.parse(instruction.substring(7), radix: 2);
-    int sum =
-        int.parse(storage.value[address], radix: 2) + int.parse(wReg.value, radix: 2);
-    String binSum = "00000000" + sum.toRadixString(2);
-    binSum = binSum.substring(binSum.length - 8);
+    var zahl1 = int.parse(storage.value[address], radix: 2);
+    print("Zahl 1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
+    var zahl2 = int.parse(wReg.value, radix: 2);
+    print("Zahl 2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
+
+    int sum = zahl1 + zahl2;
+    var sum4 = int.parse(normalize(4, zahl1), radix: 2) + int.parse(normalize(4, zahl2), radix: 2);
+
+    setZDcCBit(sum, sum4);
+
+    String binSum = normalize(8, sum);
     print("Ergebnis: " + binSum.toString());
     if (instruction[6] == "0") {
       wReg.value = binSum;
@@ -185,10 +257,16 @@ class InstructionRecognizer {
   int andwf(int index, String instruction) {
     print(index.toString() + " ANDWF");
     int address = int.parse(instruction.substring(7), radix: 2);
-    int sum =
-        int.parse(storage.value[address], radix: 2) & int.parse(wReg.value, radix: 2);
-    String binSum = "00000000" + sum.toRadixString(2);
-    binSum = binSum.substring(binSum.length - 8);
+    int sum = int.parse(storage.value[address], radix: 2) &
+        int.parse(wReg.value, radix: 2);
+    if (sum == 0) {
+      setStatusBit("Z");
+      print("Z-Bit: 1");
+    } else {
+      clearStatusBit("Z");
+      print("Z-Bit: 0");
+    }
+    String binSum = normalize(8, sum);
     print("Ergebnis: " + binSum.toString());
     if (instruction[6] == "0") {
       wReg.value = binSum;
@@ -230,7 +308,7 @@ class InstructionRecognizer {
       ++runtime;
       return ++index;
     } else {
-      runtime = runtime+2;
+      runtime = runtime + 2;
       return (index + 2); //the next instruction is skiped when bit is a 0
     }
   }
@@ -253,8 +331,12 @@ class InstructionRecognizer {
 
   int call(int index, String instruction) {
     print(index.toString() + " CALL");
-    stack.push(++index); //index+1 auf Stack (return adresse)
-    String pclath = storage.value[2];
+
+    stack[stackPointer] = index + 1; //index+1 auf Stack (return adresse)
+    stackPointer++;
+    if (stackPointer > 7) stackPointer = 0;
+
+    String pclath = storage.value[10];
     int address = int.parse((pclath.substring(3, 5) + instruction.substring(3)),
         radix: 2);
     runtime += 2;
@@ -263,13 +345,13 @@ class InstructionRecognizer {
 
   int ret(int index) {
     print(index.toString() + " RETURN");
-    if (stack.isNotEmpty) {
-      index = stack.top();
-      stack.pop();
-    } else {
-      ++index;
-    }
-    ++runtime;
+    --stackPointer;
+    if (stackPointer < 0) stackPointer = 7;
+    var temp = stack[stackPointer];
+    temp == null ? index++ : index = temp;
+
+    stack[stackPointer] = null;
+    runtime += 2;
     return index;
   }
 
@@ -297,97 +379,85 @@ class InstructionRecognizer {
 
   int retlw(int index, String instruction) {
     print(index.toString() + " RETLW");
-    wReg.value = "00" + instruction.substring(5);
+    wReg.value = instruction.substring(6);
     index = ret(index);
-    runtime += 2;
     return index;
   }
 
   int sublw(int index, String instruction) {
-    // 1 Word 1 Cycle
-    // TODO: C und DC Bit nicht korrekt gesetzt
     print(index.toString() + " SUBLW");
-    var zahl1 = int.parse(wReg.value, radix: 2);
-    print("Zahl1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
-    var zahl2 =
+    var zahl1 =
         int.parse(instruction.substring(instruction.length - 8), radix: 2);
-    print("Zahl2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
-    var sub = zahl2 - zahl1;
-    print("Ergebnis int: " + sub.toString());
-    String m = "";
-    String out = "";
-    if ((sub > 16) || (sub < -16) || (sub == 0)) {
-      // Overflow der ersten 4 Bit
-      setStatusBit("DC");
-      out = "DC-Bit: 1 ";
-    } else {
-      clearStatusBit("DC");
-      out = "DC-Bit: 0 ";
-    }
-    if (sub > 0) {
-      // result is positive
-      setStatusBit("C"); // C-Bit
-      clearStatusBit("Z"); // Z-Bit
-      m = "00000000" + sub.toRadixString(2);
-      out += "C-Bit: 1 Z-Bit: 0";
-    } else if (sub == 0) {
-      // result is zero
-      setStatusBit("C"); // C-Bit
-      setStatusBit("Z"); // Z-Bit
-      m = "00000000";
-      out += ("C-Bit: 1 Z-Bit: 1");
-    } else if (sub < 0) {
-      // result is negative
-      clearStatusBit("C"); // C-Bit
-      clearStatusBit("Z"); // Z-Bit
-      sub = (sub & 255); // invertieren
-      m = "11111111" + sub.toRadixString(2); //2er Komplement bilden
-      m = m.substring(m.length - 8);
-      out += ("C-Bit: 0 Z-Bit: 0");
-    }
-    print(out);
-    m = m.substring(m.length - 8);
-    print("Ergebnis: " + m + "   " + (int.parse(m, radix: 2)).toString());
-    wReg.value = m;
-    print(wReg.value);
+    print("Zahl 1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
+    var zahl2 = int.parse(wReg.value, radix: 2);
+    print("Zahl 2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
+
+    int komplement =
+        int.parse(normalize(8, complement(8, zahl2) + 1), radix: 2);
+    int komplement4 =
+        int.parse(normalize(4, complement(4, zahl2) + 1), radix: 2);
+
+    var sub = zahl1 + komplement;
+    var sub4 = int.parse(normalize(4, zahl1), radix: 2) + komplement4;
+
+    setZDcCBit(sub, sub4);
+
+    wReg.value = normalize(8, sub);
+    print("Ergebnis: " +
+        wReg.value +
+        "   " +
+        sub.toRadixString(16) +
+        "   " +
+        sub.toString());
     ++runtime;
     return (++index);
   }
 
   int iorlw(int index, String instruction) {
     print(index.toString() + " IORLW");
-    int ins = int.parse(instruction.substring(instruction.length-8), radix: 2);
-    int w = int.parse(wReg.value, radix: 2);
-    int ret = w | ins; // Binary OR
-    wReg.value = "00000000"+ ret.toRadixString(2);
-    wReg.value = wReg.value.substring(wReg.value.length-8);
-    storage.value[3] = replaceCharAt(storage.value[2], 5, "0"); // Z-Bit
-    print("wReg: " +
-        wReg.value +
-        " Int: " +
-        ret.toString() +
-        " Hex: " +
-        ret.toRadixString(16) +
-        "   zBit: 0");
-    ++runtime;
-    return (++index);
-  }
-
-  int xorlw(int index, String instruction) {
-    // 1 Word 1 Cycle
-    print(index.toString() + " XORLW");
     int ins =
         int.parse(instruction.substring(instruction.length - 8), radix: 2);
     int w = int.parse(wReg.value, radix: 2);
-    int ret = w ^ ins; // Binary XOR
-    wReg.value = "00000000" + ret.toRadixString(2);
-    wReg.value = wReg.value.substring(wReg.value.length - 8);
+    int ret = w | ins; // Binary OR
+    wReg.value = normalize(8, ret);
     print("wReg: " +
         wReg.value +
         " Int: " +
         ret.toString() +
         " Hex: " +
         ret.toRadixString(16));
+
+    if (ret == 0) {
+      setStatusBit("Z");
+      print("Z-Bit: 1");
+    } else {
+      clearStatusBit("Z");
+      print("Z-Bit: 0");
+    }
+    ++runtime;
+    return (++index);
+  }
+
+  int xorlw(int index, String instruction) {
+    print(index.toString() + " XORLW");
+    int ins =
+        int.parse(instruction.substring(instruction.length - 8), radix: 2);
+    int w = int.parse(wReg.value, radix: 2);
+    int ret = w ^ ins; // Binary XOR
+    wReg.value = normalize(8, ret);
+    print("wReg: " +
+        wReg.value +
+        " Int: " +
+        ret.toString() +
+        " Hex: " +
+        ret.toRadixString(16));
+    if (ret == 0) {
+      setStatusBit("Z");
+      print("Z-Bit: 1");
+    } else {
+      clearStatusBit("Z");
+      print("Z-Bit: 0");
+    }
     ++runtime;
     return (++index);
   }

@@ -17,10 +17,17 @@ class InstructionCycler {
     storage.value[10] = "00000000"; //PCLatch
     storage.value[11] = "0000000" + storage.value[11][7]; //INTCON
     storage.value[129] = "11111111"; //Option
-    storage.value[133] = "00011111"; //TrisA first three digits undefined -> read as 0
+    storage.value[133] =
+        "00011111"; //TrisA first three digits undefined -> read as 0
     storage.value[134] = "11111111"; //TrisB
     storage.value[138] = "00000000"; //PCLATH
     storage.value[139] = "0000000" + storage.value[139][7]; //INTCON
+    if (poReset) {
+      stack.forEach((element) {
+        element = "00000000000000";
+      });
+    }
+    recognizer.stackPointer = 0;
   }
 
   void start() async {
@@ -31,9 +38,15 @@ class InstructionCycler {
           recognizer.recognize(programCounter, programStorage[programCounter]);
       print("start: programCounter " + programCounter.toString());
       print("wReg: " + wReg.value.toString());
-      print("instruction: " +
-          int.parse(programStorage[programCounter], radix: 2)
-              .toRadixString(16));
+      var instruction;
+      if (programStorage.length >= programCounter) {
+        instruction = int.parse(programStorage[programCounter], radix: 2)
+            .toRadixString(16);
+      } else {
+        instruction = int.parse(programStorage[0], radix: 2).toRadixString(16);
+      }
+      print("instruction: " + instruction);
+
       // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
       storage.notifyListeners();
       await Future.delayed(const Duration(milliseconds: 200));
@@ -62,6 +75,9 @@ class InstructionCycler {
           wReg.value.toString() +
           "  " +
           int.parse(wReg.value, radix: 2).toRadixString(16));
+      if (programStorage.length <= programCounter) {
+        programCounter = 0;
+      }
       print("instruction: " +
           int.parse(programStorage[programCounter], radix: 2)
               .toRadixString(16));
