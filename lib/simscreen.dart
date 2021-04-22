@@ -29,6 +29,7 @@ class _SimScreenState extends State<SimScreen> {
         }
         // shows updated runtime; a bit hacky
         runtime = runtime;
+        stack = stack;
       });
       await Future.delayed(const Duration(milliseconds: 100));
     } while (cycler.run);
@@ -84,7 +85,7 @@ class _SimScreenState extends State<SimScreen> {
           );
         });
   }
-  
+
   createQuartzDialog(BuildContext context, String dropdownValue) {
     return showDialog(
         context: context,
@@ -95,59 +96,62 @@ class _SimScreenState extends State<SimScreen> {
             children: [
               Text("Select a quartz frequency (MHz)"),
               Center(
-                child: DropdownButton<String>(
-                  value: dropdownValue,
-                  //icon: const Icon(Icons.arrow_downward),
-                  iconSize: 24,
-                  //elevation: 16,
-                  style: const TextStyle(color: Colors.deepPurple),
-                  underline: Container(
-                    height: 2,
-                    color: Colors.deepPurpleAccent,
-                  ),
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      dropdownValue = newValue!;
-                    });
-                  },
-                  items: <String>[
-                    "0.032768",
-                    "0.100000",
-                    "0.455000",
-                    "0.500000",
-                    "1.000000",
-                    "2.000000",
-                    "2.457600",
-                    "3.000000",
-                    "3.276800",
-                    "3.680000",
-                    "3.686411",
-                    "4.000000",
-                    "4.096000",
-                    "4.194304",
-                    "4.433619",
-                    "4.915200",
-                    "5.000000",
-                    "6.000000",
-                    "6.144000",
-                    "6.250000",
-                    "6.553600",
-                    "8.000000",
-                    "10.00000",
-                    "12.00000",
-                    "16.00000",
-                    "20.00000",
-                    "24.00000",
-                    "32.00000",
-                    "40.00000",
-                    "80.00000"
-                  ].map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                ),
+                child: StatefulBuilder(
+                    builder: (BuildContext context, StateSetter setState) {
+                  return DropdownButton<String>(
+                    value: dropdownValue,
+                    //icon: const Icon(Icons.arrow_downward),
+                    iconSize: 24,
+                    //elevation: 16,
+                    style: const TextStyle(color: Colors.deepPurple),
+                    underline: Container(
+                      height: 2,
+                      color: Colors.deepPurpleAccent,
+                    ),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        dropdownValue = newValue!;
+                      });
+                    },
+                    items: <String>[
+                      "0.032768",
+                      "0.100000",
+                      "0.455000",
+                      "0.500000",
+                      "1.000000",
+                      "2.000000",
+                      "2.457600",
+                      "3.000000",
+                      "3.276800",
+                      "3.680000",
+                      "3.686411",
+                      "4.000000",
+                      "4.096000",
+                      "4.194304",
+                      "4.433619",
+                      "4.915200",
+                      "5.000000",
+                      "6.000000",
+                      "6.144000",
+                      "6.250000",
+                      "6.553600",
+                      "8.000000",
+                      "10.00000",
+                      "12.00000",
+                      "16.00000",
+                      "20.00000",
+                      "24.00000",
+                      "32.00000",
+                      "40.00000",
+                      "80.00000"
+                    ].map<DropdownMenuItem<String>>((String value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                  );
+                }),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -157,7 +161,7 @@ class _SimScreenState extends State<SimScreen> {
                     double temp = double.parse(dropdownValue);
                     setState(() {
                       quartzFrequency = dropdownValue;
-                      cycleDuration = temp * (1 / (temp*temp)) * 4;
+                      cycleDuration = temp * (1 / (temp * temp)) * 4;
                     });
                     Navigator.of(context).pop();
                   },
@@ -343,101 +347,107 @@ class _SimScreenState extends State<SimScreen> {
                 ),
                 Padding(
                   padding: const EdgeInsets.all(15.0),
-                  child: Column(
-                    children: [
-                      ValueListenableBuilder(
-                          valueListenable: wReg,
-                          builder: (context, value, child) {
-                            return InkWell(
-                              onTap: () => createStorageDialog(context, 4),
-                              child: Text("WReg: " +
-                                  wReg.value +
-                                  " (" +
-                                  int.parse(wReg.value, radix: 2)
-                                      .toRadixString(16) +
-                                  ")"),
-                            );
-                          }),
-                      ValueListenableBuilder(
-                          valueListenable: storage,
-                          builder: (context, value, child) {
-                            return Column(
-                              children: [
-                                InkWell(
-                                    onTap: () =>
-                                        createStorageDialog(context, 4),
-                                    child: Text("FSR: " +
-                                        storage.value[4] +
-                                        " (" +
-                                        int.parse(storage.value[4], radix: 2)
-                                            .toRadixString(16) +
-                                        ")")),
-                                InkWell(
-                                    onTap: () =>
-                                        createStorageDialog(context, 2),
-                                    child: Text("PCL: " +
-                                        storage.value[2] +
-                                        " (" +
-                                        int.parse(storage.value[2], radix: 2)
-                                            .toRadixString(16) +
-                                        ")")),
-                                InkWell(
-                                    onTap: () =>
-                                        createStorageDialog(context, 10),
-                                    child: Text("PCLATCH: " +
-                                        storage.value[10] +
-                                        " (" +
-                                        int.parse(storage.value[10], radix: 2)
-                                            .toRadixString(16) +
-                                        ")")),
-                                InkWell(
-                                    onTap: () =>
-                                        createStorageDialog(context, 3),
-                                    child: Text("Status: " +
-                                        storage.value[3] +
-                                        " (" +
-                                        int.parse(storage.value[3], radix: 2)
-                                            .toRadixString(16) +
-                                        ")")),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: InkWell(
-                                    onTap: () =>
-                                        createQuartzDialog(context, quartzFrequency),
-                                    child: Text(
-                                      "Quartz: " +
-                                          quartzFrequency +
-                                          " MHz (" +
-                                          cycleDuration.toStringAsPrecision(4) +
-                                          " µs)",
+                  child: Container(
+                    decoration: BoxDecoration(border: Border.all(width: 0.5), borderRadius: BorderRadius.circular(7.5)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          ValueListenableBuilder(
+                              valueListenable: wReg,
+                              builder: (context, value, child) {
+                                return InkWell(
+                                  onTap: () => createStorageDialog(context, 4),
+                                  child: Text("WReg: " +
+                                      wReg.value +
+                                      " (" +
+                                      int.parse(wReg.value, radix: 2)
+                                          .toRadixString(16) +
+                                      ")"),
+                                );
+                              }),
+                          ValueListenableBuilder(
+                              valueListenable: storage,
+                              builder: (context, value, child) {
+                                return Column(
+                                  children: [
+                                    InkWell(
+                                        onTap: () =>
+                                            createStorageDialog(context, 4),
+                                        child: Text("FSR: " +
+                                            storage.value[4] +
+                                            " (" +
+                                            int.parse(storage.value[4], radix: 2)
+                                                .toRadixString(16) +
+                                            ")")),
+                                    InkWell(
+                                        onTap: () =>
+                                            createStorageDialog(context, 2),
+                                        child: Text("PCL: " +
+                                            storage.value[2] +
+                                            " (" +
+                                            int.parse(storage.value[2], radix: 2)
+                                                .toRadixString(16) +
+                                            ")")),
+                                    InkWell(
+                                        onTap: () =>
+                                            createStorageDialog(context, 10),
+                                        child: Text("PCLATCH: " +
+                                            storage.value[10] +
+                                            " (" +
+                                            int.parse(storage.value[10], radix: 2)
+                                                .toRadixString(16) +
+                                            ")")),
+                                    InkWell(
+                                        onTap: () =>
+                                            createStorageDialog(context, 3),
+                                        child: Text("Status: " +
+                                            storage.value[3] +
+                                            " (" +
+                                            int.parse(storage.value[3], radix: 2)
+                                                .toRadixString(16) +
+                                            ")")),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: InkWell(
+                                        onTap: () => createQuartzDialog(
+                                            context, quartzFrequency),
+                                        child: Text(
+                                          "Quartz: " +
+                                              quartzFrequency +
+                                              " MHz (" +
+                                              cycleDuration.toStringAsPrecision(4) +
+                                              " µs)",
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                                Text("Runtime: " +
-                                    (cycleDuration * runtime)
-                                        .toStringAsPrecision(3) +
-                                    " µs"),
-                                Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: Tooltip(
-                                      message: "Clear runtime counter",
-                                      child: OutlinedButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            runtime = 0;
-                                          });
-                                        },
-                                        child: Text("Reset Runtime",
-                                            style: TextStyle(
-                                              color: Colors.black,
-                                              fontSize: 12,
-                                            )),
-                                      )),
-                                ),
-                              ],
-                            );
-                          }),
-                    ],
+                                    Text("Runtime: " +
+                                        (cycleDuration * runtime)
+                                            .toStringAsPrecision(3) +
+                                        " µs"),
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Tooltip(
+                                          message: "Clear runtime counter",
+                                          child: OutlinedButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                runtime = 0;
+                                              });
+                                            },
+                                            child: Text("Reset Runtime",
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 12,
+                                                )),
+                                          )),
+                                    ),
+                                  ],
+                                );
+                              }),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
                 Container(
@@ -511,6 +521,29 @@ class _SimScreenState extends State<SimScreen> {
                     },
                   ),
                 ),
+                Padding(
+                  padding: const EdgeInsets.all(15.0),
+                  child: Container(
+                    decoration: BoxDecoration(border: Border.all(width: 0.5), borderRadius: BorderRadius.circular(7.5)),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        children: [
+                          Text("Stack",
+                              style: TextStyle(fontWeight: FontWeight.bold)),
+                          Text("0: " + stack[0].toString()),
+                          Text("1: " + stack[1].toString()),
+                          Text("2: " + stack[2].toString()),
+                          Text("3: " + stack[3].toString()),
+                          Text("4: " + stack[4].toString()),
+                          Text("5: " + stack[5].toString()),
+                          Text("6: " + stack[6].toString()),
+                          Text("7: " + stack[7].toString()),
+                        ],
+                      ),
+                    ),
+                  ),
+                )
               ],
             ),
           ),
