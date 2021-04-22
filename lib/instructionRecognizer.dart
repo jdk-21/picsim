@@ -71,7 +71,7 @@ class InstructionRecognizer {
 
   String normalize(int stellen, int number) {
     String m = "";
-    for (int i = 0; i < stellen; i++) {
+    for (int i = 0; i <= stellen; i++) {
       m += "0";
     }
     m += number.toRadixString(2);
@@ -151,6 +151,10 @@ class InstructionRecognizer {
     // RRF
     else if (instruction.startsWith("001100")) {
       return rrf(index, instruction);
+    }
+    // DECFSZ
+    else if (instruction.startsWith("001011")) {
+      return decfsz(index, instruction);
     }
     // INCF
     else if (instruction.startsWith("001010")) {
@@ -267,7 +271,6 @@ class InstructionRecognizer {
 
   int addwf(int index, String instruction) {
     print(index.toString() + " ADDWF");
-    String out = "";
     int address = int.parse(instruction.substring(7), radix: 2);
     var zahl1 = int.parse(storage.value[address], radix: 2);
     print("Zahl 1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
@@ -275,7 +278,8 @@ class InstructionRecognizer {
     print("Zahl 2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
 
     int sum = zahl1 + zahl2;
-    var sum4 = int.parse(normalize(4, zahl1)) + int.parse(normalize(4, zahl2));
+    var sum4 = int.parse(normalize(4, zahl1), radix: 2) +
+        int.parse(normalize(4, zahl2), radix: 2);
 
     setZDcCBit(sum, sum4);
 
@@ -625,19 +629,57 @@ class InstructionRecognizer {
         int.parse(instruction.substring(instruction.length - 7), radix: 2);
     String reg = storage.value[adresse];
     int res = int.parse(reg, radix: 2);
+    print("Register[" + adresse.toString() + "]: " + res.toRadixString(16));
     // destination Bit
-    if(instruction[6] == "0"){
-      wReg.value = reg;      
-    }else{
-      storage.value[adresse] = reg;      
+    if (instruction[6] == "0") {
+      wReg.value = reg;
+    } else {
+      storage.value[adresse] = reg;
     }
     // prüfe Z-Bit
-    if(res == 0){
+    if (res == 0) {
       setStatusBit("Z");
-    }else{
+    } else {
       clearStatusBit("Z");
     }
-    
+    ++runtime;
+    return ++index;
+  }
+
+  int decf(int index, String instruction) {
+    print(index.toString() + " DECF");
+    int adresse = int.parse(instruction.substring(7), radix: 2);
+    int res = int.parse(storage.value[adresse], radix: 2);
+    res = res - 1;
+    if (res < 0) {
+      res = 255;
+    } // Fallbehandlung DECF 0
+    // destination Bit
+    if (instruction[6] == "0") {
+      wReg.value = normalize(8, res);
+    } else {
+      storage.value[adresse] = normalize(8, res);
+    }
+    // prüfe Z-Bit
+    if (res == 0) {
+      setStatusBit("Z");
+    } else {
+      clearStatusBit("Z");
+    }
+    ++runtime;
+    return ++index;
+  }
+
+  int decfsz(int index, String instruction) {
+    print(index.toString() + " DECFSZ");
+    index = decf(index, instruction); // Cycle 1
+    // Ergebnis auf 0 prüfen
+    if (storage.value[3][statustoBit("Z")] != "1") {
+      return index; // Nächster Befehl
+    } else {
+      return nop(
+          index); // Cycle 2 - Überspringen des nächsten Befehls, wurde durch NOP ersetzt
+    }
     return ++index;
   }
 }
