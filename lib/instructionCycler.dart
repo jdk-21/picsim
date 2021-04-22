@@ -24,7 +24,7 @@ class InstructionCycler {
     storage.value[139] = "0000000" + storage.value[139][7]; //INTCON
     if (poReset) {
       stack.forEach((element) {
-        element = "00000000000000";
+        element = "0000000000000";
       });
     }
     recognizer.stackPointer = 0;
@@ -34,8 +34,8 @@ class InstructionCycler {
     print("started");
     run = true;
     while (run) {
-      programCounter =
-          recognizer.recognize(programCounter, programStorage[programCounter]);
+      programCounter = int.parse((storage.value[10]+storage.value[2]),radix: 2);
+      storage.value[2] = recognizer.normalize(8, recognizer.recognize(programCounter, programStorage[programCounter]));
       print("start: programCounter " + programCounter.toString());
       print("wReg: " + wReg.value.toString());
       var instruction;
@@ -68,8 +68,9 @@ class InstructionCycler {
 
   void step() {
     if (!run) {
-      programCounter =
-          recognizer.recognize(programCounter, programStorage[programCounter]);
+      var blub = recognizer.recognize(programCounter, programStorage[programCounter]);
+      storage.value[2] = recognizer.normalize(8, blub);
+      programCounter = int.parse((storage.value[10]+storage.value[2]),radix: 2);
       print("step: programCounter " + programCounter.toString());
       print("wReg: " +
           wReg.value.toString() +
