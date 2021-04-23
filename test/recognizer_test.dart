@@ -306,4 +306,13 @@ void main() {
       expect(storage.value[26], hexToBin8(element[4]));
     });
   });
+
+  test("indirekte Adressierung", () {
+    final InstructionRecognizer rec = InstructionRecognizer();
+    storage.value[26] = hexToBin8("FF");
+    storage.value[4] = hexToBin8("1A"); // FSR Register
+    expect(rec.clrf(0, hexToBin14("00")), 1); // 0 als Adresse
+    expect(storage.value[26], hexToBin8("00"));
+    expect(storage.value[3][rec.statustoBit("Z")], "1");
+  });
 }
