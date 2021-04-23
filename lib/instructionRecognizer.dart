@@ -676,7 +676,6 @@ class InstructionRecognizer {
       return nop(
           index); // Cycle 2 - Überspringen des nächsten Befehls, wurde durch NOP ersetzt
     }
-    return ++index;
   }
 }
 //Testprog 3: comf, decf, iorwf, subwf, swapf, xorwf
