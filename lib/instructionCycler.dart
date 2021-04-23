@@ -13,15 +13,28 @@ class InstructionCycler {
     // if Timer is altered, add another cycle
     if (oldTimer0 != timerValue) runtime++;
     if (storage.value[129][2] == "0" && storage.value[129][4] == "1") {
-      
       oldTimer0 = timerValue + 1;
       storage.value[1] = recognizer.normalize(8, timerValue + 1);
       if (storage.value[1] == "00000000")
         storage.value[11] = storage.value[11].substring(0, 2) +
             "1" +
             storage.value[11].substring(3);
+    } else
+      oldTimer0 = timerValue;
+  }
+
+  bool interrupt() {
+    if (storage.value[11][0] == "1" &&
+        storage.value[11][2] == "1" &&
+        storage.value[11][5] == "1") {
+      recognizer.call(int.parse(storage.value[10] + storage.value[2], radix: 2),
+          "00000000000100");
+      // set ISR-address
+      storage.value[10] = "00000000";
+      storage.value[2] = "00000100";
+      return true;
     }
-    else oldTimer0 = timerValue;
+    return false;
   }
 
   void resetRegisters(bool poReset) {
@@ -49,20 +62,22 @@ class InstructionCycler {
   }
 
   void programm() {
-    programCounter =
-        int.parse((storage.value[10] + storage.value[2]), radix: 2);
-    storage.value[2] = recognizer.normalize(8,
-        recognizer.recognize(programCounter, programStorage[programCounter]));
-    print("wReg: " +
-        wReg.value.toString() +
-        " Hex: " +
-        int.parse(wReg.value, radix: 2).toRadixString(16));
-    String dc = storage.value[3][recognizer.statustoBit("DC")];
-    String c = storage.value[3][recognizer.statustoBit("C")];
-    String z = storage.value[3][recognizer.statustoBit("Z")];
-    print("DC= " + dc + " C= " + c + " Z= " + z);
-    print("---");
-    timer0();
+    if (!interrupt()) {
+      programCounter =
+          int.parse((storage.value[10] + storage.value[2]), radix: 2);
+      storage.value[2] = recognizer.normalize(8,
+          recognizer.recognize(programCounter, programStorage[programCounter]));
+      print("wReg: " +
+          wReg.value.toString() +
+          " Hex: " +
+          int.parse(wReg.value, radix: 2).toRadixString(16));
+      String dc = storage.value[3][recognizer.statustoBit("DC")];
+      String c = storage.value[3][recognizer.statustoBit("C")];
+      String z = storage.value[3][recognizer.statustoBit("Z")];
+      print("DC= " + dc + " C= " + c + " Z= " + z);
+      print("---");
+      timer0();
+    }
   }
 
   void start() async {
