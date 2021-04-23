@@ -252,7 +252,6 @@ class InstructionRecognizer {
   int addlw(int index, String instruction) {
     print(index.toString() + " ADDLW");
     // convert to base 10 than back to hex and string
-    String out = "";
     var zahl1 = int.parse(instruction.substring(6), radix: 2);
     print("Zahl 1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
     var zahl2 = int.parse(wReg.value, radix: 2);
@@ -260,7 +259,8 @@ class InstructionRecognizer {
 
     int sum = zahl1 + zahl2;
 
-    var sum4 = int.parse(normalize(4, zahl1)) + int.parse(normalize(4, zahl2));
+    var sum4 = int.parse(normalize(4, zahl1), radix: 2) +
+        int.parse(normalize(4, zahl2), radix: 2);
     String binSum = normalize(8, sum);
     wReg.value = binSum;
 
@@ -396,13 +396,12 @@ class InstructionRecognizer {
 
   int call(int index, String instruction) {
     print(index.toString() + " CALL");
-    if (stackPointer == 8) {
-      stackPointer = 0;
-    } else {
-      stackPointer++;
-    }
+
     stack[stackPointer] = index + 1; //index+1 auf Stack (return adresse)
-    String pclath = storage.value[2];
+    stackPointer++;
+    if (stackPointer > 7) stackPointer = 0;
+
+    String pclath = storage.value[10];
     int address = int.parse((pclath.substring(3, 5) + instruction.substring(3)),
         radix: 2);
     runtime += 2;
@@ -411,13 +410,12 @@ class InstructionRecognizer {
 
   int ret(int index) {
     print(index.toString() + " RETURN");
-    if ((stack.map((e) => null)).length == stack.length) {
-      ++index;
-    } else {
-      index = stack[stackPointer];
-      stack[stackPointer] = null;
-      --stackPointer;
-    }
+    --stackPointer;
+    if (stackPointer < 0) stackPointer = 7;
+    var temp = stack[stackPointer];
+    temp == null ? index++ : index = temp;
+
+    stack[stackPointer] = null;
     runtime += 2;
     return index;
   }
@@ -446,7 +444,7 @@ class InstructionRecognizer {
 
   int retlw(int index, String instruction) {
     print(index.toString() + " RETLW");
-    wReg.value = "00" + instruction.substring(5);
+    wReg.value = instruction.substring(6);
     index = ret(index);
     return index;
   }

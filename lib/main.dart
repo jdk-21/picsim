@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:filepicker_windows/filepicker_windows.dart';
 import 'package:picsim/instructionCycler.dart';
 import 'package:picsim/simscreen.dart';
-import 'package:stack/stack.dart' as st;
 
 var stack = List<dynamic>.filled(8, null);
 List<Map> program = [];

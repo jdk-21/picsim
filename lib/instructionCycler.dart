@@ -4,8 +4,22 @@ import 'main.dart';
 class InstructionCycler {
   InstructionRecognizer recognizer = InstructionRecognizer();
   int programCounter = 0;
-  var programStorage = [];
+  List programStorage = [];
   bool run = false;
+  int oldTimer0 = 0;
+
+  void timer0() {
+    int timerValue = int.parse(storage.value[1], radix: 2);
+    // if Timer is altered, add another cycle
+    if (oldTimer0 + 1 != timerValue) runtime++;
+    if (storage.value[129][2] == "0" && storage.value[129][4] == "1") {
+      storage.value[1] = recognizer.normalize(8, timerValue + 1);
+      if (storage.value[1] == "00000000")
+        storage.value[11] = storage.value[11].substring(0, 2) +
+            "1" +
+            storage.value[11].substring(3);
+    }
+  }
 
   void resetRegisters(bool poReset) {
     // if poReset is true set all Power-on Reset bits
@@ -22,17 +36,26 @@ class InstructionCycler {
     storage.value[134] = "11111111"; //TrisB
     storage.value[138] = "00000000"; //PCLATH
     storage.value[139] = "0000000" + storage.value[139][7]; //INTCON
+    if (poReset) {
+      stack.forEach((element) {
+        element = "0000000000000";
+      });
+    }
+    recognizer.stackPointer = 0;
   }
 
   void programm() {
     programCounter =
-        recognizer.recognize(programCounter, programStorage[programCounter]);
+          int.parse((storage.value[10] + storage.value[2]), radix: 2);
+      storage.value[2] = recognizer.normalize(8,
+          recognizer.recognize(programCounter, programStorage[programCounter]));
     print("wReg: " + wReg.value.toString()+" Hex: " + int.parse(wReg.value, radix: 2).toRadixString(16));   
     String dc = storage.value[3][recognizer.statustoBit("DC")];
     String c = storage.value[3][recognizer.statustoBit("C")];
     String z = storage.value[3][recognizer.statustoBit("Z")];
     print("DC= "+dc+" C= "+c+" Z= "+z);
     print("---");
+    timer0();
   }
 
   void start() async {
@@ -41,6 +64,8 @@ class InstructionCycler {
     while (run) {
       print("start: PC " + programCounter.toString());
       programm();
+
+      
       // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
       storage.notifyListeners();
       await Future.delayed(const Duration(milliseconds: 200));
