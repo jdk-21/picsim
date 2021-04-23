@@ -3,6 +3,10 @@ import 'main.dart';
 class InstructionRecognizer {
   int stackPointer = 0;
 
+  String binToHex(String s) {
+    return int.parse(s, radix: 2).toRadixString(16);
+  }
+
   String replaceCharAt(String oldString, int index, String newChar) {
     return oldString.substring(0, index) +
         newChar +
@@ -66,15 +70,12 @@ class InstructionRecognizer {
   }
 
   String normalize(int stellen, int number) {
-    print("Normelize: " + number.toRadixString(2));
     String m = "";
-    for (int i = 0; i < stellen; i++) {
+    for (int i = 0; i <= stellen; i++) {
       m += "0";
     }
     m += number.toRadixString(2);
-    print(m);
     m = m.substring(m.length - stellen);
-    print(m);
     return m;
   }
 
@@ -117,6 +118,19 @@ class InstructionRecognizer {
         instruction.endsWith("00000")) {
       return nop(index);
     }
+    // 7-Stellen
+    // CLRF
+    else if (instruction.startsWith("0000011")) {
+      return clrf(index, instruction);
+    }
+    // CLRW
+    else if (instruction.startsWith("0000010")) {
+      return clrw(index, instruction);
+    }
+    // MOVWF
+    else if (instruction.startsWith("0000001")) {
+      return movwf(index, instruction);
+    }
     // 6-Stellen
     // ANDLW
     else if (instruction.startsWith("111001")) {
@@ -129,6 +143,30 @@ class InstructionRecognizer {
     // IORLW
     else if (instruction.startsWith("111000")) {
       return iorlw(index, instruction);
+    }
+    // INCFSZ
+    else if (instruction.startsWith("001111")) {
+      return incfsz(index, instruction);
+    }
+    // RRF
+    else if (instruction.startsWith("001100")) {
+      return rrf(index, instruction);
+    }
+    // DECFSZ
+    else if (instruction.startsWith("001011")) {
+      return decfsz(index, instruction);
+    }
+    // INCF
+    else if (instruction.startsWith("001010")) {
+      return incf(index, instruction);
+    }
+    // RLF
+    else if (instruction.startsWith("001101")) {
+      return rlf(index, instruction);
+    }
+    // MOVF
+    else if (instruction.startsWith("001000")) {
+      return movf(index, instruction);
     }
     // ADDWF
     else if (instruction.startsWith("000111")) {
@@ -239,7 +277,8 @@ class InstructionRecognizer {
     print("Zahl 2: " + zahl2.toRadixString(2) + "   " + zahl2.toString());
 
     int sum = zahl1 + zahl2;
-    var sum4 = int.parse(normalize(4, zahl1), radix: 2) + int.parse(normalize(4, zahl2), radix: 2);
+    var sum4 = int.parse(normalize(4, zahl1), radix: 2) +
+        int.parse(normalize(4, zahl2), radix: 2);
 
     setZDcCBit(sum, sum4);
 
@@ -461,4 +500,184 @@ class InstructionRecognizer {
     ++runtime;
     return (++index);
   }
+
+  int rlf(int index, String instruction) {
+    print(index.toString() + " RLF");
+    int adresse =
+        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    String reg = storage.value[adresse];
+    String cBit = storage.value[3][statustoBit("C")];
+    print("Register: " + binToHex(reg) + "h C-Bit: " + cBit);
+    reg = reg + cBit; // C-Bit anhängen
+    storage.value[3] = replaceCharAt(storage.value[3], statustoBit("C"),
+        reg[0]); // Register stelle 0 in C-Bit verschieben
+    reg = reg.substring(1); // verschobenes Bit löschen
+    cBit = storage.value[3][statustoBit("C")];
+    print("New Reister: " + binToHex(reg) + "h New C-Bit: " + cBit);
+    //speichern
+    if (instruction[instruction.length - 8] == "0") {
+      wReg.value = reg;
+    } else {
+      storage.value[adresse] = reg;
+    }
+    ++runtime;
+    return ++index;
+  }
+
+  int clrw(int index, String instruction) {
+    print(index.toString() + " CLRW");
+    wReg.value = "00000000"; //clear
+    setStatusBit("Z");
+    ++runtime;
+    return ++index;
+  }
+
+  int clrf(int index, String instruction) {
+    print(index.toString() + " CLRF");
+    int adresse =
+        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    storage.value[adresse] = "00000000"; //clear
+    setStatusBit("Z");
+    ++runtime;
+    return ++index;
+  }
+
+  int incf(int index, String instruction) {
+    print(index.toString() + " INCF");
+    int adresse =
+        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    int reg = int.parse(storage.value[adresse], radix: 2);
+    print("Register: " +
+        reg.toRadixString(2) +
+        " Int: " +
+        reg.toString() +
+        " Hex: " +
+        reg.toRadixString(16));
+    reg = complement(8, reg);
+    String res = normalize(8, reg);
+    // Speichern
+    if (instruction[instruction.length - 8] == "0") {
+      wReg.value = res;
+    } else {
+      storage.value[adresse] = res;
+    }
+    // Z-Bit setzen
+    if (reg == 0) {
+      setStatusBit("Z");
+      print("Z-Bit: 1");
+    } else {
+      clearStatusBit("Z");
+      print("Z-Bit: 0");
+    }
+    ++runtime;
+    return ++index;
+  }
+
+  int incfsz(int index, String instruction) {
+    print(index.toString() + " INCFSZ");
+    index = incf(index, instruction); // Cycle 1
+
+    // Ergebnis auf 0 prüfen
+    if (storage.value[3][statustoBit("Z")] != "1") {
+      return index; // Nächster Befehl
+    } else {
+      return nop(
+          index); // Cycle 2 - Überspringen des nächsten Befehls, wurde durch NOP ersetzt
+    }
+  }
+
+  int movwf(int index, String instruction) {
+    print(index.toString() + " MOVWF");
+    int adresse =
+        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    storage.value[adresse] = wReg.value;
+    return ++index;
+  }
+
+  int rrf(int index, String instruction) {
+    print(index.toString() + " RRF");
+    int adresse =
+        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    String reg = storage.value[adresse];
+    String cBit = storage.value[3][statustoBit("C")];
+    print("Register: " + binToHex(reg) + "h C-Bit: " + cBit);
+    reg = cBit + reg; // C-Bit voranstellen
+    print(reg);
+    storage.value[3] = replaceCharAt(storage.value[3], statustoBit("C"),
+        reg[reg.length - 1]); // Register letzte Stelle in C-Bit verschieben
+    reg = reg.substring(0, reg.length - 1); // verschobenes Bit löschen
+    print(reg);
+    cBit = storage.value[3][statustoBit("C")];
+    print("New Reister: " + binToHex(reg) + "h New C-Bit: " + cBit);
+    //speichern
+    if (instruction[instruction.length - 8] == "0") {
+      wReg.value = reg;
+    } else {
+      storage.value[adresse] = reg;
+    }
+    ++runtime;
+    return ++index;
+  }
+
+  int movf(int index, String instruction) {
+    print(index.toString() + " MOVF");
+    int adresse =
+        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    String reg = storage.value[adresse];
+    int res = int.parse(reg, radix: 2);
+    print("Register[" + adresse.toString() + "]: " + res.toRadixString(16));
+    // destination Bit
+    if (instruction[6] == "0") {
+      wReg.value = reg;
+    } else {
+      storage.value[adresse] = reg;
+    }
+    // prüfe Z-Bit
+    if (res == 0) {
+      setStatusBit("Z");
+    } else {
+      clearStatusBit("Z");
+    }
+    ++runtime;
+    return ++index;
+  }
+
+  int decf(int index, String instruction) {
+    print(index.toString() + " DECF");
+    int adresse = int.parse(instruction.substring(7), radix: 2);
+    int res = int.parse(storage.value[adresse], radix: 2);
+    res = res - 1;
+    if (res < 0) {
+      res = 255;
+    } // Fallbehandlung DECF 0
+    // destination Bit
+    if (instruction[6] == "0") {
+      wReg.value = normalize(8, res);
+    } else {
+      storage.value[adresse] = normalize(8, res);
+    }
+    // prüfe Z-Bit
+    if (res == 0) {
+      setStatusBit("Z");
+    } else {
+      clearStatusBit("Z");
+    }
+    ++runtime;
+    return ++index;
+  }
+
+  int decfsz(int index, String instruction) {
+    print(index.toString() + " DECFSZ");
+    index = decf(index, instruction); // Cycle 1
+    // Ergebnis auf 0 prüfen
+    if (storage.value[3][statustoBit("Z")] != "1") {
+      return index; // Nächster Befehl
+    } else {
+      return nop(
+          index); // Cycle 2 - Überspringen des nächsten Befehls, wurde durch NOP ersetzt
+    }
+    return ++index;
+  }
 }
+//Testprog 3: comf, decf, iorwf, subwf, swapf, xorwf
+//Testprog 4:

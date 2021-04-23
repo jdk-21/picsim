@@ -30,22 +30,23 @@ class InstructionCycler {
     recognizer.stackPointer = 0;
   }
 
+  void programm() {
+    programCounter =
+        recognizer.recognize(programCounter, programStorage[programCounter]);
+    print("wReg: " + wReg.value.toString()+" Hex: " + int.parse(wReg.value, radix: 2).toRadixString(16));   
+    String dc = storage.value[3][recognizer.statustoBit("DC")];
+    String c = storage.value[3][recognizer.statustoBit("C")];
+    String z = storage.value[3][recognizer.statustoBit("Z")];
+    print("DC= "+dc+" C= "+c+" Z= "+z);
+    print("---");
+  }
+
   void start() async {
     print("started");
     run = true;
     while (run) {
-      programCounter =
-          recognizer.recognize(programCounter, programStorage[programCounter]);
-      print("start: programCounter " + programCounter.toString());
-      print("wReg: " + wReg.value.toString());
-      var instruction;
-      if (programStorage.length >= programCounter) {
-        instruction = int.parse(programStorage[programCounter], radix: 2)
-            .toRadixString(16);
-      } else {
-        instruction = int.parse(programStorage[0], radix: 2).toRadixString(16);
-      }
-      print("instruction: " + instruction);
+      print("start: PC " + programCounter.toString());
+      programm();
 
       // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
       storage.notifyListeners();
@@ -68,19 +69,9 @@ class InstructionCycler {
 
   void step() {
     if (!run) {
-      programCounter =
-          recognizer.recognize(programCounter, programStorage[programCounter]);
-      print("step: programCounter " + programCounter.toString());
-      print("wReg: " +
-          wReg.value.toString() +
-          "  " +
-          int.parse(wReg.value, radix: 2).toRadixString(16));
-      if (programStorage.length <= programCounter) {
-        programCounter = 0;
-      }
-      print("instruction: " +
-          int.parse(programStorage[programCounter], radix: 2)
-              .toRadixString(16));
+      print("step: PC " + programCounter.toString());
+      programm();
+
       // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
       storage.notifyListeners();
     }
