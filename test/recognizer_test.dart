@@ -288,25 +288,6 @@ void main() {
     });
   });
 
-  test("subwf", () {
-    final InstructionRecognizer rec = InstructionRecognizer();
-    int test = 0;
-    List input = [
-      // wReg, Storage, Instruction, wReg out, Storage out
-      ["04", "01", "9A", "01", "03"], // d-Bit 1 Reg: 2 --> Storage
-      ["04", "01", "1A", "03", "04"] // d-Bit 0 Reg: 2 --> wReg
-    ];
-    input.forEach((element) {
-      test++;
-      print("Test: " + test.toString());
-      storage.value[26] = hexToBin8(element[0]);
-      wReg.value = hexToBin8(element[1]);
-      expect(rec.subwf(0, hexToBin14(element[2])), 1);
-      expect(wReg.value, hexToBin8(element[3]));
-      expect(storage.value[26], hexToBin8(element[4]));
-    });
-  });
-
   test("indirekte Adressierung", () {
     final InstructionRecognizer rec = InstructionRecognizer();
     storage.value[26] = hexToBin8("FF");
@@ -415,6 +396,64 @@ void main() {
       rec.andwf(0, hexToBin14("9A"));
       expect(storage.value[26], hexToBin8("0"));
       expect(storage.value[3][5], "1");
+    });
+  });
+
+  group('WF', () {
+    test("subwf", () {
+      final InstructionRecognizer rec = InstructionRecognizer();
+      int test = 0;
+      List input = [
+        // wReg, Storage, Instruction, wReg out, Storage out
+        ["04", "01", "9A", "01", "03"], // d-Bit 1 Reg: 2 --> Storage
+        ["04", "01", "1A", "03", "04"] // d-Bit 0 Reg: 2 --> wReg
+      ];
+      input.forEach((element) {
+        test++;
+        print("Test: " + test.toString());
+        storage.value[26] = hexToBin8(element[0]);
+        wReg.value = hexToBin8(element[1]);
+        expect(rec.subwf(0, hexToBin14(element[2])), 1);
+        expect(wReg.value, hexToBin8(element[3]));
+        expect(storage.value[26], hexToBin8(element[4]));
+      });
+    });
+    test("iorwf", () {
+      final InstructionRecognizer rec = InstructionRecognizer();
+      int test = 0;
+      List input = [
+        // wReg, Storage, Instruction, wReg out, Storage out
+        ["0f", "f0", "9A", "f0", "ff"], // d-Bit 1 Reg: 2 --> Storage
+        ["0f", "f0", "1A", "ff", "0f"] // d-Bit 0 Reg: 2 --> wReg
+      ];
+      input.forEach((element) {
+        test++;
+        print("Test: " + test.toString());
+        storage.value[26] = hexToBin8(element[0]);
+        wReg.value = hexToBin8(element[1]);
+        expect(rec.iorwf(0, hexToBin14(element[2])), 1);
+        expect(wReg.value, hexToBin8(element[3]));
+        expect(storage.value[26], hexToBin8(element[4]));
+      });
+    });
+
+    test("xorwf", () {
+      final InstructionRecognizer rec = InstructionRecognizer();
+      int test = 0;
+      List input = [
+        // Storage, wReg, Instruction, wReg out, Storage out
+        ["ab", "ef", "9A", "ef", "44"], // d-Bit 1 Reg: 2 --> Storage
+        ["ab", "ef", "1A", "44", "ab"] // d-Bit 0 Reg: 2 --> wReg
+      ];
+      input.forEach((element) {
+        test++;
+        print("Test: " + test.toString());
+        storage.value[26] = hexToBin8(element[0]);
+        wReg.value = hexToBin8(element[1]);
+        expect(rec.xorwf(0, hexToBin14(element[2])), 1);
+        expect(wReg.value, hexToBin8(element[3]));
+        expect(storage.value[26], hexToBin8(element[4]));
+      });
     });
   });
 
