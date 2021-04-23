@@ -24,6 +24,8 @@ class _SimScreenState extends State<SimScreen> {
             program[lastIndex]['isSelected'] = false;
             element['isSelected'] = true;
             lastIndex = c;
+            // stop if there is a breakpoint
+            if(element['isBreakpoint']) cycler.run = false;
             break;
           }
           c++;
@@ -652,17 +654,24 @@ class _SimScreenState extends State<SimScreen> {
                     color: program[index]['isSelected'] == true
                         ? Colors.amber
                         : Colors.white,
-                    child: ListTile(
-                        dense: true,
-                        leading: Checkbox(
-                          activeColor: Colors.redAccent,
-                          value: false,
-                          onChanged: (value) => print("value changed"),
-                        ),
-                        title: Text(
-                          program[index]['content'],
-                          style: GoogleFonts.robotoMono(),
-                        )),
+                    child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                      return ListTile(
+                          dense: true,
+                          leading: Checkbox(
+                            activeColor: Colors.redAccent,
+                            value: program[index]['isBreakpoint'],
+                            onChanged: (value) {
+                              setState(() {
+                                program[index]['isBreakpoint'] = !program[index]['isBreakpoint'];
+                              });
+                            },
+                          ),
+                          title: Text(
+                            program[index]['content'],
+                            style: GoogleFonts.robotoMono(),
+                          ));
+                    }),
                   ),
                 );
               },

@@ -49,9 +49,9 @@ class _MyHomePageState extends State<MyHomePage> {
         m = m.substring(m.length-14);
         cycler.programStorage
             .add(m);
-        program.add({'index': cycler.programStorage.length-1, 'content': part, 'isSelected': false});
+        program.add({'index': cycler.programStorage.length-1, 'content': part, 'isSelected': false, 'isBreakpoint': false});
       }
-      else program.add({'content': part, 'isSelected': false});
+      else program.add({'content': part, 'isSelected': false, 'isBreakpoint': false});
     });
     print(cycler.programStorage);
   }
