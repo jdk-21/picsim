@@ -110,6 +110,14 @@ class InstructionRecognizer {
     }
   }
 
+  void wf(int adresse, String oldwReg, String instruction) {
+    if (instruction[6] == "1") {
+      print("d-Bit: 1");
+      storage.value[adresse] = wReg.value;
+      wReg.value = oldwReg;
+    }
+  }
+
   int recognize(int index, String instruction) {
     //print(instruction);
     // 14-Stellen
@@ -180,6 +188,14 @@ class InstructionRecognizer {
     // ANDWF
     else if (instruction.startsWith("000101")) {
       return andwf(index, instruction);
+    }
+    // XORWF
+    else if (instruction.startsWith("000110")) {
+      return xorwf(index, instruction);
+    }
+    // IORWF
+    else if (instruction.startsWith("000100")) {
+      return iorwf(index, instruction);
     }
     // SUBWF
     else if (instruction.startsWith("000010")) {
@@ -690,13 +706,29 @@ class InstructionRecognizer {
     String w = wReg.value;
     String zahl = normalize(14, int.parse(storage.value[adresse], radix: 2));
     index = sublw(index, zahl);
-    if (instruction[6] == "1") {
-      print("d-Bit: 1");
-      storage.value[adresse] = wReg.value;
-      wReg.value = w;
-    }
+    wf(adresse, w, instruction);
+    return index;
+  }
+
+  int iorwf(int index, String instruction) {
+    print(index.toString() + " IORWF");
+    int adresse = int.parse(instruction.substring(7), radix: 2);
+    String w = wReg.value;
+    String zahl = normalize(14, int.parse(storage.value[adresse], radix: 2));
+    index = iorlw(index, zahl);
+    wf(adresse, w, instruction);
+    return index;
+  }
+
+  int xorwf(int index, String instruction) {
+    print(index.toString() + " XORWF");
+    int adresse = int.parse(instruction.substring(7), radix: 2);
+    String w = wReg.value;
+    String zahl = normalize(14, int.parse(storage.value[adresse], radix: 2));
+    index = xorlw(index, zahl);
+    wf(adresse, w, instruction);
     return index;
   }
 }
-//Testprog 3: comf, decf, iorwf, subwf, swapf, xorwf
+//Testprog 3: comf, decf, subwf, swapf
 //Testprog 4:
