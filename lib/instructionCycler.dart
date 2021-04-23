@@ -22,6 +22,12 @@ class InstructionCycler {
     storage.value[134] = "11111111"; //TrisB
     storage.value[138] = "00000000"; //PCLATH
     storage.value[139] = "0000000" + storage.value[139][7]; //INTCON
+    if (poReset) {
+      stack.forEach((element) {
+        element = "00000000000000";
+      });
+    }
+    recognizer.stackPointer = 0;
   }
 
   void programm() {
@@ -41,6 +47,7 @@ class InstructionCycler {
     while (run) {
       print("start: PC " + programCounter.toString());
       programm();
+
       // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
       storage.notifyListeners();
       await Future.delayed(const Duration(milliseconds: 200));
@@ -64,6 +71,7 @@ class InstructionCycler {
     if (!run) {
       print("step: PC " + programCounter.toString());
       programm();
+
       // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
       storage.notifyListeners();
     }
