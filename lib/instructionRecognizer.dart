@@ -176,6 +176,10 @@ class InstructionRecognizer {
     else if (instruction.startsWith("000101")) {
       return andwf(index, instruction);
     }
+    // SUBWF
+    else if (instruction.startsWith("000010")) {
+      return subwf(index, instruction);
+    }
     //5-Stellen
     // ADDLW
     else if (instruction.startsWith("11111")) {
@@ -428,7 +432,6 @@ class InstructionRecognizer {
 
   int sublw(int index, String instruction) {
     print(index.toString() + " SUBLW");
-    String out = "";
     var zahl1 =
         int.parse(instruction.substring(instruction.length - 8), radix: 2);
     print("Zahl 1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
@@ -557,16 +560,16 @@ class InstructionRecognizer {
         reg.toString() +
         " Hex: " +
         reg.toRadixString(16));
-    reg = complement(8, reg);
+    reg = reg + 1;
     String res = normalize(8, reg);
-    // Speichern
-    if (instruction[instruction.length - 8] == "0") {
+    // Destination Bit
+    if (instruction[6] == "0") {
       wReg.value = res;
     } else {
       storage.value[adresse] = res;
     }
     // Z-Bit setzen
-    if (reg == 0) {
+    if (reg == 256 || reg == 0) {
       setStatusBit("Z");
       print("Z-Bit: 1");
     } else {
@@ -680,7 +683,20 @@ class InstructionRecognizer {
       return nop(
           index); // Cycle 2 - Überspringen des nächsten Befehls, wurde durch NOP ersetzt
     }
-    return ++index;
+  }
+
+  int subwf(int index, String instruction) {
+    print(index.toString() + " SUBWF");
+    int adresse = int.parse(instruction.substring(7), radix: 2);
+    String w = wReg.value;
+    String zahl = normalize(14, int.parse(storage.value[adresse], radix: 2));
+    index = sublw(index, zahl);
+    if (instruction[6] == "1") {
+      print("d-Bit: 1");
+      storage.value[adresse] = wReg.value;
+      wReg.value = w;
+    }
+    return index;
   }
 }
 //Testprog 3: comf, decf, iorwf, subwf, swapf, xorwf
