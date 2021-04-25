@@ -679,6 +679,7 @@ void main() {
   test('SWAPF', () {
     final InstructionRecognizer rec = InstructionRecognizer();
     int test = 0;
+    runtime = 0;
     List input = [
       // 0W, 1S, 2I, 3Wo, 4So
       ["BB", "0F", "9A", "BB", "F0"], // 0F --> F0 d:1 S
@@ -698,5 +699,16 @@ void main() {
       expect(storage.value[26], hexToBin8(i[4]));
       expect(runtime, 1);
     });
+  });
+
+  test('RETFIE', () {
+    final InstructionRecognizer rec = InstructionRecognizer();
+    runtime = 0;
+    rec.stackPointer = 1;
+    storage.value[10] = hexToBin8("0"); //PCL
+    stack[0] = 15;
+    expect(rec.retfie(25), 15);
+    expect(storage.value[139][0], "1"); // GIE Bit
+    expect(runtime, 2);
   });
 }

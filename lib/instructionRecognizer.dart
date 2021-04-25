@@ -132,6 +132,14 @@ class InstructionRecognizer {
   int recognize(int index, String instruction) {
     //print(instruction);
     // 14-Stellen #################################################
+    // CLRWDT
+    if (instruction == "00000001100100") {
+      return clrwdt(index);
+    }
+    // RETFIE
+    if (instruction == "00000000001001") {
+      return retfie(index);
+    }
     // RETURN
     if (instruction == "00000000001000") {
       return ret(index);
@@ -188,7 +196,7 @@ class InstructionRecognizer {
     else if (instruction.startsWith("001010")) {
       return incf(index, instruction);
     }
-    // CÒMF
+    // COMF
     else if (instruction.startsWith("001001")) {
       return comf(index, instruction);
     }
@@ -414,6 +422,7 @@ class InstructionRecognizer {
   }
 
   int call(int index, String instruction) {
+    // Springen zu neuem Untergrogramm an Stelle PCL + Adresse, aktl. Adresse auf Stack
     print(index.toString() + " CALL");
 
     stack[stackPointer] = index + 1; //index+1 auf Stack (return adresse)
@@ -428,6 +437,7 @@ class InstructionRecognizer {
   }
 
   int ret(int index) {
+    // Aus unterprogramm zurück Springen zu Adresse auf Stack
     print(index.toString() + " RETURN");
     --stackPointer;
     if (stackPointer < 0) stackPointer = 7;
@@ -767,6 +777,25 @@ class InstructionRecognizer {
     f(adresse, reg, instruction);
     ++runtime;
     return ++index;
+  }
+
+  int clrwdt(int index) {
+    //Clear Whatchdog Timer
+    print(index.toString() + " CLRWDT");
+    //TODO: reset WDT, reset prescaler of WDT
+    setStatusBit("TO");
+    setStatusBit("PD");
+    ++runtime;
+    return ++index;
+  }
+
+  int retfie(int index) {
+    // Return from Interrupt
+    print(index.toString() + " RETFIE");
+    index = ret(index);
+    storage.value[139] = replaceCharAt(storage.value[139], 0,
+        "1"); //GIE - Global Interrupt Freigabe Bit Adresse: 8B
+    return index;
   }
 }
 //Testprog 3: comf, decf, subwf, swapf
