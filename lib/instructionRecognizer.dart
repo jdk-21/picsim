@@ -131,18 +131,18 @@ class InstructionRecognizer {
 
   int recognize(int index, String instruction) {
     //print(instruction);
-    // 14-Stellen
+    // 14-Stellen #################################################
     // RETURN
     if (instruction == "00000000001000") {
       return ret(index);
     }
-    // 12-Stellen
+    // 12-Stellen #################################################
     // NOP
     else if (instruction.startsWith("0000000") &&
         instruction.endsWith("00000")) {
       return nop(index);
     }
-    // 7-Stellen
+    // 7-Stellen #################################################
     // CLRF
     else if (instruction.startsWith("0000011")) {
       return clrf(index, instruction);
@@ -155,7 +155,7 @@ class InstructionRecognizer {
     else if (instruction.startsWith("0000001")) {
       return movwf(index, instruction);
     }
-    // 6-Stellen
+    // 6-Stellen #################################################
     // ANDLW
     else if (instruction.startsWith("111001")) {
       return andlw(index, instruction);
@@ -171,6 +171,10 @@ class InstructionRecognizer {
     // INCFSZ
     else if (instruction.startsWith("001111")) {
       return incfsz(index, instruction);
+    }
+    // SWAPF
+    else if (instruction.startsWith("001110")) {
+      return swapf(index, instruction);
     }
     // RRF
     else if (instruction.startsWith("001100")) {
@@ -216,7 +220,7 @@ class InstructionRecognizer {
     else if (instruction.startsWith("000010")) {
       return subwf(index, instruction);
     }
-    //5-Stellen
+    //5-Stellen #################################################
     // ADDLW
     else if (instruction.startsWith("11111")) {
       return addlw(index, instruction);
@@ -225,7 +229,7 @@ class InstructionRecognizer {
     else if (instruction.startsWith("11110")) {
       return sublw(index, instruction);
     }
-    // 4-Stellen
+    // 4-Stellen #################################################
     // RETLW
     else if (instruction.startsWith("1101")) {
       return retlw(index, instruction);
@@ -250,7 +254,7 @@ class InstructionRecognizer {
     else if (instruction.startsWith("0100")) {
       return bcf(index, instruction);
     }
-    // 3-Stellen
+    // 3-Stellen #################################################
     // GOTO
     else if (instruction.startsWith("101")) {
       return goto(index, instruction);
