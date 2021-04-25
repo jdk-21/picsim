@@ -115,6 +115,8 @@ class InstructionRecognizer {
       print("d-Bit: 1");
       storage.value[adresse] = wReg.value;
       wReg.value = oldwReg;
+    } else {
+      print("d-Bit: 0");
     }
   }
 
@@ -172,6 +174,10 @@ class InstructionRecognizer {
     // INCF
     else if (instruction.startsWith("001010")) {
       return incf(index, instruction);
+    }
+    // CÒMF
+    else if (instruction.startsWith("001001")) {
+      return comf(index, instruction);
     }
     // RLF
     else if (instruction.startsWith("001101")) {
@@ -726,6 +732,20 @@ class InstructionRecognizer {
     index = xorlw(index, zahl);
     wf(adresse, w, instruction);
     return index;
+  }
+
+  int comf(int index, String instruction) {
+    print(index.toString() + " COMF");
+    int adresse = int.parse(instruction.substring(7), radix: 2);
+    int zahl = int.parse(storage.value[adresse], radix: 2);
+    int res = complement(8, zahl);
+    if (instruction[6] == "0") {
+      wReg.value = normalize(8, res);
+    } else {
+      storage.value[adresse] = normalize(8, res);
+    }
+    runtime++;
+    return ++index;
   }
 }
 //Testprog 3: comf, decf, subwf, swapf

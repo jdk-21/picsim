@@ -651,4 +651,28 @@ void main() {
       expect(runtime, 1);
     });
   });
+
+  test('COMF', () {
+    final InstructionRecognizer rec = InstructionRecognizer();
+    int test = 0;
+    List input = [
+      // W, S, I, Wo, So
+      ["F0", "F0", "9A", "F0", "0F"], // FF --> 00 d:1 S
+      ["00", "00", "9A", "00", "FF"], // 00 --> FF d:1 S
+      ["00", "FF", "1A", "00", "FF"], // FF --> 00 d:0 W
+      ["00", "00", "1A", "FF", "00"] // 00 --> FF d:0 W
+    ];
+
+    input.forEach((i) {
+      test++;
+      print("Test: " + test.toString());
+      runtime = 0;
+      wReg.value = hexToBin8(i[0]);
+      storage.value[26] = hexToBin8(i[1]);
+      expect(rec.comf(0, hexToBin14(i[2])), 1);
+      expect(wReg.value, hexToBin8(i[3]));
+      expect(storage.value[26], hexToBin8(i[4]));
+      expect(runtime, 1);
+    });
+  });
 }
