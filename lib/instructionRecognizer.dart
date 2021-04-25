@@ -782,7 +782,10 @@ class InstructionRecognizer {
   int clrwdt(int index) {
     //Clear Whatchdog Timer
     print(index.toString() + " CLRWDT");
-    //TODO: reset WDT, reset prescaler of WDT
+    storage.value[1] = "00000000"; //TMR0Adr: 01h
+    storage.value[129] =
+        replaceCharAt(storage.value[129], 4, "0"); //Reset PSA Adr: 81h4
+
     setStatusBit("TO");
     setStatusBit("PD");
     ++runtime;
