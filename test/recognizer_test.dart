@@ -711,4 +711,18 @@ void main() {
     expect(storage.value[139][0], "1"); // GIE Bit
     expect(runtime, 2);
   });
+
+  test('CLRWDT', () {
+    final InstructionRecognizer rec = InstructionRecognizer();
+    runtime = 0;
+    rec.stackPointer = 1;
+    storage.value[1] = hexToBin8("AB"); //TMR0
+    storage.value[129] = rec.replaceCharAt(storage.value[129], 4, "1");
+    expect(rec.clrwdt(0), 1); //PC
+    expect(storage.value[129], hexToBin8("00")); //TMR0
+    expect(storage.value[129][4], "0"); // PSA Bit
+    expect(storage.value[3][rec.statustoBit("TO")], "1"); //TO Bit
+    expect(storage.value[3][rec.statustoBit("PD")], "1"); //PD Bit
+    expect(runtime, 1); // Cycles
+  });
 }
