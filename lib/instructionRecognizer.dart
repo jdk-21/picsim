@@ -120,6 +120,15 @@ class InstructionRecognizer {
     }
   }
 
+  void f(int adresse, String res, String instruction) {
+    res = normalize(8, int.parse(res, radix: 2));
+    if (instruction[6] == "0") {
+      wReg.value = res;
+    } else {
+      storage.value[adresse] = res;
+    }
+  }
+
   int recognize(int index, String instruction) {
     //print(instruction);
     // 14-Stellen
@@ -739,12 +748,20 @@ class InstructionRecognizer {
     int adresse = int.parse(instruction.substring(7), radix: 2);
     int zahl = int.parse(storage.value[adresse], radix: 2);
     int res = complement(8, zahl);
-    if (instruction[6] == "0") {
-      wReg.value = normalize(8, res);
-    } else {
-      storage.value[adresse] = normalize(8, res);
-    }
-    runtime++;
+    f(adresse, res.toRadixString(2), instruction);
+    ++runtime;
+    return ++index;
+  }
+
+  int swapf(int index, String instruction) {
+    print(index.toString() + " SWAPF");
+    int adresse = int.parse(instruction.substring(7), radix: 2);
+    String reg = storage.value[adresse];
+    String oh = reg.substring(0, 4);
+    String uh = reg.substring(4, 8);
+    reg = uh + oh;
+    f(adresse, reg, instruction);
+    ++runtime;
     return ++index;
   }
 }

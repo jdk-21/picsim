@@ -675,4 +675,28 @@ void main() {
       expect(runtime, 1);
     });
   });
+
+  test('SWAPF', () {
+    final InstructionRecognizer rec = InstructionRecognizer();
+    int test = 0;
+    List input = [
+      // 0W, 1S, 2I, 3Wo, 4So
+      ["BB", "0F", "9A", "BB", "F0"], // 0F --> F0 d:1 S
+      ["BB", "A3", "9A", "BB", "3A"], // A3 --> 3A d:1 S
+      ["BB", "0F", "1A", "F0", "0F"], // 0F --> F0 d:0 W
+      ["BB", "A3", "1A", "3A", "A3"] // A3 --> 3A d:0 W
+    ];
+
+    input.forEach((i) {
+      test++;
+      print("Test: " + test.toString());
+      runtime = 0;
+      wReg.value = hexToBin8(i[0]);
+      storage.value[26] = hexToBin8(i[1]);
+      expect(rec.swapf(0, hexToBin14(i[2])), 1);
+      expect(wReg.value, hexToBin8(i[3]));
+      expect(storage.value[26], hexToBin8(i[4]));
+      expect(runtime, 1);
+    });
+  });
 }
