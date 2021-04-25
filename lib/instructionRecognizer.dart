@@ -54,12 +54,6 @@ class InstructionRecognizer {
     }
   }
 
-  void clearFlags() {
-    clearStatusBit("C"); // C-Bit
-    clearStatusBit("Z"); // Z-Bit
-    clearStatusBit("DC"); // DC-Bit
-  }
-
   void setStatusBit(String ch) {
     int bit = statustoBit(ch);
     if (bit < 8) {
@@ -105,20 +99,50 @@ class InstructionRecognizer {
     return out;
   }
 
+  int catchAdresse(String instruction) {
+    int adresse =
+        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    if (adresse == 0) {
+      // FSR Register verwenden
+      return int.parse(storage.value[4], radix: 2);
+    } else {
+      return adresse;
+    }
+  }
+
+  void wf(int adresse, String oldwReg, String instruction) {
+    if (instruction[6] == "1") {
+      print("d-Bit: 1");
+      storage.value[adresse] = wReg.value;
+      wReg.value = oldwReg;
+    } else {
+      print("d-Bit: 0");
+    }
+  }
+
+  void f(int adresse, String res, String instruction) {
+    res = normalize(8, int.parse(res, radix: 2));
+    if (instruction[6] == "0") {
+      wReg.value = res;
+    } else {
+      storage.value[adresse] = res;
+    }
+  }
+
   int recognize(int index, String instruction) {
     //print(instruction);
-    // 14-Stellen
+    // 14-Stellen #################################################
     // RETURN
     if (instruction == "00000000001000") {
       return ret(index);
     }
-    // 12-Stellen
+    // 12-Stellen #################################################
     // NOP
     else if (instruction.startsWith("0000000") &&
         instruction.endsWith("00000")) {
       return nop(index);
     }
-    // 7-Stellen
+    // 7-Stellen #################################################
     // CLRF
     else if (instruction.startsWith("0000011")) {
       return clrf(index, instruction);
@@ -131,7 +155,7 @@ class InstructionRecognizer {
     else if (instruction.startsWith("0000001")) {
       return movwf(index, instruction);
     }
-    // 6-Stellen
+    // 6-Stellen #################################################
     // ANDLW
     else if (instruction.startsWith("111001")) {
       return andlw(index, instruction);
@@ -148,6 +172,10 @@ class InstructionRecognizer {
     else if (instruction.startsWith("001111")) {
       return incfsz(index, instruction);
     }
+    // SWAPF
+    else if (instruction.startsWith("001110")) {
+      return swapf(index, instruction);
+    }
     // RRF
     else if (instruction.startsWith("001100")) {
       return rrf(index, instruction);
@@ -159,6 +187,10 @@ class InstructionRecognizer {
     // INCF
     else if (instruction.startsWith("001010")) {
       return incf(index, instruction);
+    }
+    // CÒMF
+    else if (instruction.startsWith("001001")) {
+      return comf(index, instruction);
     }
     // RLF
     else if (instruction.startsWith("001101")) {
@@ -176,7 +208,19 @@ class InstructionRecognizer {
     else if (instruction.startsWith("000101")) {
       return andwf(index, instruction);
     }
-    //5-Stellen
+    // XORWF
+    else if (instruction.startsWith("000110")) {
+      return xorwf(index, instruction);
+    }
+    // IORWF
+    else if (instruction.startsWith("000100")) {
+      return iorwf(index, instruction);
+    }
+    // SUBWF
+    else if (instruction.startsWith("000010")) {
+      return subwf(index, instruction);
+    }
+    //5-Stellen #################################################
     // ADDLW
     else if (instruction.startsWith("11111")) {
       return addlw(index, instruction);
@@ -185,7 +229,7 @@ class InstructionRecognizer {
     else if (instruction.startsWith("11110")) {
       return sublw(index, instruction);
     }
-    // 4-Stellen
+    // 4-Stellen #################################################
     // RETLW
     else if (instruction.startsWith("1101")) {
       return retlw(index, instruction);
@@ -210,7 +254,7 @@ class InstructionRecognizer {
     else if (instruction.startsWith("0100")) {
       return bcf(index, instruction);
     }
-    // 3-Stellen
+    // 3-Stellen #################################################
     // GOTO
     else if (instruction.startsWith("101")) {
       return goto(index, instruction);
@@ -234,7 +278,8 @@ class InstructionRecognizer {
 
     int sum = zahl1 + zahl2;
 
-    var sum4 = int.parse(normalize(4, zahl1), radix: 2) + int.parse(normalize(4, zahl2), radix: 2);
+    var sum4 = int.parse(normalize(4, zahl1), radix: 2) +
+        int.parse(normalize(4, zahl2), radix: 2);
     String binSum = normalize(8, sum);
     wReg.value = binSum;
 
@@ -503,8 +548,7 @@ class InstructionRecognizer {
 
   int rlf(int index, String instruction) {
     print(index.toString() + " RLF");
-    int adresse =
-        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    int adresse = catchAdresse(instruction);
     String reg = storage.value[adresse];
     String cBit = storage.value[3][statustoBit("C")];
     print("Register: " + binToHex(reg) + "h C-Bit: " + cBit);
@@ -534,8 +578,7 @@ class InstructionRecognizer {
 
   int clrf(int index, String instruction) {
     print(index.toString() + " CLRF");
-    int adresse =
-        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    int adresse = catchAdresse(instruction);
     storage.value[adresse] = "00000000"; //clear
     setStatusBit("Z");
     ++runtime;
@@ -544,8 +587,7 @@ class InstructionRecognizer {
 
   int incf(int index, String instruction) {
     print(index.toString() + " INCF");
-    int adresse =
-        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    int adresse = catchAdresse(instruction);
     int reg = int.parse(storage.value[adresse], radix: 2);
     print("Register: " +
         reg.toRadixString(2) +
@@ -553,16 +595,16 @@ class InstructionRecognizer {
         reg.toString() +
         " Hex: " +
         reg.toRadixString(16));
-    reg = complement(8, reg);
+    reg = reg + 1;
     String res = normalize(8, reg);
-    // Speichern
-    if (instruction[instruction.length - 8] == "0") {
+    // Destination Bit
+    if (instruction[6] == "0") {
       wReg.value = res;
     } else {
       storage.value[adresse] = res;
     }
     // Z-Bit setzen
-    if (reg == 0) {
+    if (reg == 256 || reg == 0) {
       setStatusBit("Z");
       print("Z-Bit: 1");
     } else {
@@ -588,16 +630,14 @@ class InstructionRecognizer {
 
   int movwf(int index, String instruction) {
     print(index.toString() + " MOVWF");
-    int adresse =
-        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    int adresse = catchAdresse(instruction);
     storage.value[adresse] = wReg.value;
     return ++index;
   }
 
   int rrf(int index, String instruction) {
     print(index.toString() + " RRF");
-    int adresse =
-        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    int adresse = catchAdresse(instruction);
     String reg = storage.value[adresse];
     String cBit = storage.value[3][statustoBit("C")];
     print("Register: " + binToHex(reg) + "h C-Bit: " + cBit);
@@ -621,8 +661,7 @@ class InstructionRecognizer {
 
   int movf(int index, String instruction) {
     print(index.toString() + " MOVF");
-    int adresse =
-        int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    int adresse = catchAdresse(instruction);
     String reg = storage.value[adresse];
     int res = int.parse(reg, radix: 2);
     print("Register[" + adresse.toString() + "]: " + res.toRadixString(16));
@@ -677,6 +716,58 @@ class InstructionRecognizer {
           index); // Cycle 2 - Überspringen des nächsten Befehls, wurde durch NOP ersetzt
     }
   }
+
+  int subwf(int index, String instruction) {
+    print(index.toString() + " SUBWF");
+    int adresse = int.parse(instruction.substring(7), radix: 2);
+    String w = wReg.value;
+    String zahl = normalize(14, int.parse(storage.value[adresse], radix: 2));
+    index = sublw(index, zahl);
+    wf(adresse, w, instruction);
+    return index;
+  }
+
+  int iorwf(int index, String instruction) {
+    print(index.toString() + " IORWF");
+    int adresse = int.parse(instruction.substring(7), radix: 2);
+    String w = wReg.value;
+    String zahl = normalize(14, int.parse(storage.value[adresse], radix: 2));
+    index = iorlw(index, zahl);
+    wf(adresse, w, instruction);
+    return index;
+  }
+
+  int xorwf(int index, String instruction) {
+    print(index.toString() + " XORWF");
+    int adresse = int.parse(instruction.substring(7), radix: 2);
+    String w = wReg.value;
+    String zahl = normalize(14, int.parse(storage.value[adresse], radix: 2));
+    index = xorlw(index, zahl);
+    wf(adresse, w, instruction);
+    return index;
+  }
+
+  int comf(int index, String instruction) {
+    print(index.toString() + " COMF");
+    int adresse = int.parse(instruction.substring(7), radix: 2);
+    int zahl = int.parse(storage.value[adresse], radix: 2);
+    int res = complement(8, zahl);
+    f(adresse, res.toRadixString(2), instruction);
+    ++runtime;
+    return ++index;
+  }
+
+  int swapf(int index, String instruction) {
+    print(index.toString() + " SWAPF");
+    int adresse = int.parse(instruction.substring(7), radix: 2);
+    String reg = storage.value[adresse];
+    String oh = reg.substring(0, 4);
+    String uh = reg.substring(4, 8);
+    reg = uh + oh;
+    f(adresse, reg, instruction);
+    ++runtime;
+    return ++index;
+  }
 }
-//Testprog 3: comf, decf, iorwf, subwf, swapf, xorwf
+//Testprog 3: comf, decf, subwf, swapf
 //Testprog 4:
