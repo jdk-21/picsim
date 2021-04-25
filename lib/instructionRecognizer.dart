@@ -224,6 +224,10 @@ class InstructionRecognizer {
     else if (instruction.startsWith("000100")) {
       return iorwf(index, instruction);
     }
+    // DECF
+    else if (instruction.startsWith("000011")) {
+      return decf(index, instruction);
+    }
     // SUBWF
     else if (instruction.startsWith("000010")) {
       return subwf(index, instruction);
@@ -271,7 +275,9 @@ class InstructionRecognizer {
     else if (instruction.startsWith("100")) {
       return call(index, instruction);
     }
-    print("No hit: " + instruction);
+    print("NO HIT: " +
+        instruction +
+        "   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     return 0;
     // add new instruction with else if
   }
