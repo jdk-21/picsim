@@ -696,7 +696,8 @@ class InstructionRecognizer {
     print(index.toString() + " MOVWF");
     int address = catchAddress(instruction);
     index = changedPCL(index, address, wReg.value);
-    storage.value[address] = wReg.value;
+    String w = wReg.value;
+    wf(address, w, instruction);
     ++runtime;
     return index;
   }
