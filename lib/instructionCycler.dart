@@ -25,8 +25,9 @@ class InstructionCycler {
         storage.value[i] = storage.value[i].substring(0, 2) +
             "1" +
             storage.value[i].substring(3);
-      } else
+      } else {
         oldTimer0 = timerValue;
+      }
     }
   }
 

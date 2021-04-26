@@ -609,9 +609,9 @@ class _SimScreenState extends State<SimScreen> {
                     children: [
                       OutlinedButton(
                           onPressed: () {
-                            if (cycler.run)
+                            if (cycler.run) {
                               cycler.pause();
-                            else {
+                            } else {
                               cycler.start();
                               highlighter();
                             }
