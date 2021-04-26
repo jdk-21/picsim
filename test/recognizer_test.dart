@@ -157,31 +157,6 @@ void main() {
     });
   });
 
-  test("incfsz", () {
-    final InstructionRecognizer rec = InstructionRecognizer();
-    int test = 0;
-    List input = [
-      ["02", "9A", 1], // d-Bit 1 Reg: 2
-      ["01", "1A", 2] // d-Bit 0 Reg: 1
-    ];
-    input.forEach((element) {
-      test++;
-      print("Test: " + test.toString());
-      wReg.value = hexToBin8("00");
-      storage.value[26] = hexToBin8(element[0]);
-      expect(rec.decfsz(0, hexToBin14(element[1])), element[2]);
-    });
-  });
-
-  test("movwf", () {
-    final InstructionRecognizer rec = InstructionRecognizer();
-    storage.value[26] = hexToBin8("FF");
-    wReg.value = hexToBin8("AA");
-    expect(rec.movwf(0, hexToBin14("9A")), 1);
-    expect(storage.value[26], hexToBin8("AA"));
-    expect(wReg.value, hexToBin8("AA"));
-  });
-
   test("rrf", () {
     final InstructionRecognizer rec = InstructionRecognizer();
     // C-Bit = 1 Register endet mit 0
@@ -318,6 +293,7 @@ void main() {
       expect(rec.ret(0), 7);
       expect(rec.stackPointer, 7);
     });
+
     test("CALL with PCLATH", () {
       final InstructionRecognizer rec = InstructionRecognizer();
       storage.value[10] = "00001000";
@@ -329,6 +305,7 @@ void main() {
       storage.value[10] = "00001000";
       expect(rec.goto(0, hexToBin14("12")), 2066);
     });
+
     test('RETLW', () {
       final InstructionRecognizer rec = InstructionRecognizer();
       runtime = 0;
@@ -339,6 +316,52 @@ void main() {
       expect(rec.retlw(20, hexToBin14("ff")), 1);
       expect(wReg.value, hexToBin8("ff"));
       expect(runtime, 4);
+    });
+
+    test('BTFSC', () {
+      final InstructionRecognizer rec = InstructionRecognizer();
+      List input = ["1a", "9a", "11a", "19a", "21a", "29a", "31a", "39a"];
+
+      input.forEach((i) {
+        runtime = 0;
+        storage.value[26] = hexToBin8("ff");
+        expect(rec.btfsc(0, hexToBin14(i)), 1);
+        expect(runtime, 1);
+        storage.value[26] = hexToBin8("0");
+        expect(rec.btfsc(0, hexToBin14(i)), 2);
+        expect(runtime, 3);
+      });
+    });
+
+    test('BTFSS', () {
+      final InstructionRecognizer rec = InstructionRecognizer();
+      List input = ["1a", "9a", "11a", "19a", "21a", "29a", "31a", "39a"];
+
+      input.forEach((i) {
+        runtime = 0;
+        storage.value[26] = hexToBin8("0");
+        expect(rec.btfss(0, hexToBin14(i)), 1);
+        expect(runtime, 1);
+        storage.value[26] = hexToBin8("ff");
+        expect(rec.btfss(0, hexToBin14(i)), 2);
+        expect(runtime, 3);
+      });
+    });
+
+    test("incfsz", () {
+      final InstructionRecognizer rec = InstructionRecognizer();
+      int test = 0;
+      List input = [
+        ["02", "9A", 1], // d-Bit 1 Reg: 2
+        ["01", "1A", 2] // d-Bit 0 Reg: 1
+      ];
+      input.forEach((element) {
+        test++;
+        print("Test: " + test.toString());
+        wReg.value = hexToBin8("00");
+        storage.value[26] = hexToBin8(element[0]);
+        expect(rec.decfsz(0, hexToBin14(element[1])), element[2]);
+      });
     });
 
     // TODO addwf, incf ... with PCL
@@ -360,45 +383,6 @@ void main() {
     expect(storage.value[3][5], "1");
   });
 
-  group('ANDWF', () {
-    test("ANDWF with destination = 0", () {
-      final InstructionRecognizer rec = InstructionRecognizer();
-      wReg.value = hexToBin8("ff");
-      storage.value[26] = hexToBin8("0");
-      expect(rec.andwf(0, hexToBin14("1A")), 1);
-      expect(wReg.value, hexToBin8("0"));
-      expect(storage.value[3][5], "1");
-      wReg.value = hexToBin8("aa");
-      storage.value[26] = hexToBin8("aa");
-      rec.andwf(0, hexToBin14("1A"));
-      expect(wReg.value, hexToBin8("aa"));
-      expect(storage.value[3][5], "0");
-      wReg.value = hexToBin8("a");
-      storage.value[26] = hexToBin8("A1");
-      rec.andwf(0, hexToBin14("1A"));
-      expect(wReg.value, hexToBin8("0"));
-      expect(storage.value[3][5], "1");
-    });
-    test("ANDWF with destination = 1", () {
-      final InstructionRecognizer rec = InstructionRecognizer();
-      wReg.value = hexToBin8("ff");
-      storage.value[26] = hexToBin8("0");
-      rec.andwf(0, hexToBin14("9A"));
-      expect(storage.value[26], hexToBin8("0"));
-      expect(storage.value[3][5], "1");
-      wReg.value = hexToBin8("aa");
-      storage.value[26] = hexToBin8("aa");
-      rec.andwf(0, hexToBin14("9A"));
-      expect(storage.value[26], hexToBin8("aa"));
-      expect(storage.value[3][5], "0");
-      wReg.value = hexToBin8("a");
-      storage.value[26] = hexToBin8("A1");
-      rec.andwf(0, hexToBin14("9A"));
-      expect(storage.value[26], hexToBin8("0"));
-      expect(storage.value[3][5], "1");
-    });
-  });
-
   group('WF', () {
     test("subwf", () {
       final InstructionRecognizer rec = InstructionRecognizer();
@@ -418,6 +402,7 @@ void main() {
         expect(storage.value[26], hexToBin8(element[4]));
       });
     });
+
     test("iorwf", () {
       final InstructionRecognizer rec = InstructionRecognizer();
       int test = 0;
@@ -455,6 +440,97 @@ void main() {
         expect(storage.value[26], hexToBin8(element[4]));
       });
     });
+
+    group('ANDWF', () {
+      test("ANDWF with destination = 0", () {
+        final InstructionRecognizer rec = InstructionRecognizer();
+        wReg.value = hexToBin8("ff");
+        storage.value[26] = hexToBin8("0");
+        expect(rec.andwf(0, hexToBin14("1A")), 1);
+        expect(wReg.value, hexToBin8("0"));
+        expect(storage.value[3][5], "1");
+        wReg.value = hexToBin8("aa");
+        storage.value[26] = hexToBin8("aa");
+        rec.andwf(0, hexToBin14("1A"));
+        expect(wReg.value, hexToBin8("aa"));
+        expect(storage.value[3][5], "0");
+        wReg.value = hexToBin8("a");
+        storage.value[26] = hexToBin8("A1");
+        rec.andwf(0, hexToBin14("1A"));
+        expect(wReg.value, hexToBin8("0"));
+        expect(storage.value[3][5], "1");
+      });
+
+      test("ANDWF with destination = 1", () {
+        final InstructionRecognizer rec = InstructionRecognizer();
+        wReg.value = hexToBin8("ff");
+        storage.value[26] = hexToBin8("0");
+        rec.andwf(0, hexToBin14("9A"));
+        expect(storage.value[26], hexToBin8("0"));
+        expect(storage.value[3][5], "1");
+        wReg.value = hexToBin8("aa");
+        storage.value[26] = hexToBin8("aa");
+        rec.andwf(0, hexToBin14("9A"));
+        expect(storage.value[26], hexToBin8("aa"));
+        expect(storage.value[3][5], "0");
+        wReg.value = hexToBin8("a");
+        storage.value[26] = hexToBin8("A1");
+        rec.andwf(0, hexToBin14("9A"));
+        expect(storage.value[26], hexToBin8("0"));
+        expect(storage.value[3][5], "1");
+      });
+    });
+
+    test("movwf", () {
+      final InstructionRecognizer rec = InstructionRecognizer();
+      storage.value[26] = hexToBin8("FF");
+      wReg.value = hexToBin8("AA");
+      expect(rec.movwf(0, hexToBin14("9A")), 1);
+      expect(storage.value[26], hexToBin8("AA"));
+      expect(wReg.value, hexToBin8("AA"));
+    });
+
+    group('ADDWF', () {
+      test('ADDWF with destination = 0', () {
+        final InstructionRecognizer rec = InstructionRecognizer();
+        List input = [
+          //[wReg, storage, result, status]
+          ["7f", "0", "7f", "000"],
+          ["7f", "82", "01", "011"],
+          ["7f", "a0", "1f", "001"],
+          ["7f", "81", "0", "111"],
+          ["f", "1", "10", "010"],
+          ["0", "0", "0", "100"]
+        ];
+        input.forEach((i) {
+          wReg.value = hexToBin8(i[0]);
+          storage.value[26] = hexToBin8(i[1]);
+          expect(rec.addwf(0, hexToBin14("1a")), 1);
+          expect(wReg.value, hexToBin8(i[2]));
+          expect(storage.value[3].substring(5), i[3]);
+        });
+      });
+
+      test('ADDWF with destination = 1', () {
+        final InstructionRecognizer rec = InstructionRecognizer();
+        List input = [
+          //[wReg, storage, result, status]
+          ["7f", "0", "7f", "000"],
+          ["7f", "82", "01", "011"],
+          ["7f", "a0", "1f", "001"],
+          ["7f", "81", "0", "111"],
+          ["f", "1", "10", "010"],
+          ["0", "0", "0", "100"]
+        ];
+        input.forEach((i) {
+          wReg.value = hexToBin8(i[0]);
+          storage.value[26] = hexToBin8(i[1]);
+          rec.addwf(0, hexToBin14("9A"));
+          expect(storage.value[26], hexToBin8(i[2]));
+          expect(storage.value[3].substring(5), i[3]);
+        });
+      });
+    });
   });
 
   group('ADDLW', () {
@@ -482,48 +558,6 @@ void main() {
       expect(rec.addlw(0, hexToBin14("f2")), 1);
       expect(wReg.value, hexToBin8("e2"));
       expect(storage.value[3].substring(5), "001");
-    });
-  });
-
-  group('ADDWF', () {
-    test('ADDWF with destination = 0', () {
-      final InstructionRecognizer rec = InstructionRecognizer();
-      List input = [
-        //[wReg, storage, result, status]
-        ["7f", "0", "7f", "000"],
-        ["7f", "82", "01", "011"],
-        ["7f", "a0", "1f", "001"],
-        ["7f", "81", "0", "111"],
-        ["f", "1", "10", "010"],
-        ["0", "0", "0", "100"]
-      ];
-      input.forEach((i) {
-        wReg.value = hexToBin8(i[0]);
-        storage.value[26] = hexToBin8(i[1]);
-        expect(rec.addwf(0, hexToBin14("1a")), 1);
-        expect(wReg.value, hexToBin8(i[2]));
-        expect(storage.value[3].substring(5), i[3]);
-      });
-    });
-
-    test('ADDWF with destination = 1', () {
-      final InstructionRecognizer rec = InstructionRecognizer();
-      List input = [
-        //[wReg, storage, result, status]
-        ["7f", "0", "7f", "000"],
-        ["7f", "82", "01", "011"],
-        ["7f", "a0", "1f", "001"],
-        ["7f", "81", "0", "111"],
-        ["f", "1", "10", "010"],
-        ["0", "0", "0", "100"]
-      ];
-      input.forEach((i) {
-        wReg.value = hexToBin8(i[0]);
-        storage.value[26] = hexToBin8(i[1]);
-        rec.addwf(0, hexToBin14("9A"));
-        expect(storage.value[26], hexToBin8(i[2]));
-        expect(storage.value[3].substring(5), i[3]);
-      });
     });
   });
 
@@ -564,36 +598,6 @@ void main() {
       storage.value[26] = hexToBin8(i[0]);
       expect(rec.bsf(0, hexToBin14(i[1])), 1);
       expect(storage.value[26], "11111111");
-    });
-  });
-
-  test('BTFSC', () {
-    final InstructionRecognizer rec = InstructionRecognizer();
-    List input = ["1a", "9a", "11a", "19a", "21a", "29a", "31a", "39a"];
-
-    input.forEach((i) {
-      runtime = 0;
-      storage.value[26] = hexToBin8("ff");
-      expect(rec.btfsc(0, hexToBin14(i)), 1);
-      expect(runtime, 1);
-      storage.value[26] = hexToBin8("0");
-      expect(rec.btfsc(0, hexToBin14(i)), 2);
-      expect(runtime, 3);
-    });
-  });
-
-  test('BTFSS', () {
-    final InstructionRecognizer rec = InstructionRecognizer();
-    List input = ["1a", "9a", "11a", "19a", "21a", "29a", "31a", "39a"];
-
-    input.forEach((i) {
-      runtime = 0;
-      storage.value[26] = hexToBin8("0");
-      expect(rec.btfss(0, hexToBin14(i)), 1);
-      expect(runtime, 1);
-      storage.value[26] = hexToBin8("ff");
-      expect(rec.btfss(0, hexToBin14(i)), 2);
-      expect(runtime, 3);
     });
   });
 
@@ -724,5 +728,17 @@ void main() {
     expect(storage.value[3][rec.statustoBit("TO")], "1"); //TO Bit
     expect(storage.value[3][rec.statustoBit("PD")], "1"); //PD Bit
     expect(runtime, 1); // Cycles
+  });
+
+  test('RETLW', () {
+    final InstructionRecognizer rec = InstructionRecognizer();
+    runtime = 0;
+    rec.stackPointer = 1;
+    stack[0] = 15;
+    wReg.value = hexToBin8("CC");
+
+    expect(rec.retlw(0, hexToBin14("1A")), 15); //PC
+    expect(wReg.value, hexToBin8("1A")); //TMR0
+    expect(runtime, 2); // Cycles
   });
 }
