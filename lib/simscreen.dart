@@ -10,6 +10,7 @@ class SimScreen extends StatefulWidget {
 class _SimScreenState extends State<SimScreen> {
   int lastIndex = 0;
   String quartzFrequency = "4.000000";
+  double runtimeDisplay = 0;
 
   Future<void> highlighter() async {
     do {
@@ -17,18 +18,20 @@ class _SimScreenState extends State<SimScreen> {
         // line highlighting
         // c counts index
         var c = 0;
+        var index = cycler.programCounter;
         for (var element in program) {
-          //print(element);
-          if (element['index'] == cycler.programCounter) {
+          if (element['index'] == index) {
             program[lastIndex]['isSelected'] = false;
             element['isSelected'] = true;
             lastIndex = c;
+            // stop if there is a breakpoint
+            if(element['isBreakpoint']) cycler.run = false;
             break;
           }
           c++;
         }
         // shows updated runtime; a bit hacky
-        runtime = runtime;
+        //runtimeDisplay = runtime;
         stack = stack;
       });
       await Future.delayed(const Duration(milliseconds: 100));
@@ -103,10 +106,10 @@ class _SimScreenState extends State<SimScreen> {
                     //icon: const Icon(Icons.arrow_downward),
                     iconSize: 24,
                     //elevation: 16,
-                    style: const TextStyle(color: Colors.deepPurple),
+                    style: const TextStyle(color: Colors.black),
                     underline: Container(
                       height: 2,
-                      color: Colors.deepPurpleAccent,
+                      color: Colors.black,
                     ),
                     onChanged: (String? newValue) {
                       setState(() {
@@ -160,6 +163,9 @@ class _SimScreenState extends State<SimScreen> {
                   onPressed: () {
                     double temp = double.parse(dropdownValue);
                     setState(() {
+                      runtimeDisplay =
+                          runtimeDisplay + (runtime * cycleDuration);
+                      runtime = 0;
                       quartzFrequency = dropdownValue;
                       cycleDuration = temp * (1 / (temp * temp)) * 4;
                     });
@@ -348,7 +354,9 @@ class _SimScreenState extends State<SimScreen> {
                 Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Container(
-                    decoration: BoxDecoration(border: Border.all(width: 0.5), borderRadius: BorderRadius.circular(7.5)),
+                    decoration: BoxDecoration(
+                        border: Border.all(width: 0.5),
+                        borderRadius: BorderRadius.circular(7.5)),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -377,7 +385,8 @@ class _SimScreenState extends State<SimScreen> {
                                         child: Text("FSR: " +
                                             storage.value[4] +
                                             " (" +
-                                            int.parse(storage.value[4], radix: 2)
+                                            int.parse(storage.value[4],
+                                                    radix: 2)
                                                 .toRadixString(16) +
                                             ")")),
                                     InkWell(
@@ -386,7 +395,8 @@ class _SimScreenState extends State<SimScreen> {
                                         child: Text("PCL: " +
                                             storage.value[2] +
                                             " (" +
-                                            int.parse(storage.value[2], radix: 2)
+                                            int.parse(storage.value[2],
+                                                    radix: 2)
                                                 .toRadixString(16) +
                                             ")")),
                                     InkWell(
@@ -395,7 +405,8 @@ class _SimScreenState extends State<SimScreen> {
                                         child: Text("PCLATCH: " +
                                             storage.value[10] +
                                             " (" +
-                                            int.parse(storage.value[10], radix: 2)
+                                            int.parse(storage.value[10],
+                                                    radix: 2)
                                                 .toRadixString(16) +
                                             ")")),
                                     InkWell(
@@ -404,7 +415,8 @@ class _SimScreenState extends State<SimScreen> {
                                         child: Text("Status: " +
                                             storage.value[3] +
                                             " (" +
-                                            int.parse(storage.value[3], radix: 2)
+                                            int.parse(storage.value[3],
+                                                    radix: 2)
                                                 .toRadixString(16) +
                                             ")")),
                                     Padding(
@@ -416,13 +428,15 @@ class _SimScreenState extends State<SimScreen> {
                                           "Quartz: " +
                                               quartzFrequency +
                                               " MHz (" +
-                                              cycleDuration.toStringAsPrecision(4) +
+                                              cycleDuration
+                                                  .toStringAsPrecision(4) +
                                               " µs)",
                                         ),
                                       ),
                                     ),
                                     Text("Runtime: " +
-                                        (cycleDuration * runtime)
+                                        (runtimeDisplay +
+                                                (cycleDuration * runtime))
                                             .toStringAsPrecision(3) +
                                         " µs"),
                                     Padding(
@@ -432,6 +446,7 @@ class _SimScreenState extends State<SimScreen> {
                                           child: OutlinedButton(
                                             onPressed: () {
                                               setState(() {
+                                                runtimeDisplay = 0;
                                                 runtime = 0;
                                               });
                                             },
@@ -489,7 +504,7 @@ class _SimScreenState extends State<SimScreen> {
                       if (row == 0 || row == 2 || row == 4) {
                         return Container(
                             child: Container(
-                          color: Colors.deepOrange,
+                          color: Colors.amber,
                           alignment: Alignment.center,
                           child: Text(
                             statusReg[(row * 4) + (bit)],
@@ -524,7 +539,9 @@ class _SimScreenState extends State<SimScreen> {
                 Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Container(
-                    decoration: BoxDecoration(border: Border.all(width: 0.5), borderRadius: BorderRadius.circular(7.5)),
+                    decoration: BoxDecoration(
+                        border: Border.all(width: 0.5),
+                        borderRadius: BorderRadius.circular(7.5)),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -532,14 +549,46 @@ class _SimScreenState extends State<SimScreen> {
                           Text("Stack",
                               style: TextStyle(fontWeight: FontWeight.bold)),
                           // stack[] can be null, thats why we have to check for null and escape it with a "0" instead
-                          Text("0: " + int.parse(stack[0].toString() == "null" ? "0":stack[0].toString()).toRadixString(16)),
-                          Text("1: " + int.parse(stack[1].toString() == "null" ? "0":stack[1].toString()).toRadixString(16)),
-                          Text("2: " + int.parse(stack[2].toString() == "null" ? "0":stack[2].toString()).toRadixString(16)),
-                          Text("3: " + int.parse(stack[3].toString() == "null" ? "0":stack[3].toString()).toRadixString(16)),
-                          Text("4: " + int.parse(stack[4].toString() == "null" ? "0":stack[4].toString()).toRadixString(16)),
-                          Text("5: " + int.parse(stack[5].toString() == "null" ? "0":stack[5].toString()).toRadixString(16)),
-                          Text("6: " + int.parse(stack[6].toString() == "null" ? "0":stack[6].toString()).toRadixString(16)),
-                          Text("7: " + int.parse(stack[7].toString() == "null" ? "0":stack[7].toString()).toRadixString(16)),
+                          Text("0: " +
+                              int.parse(stack[0].toString() == "null"
+                                      ? "0"
+                                      : stack[0].toString())
+                                  .toRadixString(16)),
+                          Text("1: " +
+                              int.parse(stack[1].toString() == "null"
+                                      ? "0"
+                                      : stack[1].toString())
+                                  .toRadixString(16)),
+                          Text("2: " +
+                              int.parse(stack[2].toString() == "null"
+                                      ? "0"
+                                      : stack[2].toString())
+                                  .toRadixString(16)),
+                          Text("3: " +
+                              int.parse(stack[3].toString() == "null"
+                                      ? "0"
+                                      : stack[3].toString())
+                                  .toRadixString(16)),
+                          Text("4: " +
+                              int.parse(stack[4].toString() == "null"
+                                      ? "0"
+                                      : stack[4].toString())
+                                  .toRadixString(16)),
+                          Text("5: " +
+                              int.parse(stack[5].toString() == "null"
+                                      ? "0"
+                                      : stack[5].toString())
+                                  .toRadixString(16)),
+                          Text("6: " +
+                              int.parse(stack[6].toString() == "null"
+                                      ? "0"
+                                      : stack[6].toString())
+                                  .toRadixString(16)),
+                          Text("7: " +
+                              int.parse(stack[7].toString() == "null"
+                                      ? "0"
+                                      : stack[7].toString())
+                                  .toRadixString(16)),
                         ],
                       ),
                     ),
@@ -605,17 +654,24 @@ class _SimScreenState extends State<SimScreen> {
                     color: program[index]['isSelected'] == true
                         ? Colors.amber
                         : Colors.white,
-                    child: ListTile(
-                        dense: true,
-                        leading: Checkbox(
-                          activeColor: Colors.redAccent,
-                          value: false,
-                          onChanged: (value) => print("value changed"),
-                        ),
-                        title: Text(
-                          program[index]['content'],
-                          style: GoogleFonts.robotoMono(),
-                        )),
+                    child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                      return ListTile(
+                          dense: true,
+                          leading: Checkbox(
+                            activeColor: Colors.redAccent,
+                            value: program[index]['isBreakpoint'],
+                            onChanged: (value) {
+                              setState(() {
+                                program[index]['isBreakpoint'] = !program[index]['isBreakpoint'];
+                              });
+                            },
+                          ),
+                          title: Text(
+                            program[index]['content'],
+                            style: GoogleFonts.robotoMono(),
+                          ));
+                    }),
                   ),
                 );
               },
