@@ -26,6 +26,8 @@ dependencies:
   filepicker_windows: ^2.0.0
   stack: ^0.1.5
   google_fonts: ^2.0.0
+  file_picker: ^3.0.0
+  file_selector: ^0.8.2
 
 
   # The following adds the Cupertino Icons font to your application.

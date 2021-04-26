@@ -10,6 +10,7 @@ class SimScreen extends StatefulWidget {
 class _SimScreenState extends State<SimScreen> {
   int lastIndex = 0;
   String quartzFrequency = "4.000000";
+  double runtimeDisplay = 0;
 
   Future<void> highlighter() async {
     do {
@@ -17,18 +18,20 @@ class _SimScreenState extends State<SimScreen> {
         // line highlighting
         // c counts index
         var c = 0;
+        var index = cycler.programCounter;
         for (var element in program) {
-          //print(element);
-          if (element['index'] == cycler.programCounter) {
+          if (element['index'] == index) {
             program[lastIndex]['isSelected'] = false;
             element['isSelected'] = true;
             lastIndex = c;
+            // stop if there is a breakpoint
+            if(element['isBreakpoint']) cycler.run = false;
             break;
           }
           c++;
         }
         // shows updated runtime; a bit hacky
-        runtime = runtime;
+        //runtimeDisplay = runtime;
         stack = stack;
       });
       await Future.delayed(const Duration(milliseconds: 100));
@@ -103,10 +106,10 @@ class _SimScreenState extends State<SimScreen> {
                     //icon: const Icon(Icons.arrow_downward),
                     iconSize: 24,
                     //elevation: 16,
-                    style: const TextStyle(color: Colors.deepPurple),
+                    style: const TextStyle(color: Colors.black),
                     underline: Container(
                       height: 2,
-                      color: Colors.deepPurpleAccent,
+                      color: Colors.black,
                     ),
                     onChanged: (String? newValue) {
                       setState(() {
@@ -160,6 +163,9 @@ class _SimScreenState extends State<SimScreen> {
                   onPressed: () {
                     double temp = double.parse(dropdownValue);
                     setState(() {
+                      runtimeDisplay =
+                          runtimeDisplay + (runtime * cycleDuration);
+                      runtime = 0;
                       quartzFrequency = dropdownValue;
                       cycleDuration = temp * (1 / (temp * temp)) * 4;
                     });
@@ -429,7 +435,8 @@ class _SimScreenState extends State<SimScreen> {
                                       ),
                                     ),
                                     Text("Runtime: " +
-                                        (cycleDuration * runtime)
+                                        (runtimeDisplay +
+                                                (cycleDuration * runtime))
                                             .toStringAsPrecision(3) +
                                         " µs"),
                                     Padding(
@@ -439,6 +446,7 @@ class _SimScreenState extends State<SimScreen> {
                                           child: OutlinedButton(
                                             onPressed: () {
                                               setState(() {
+                                                runtimeDisplay = 0;
                                                 runtime = 0;
                                               });
                                             },
@@ -496,7 +504,7 @@ class _SimScreenState extends State<SimScreen> {
                       if (row == 0 || row == 2 || row == 4) {
                         return Container(
                             child: Container(
-                          color: Colors.deepOrange,
+                          color: Colors.amber,
                           alignment: Alignment.center,
                           child: Text(
                             statusReg[(row * 4) + (bit)],
@@ -646,17 +654,24 @@ class _SimScreenState extends State<SimScreen> {
                     color: program[index]['isSelected'] == true
                         ? Colors.amber
                         : Colors.white,
-                    child: ListTile(
-                        dense: true,
-                        leading: Checkbox(
-                          activeColor: Colors.redAccent,
-                          value: false,
-                          onChanged: (value) => print("value changed"),
-                        ),
-                        title: Text(
-                          program[index]['content'],
-                          style: GoogleFonts.robotoMono(),
-                        )),
+                    child: StatefulBuilder(
+                        builder: (BuildContext context, StateSetter setState) {
+                      return ListTile(
+                          dense: true,
+                          leading: Checkbox(
+                            activeColor: Colors.redAccent,
+                            value: program[index]['isBreakpoint'],
+                            onChanged: (value) {
+                              setState(() {
+                                program[index]['isBreakpoint'] = !program[index]['isBreakpoint'];
+                              });
+                            },
+                          ),
+                          title: Text(
+                            program[index]['content'],
+                            style: GoogleFonts.robotoMono(),
+                          ));
+                    }),
                   ),
                 );
               },
