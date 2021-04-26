@@ -114,6 +114,9 @@ class InstructionRecognizer {
     //Filtere die Adresse aus der instruction und beachte die indirekte Adressierung.
     int address =
         int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    if (storage.value[3][statustoBit("RP0")] == "1") {
+      address = address + 128; //Umschalten auf Bank 1
+    }
     if (address == 0) {
       // FSR Register verwenden
       return int.parse(storage.value[4], radix: 2);
