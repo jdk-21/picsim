@@ -483,11 +483,13 @@ void main() {
 
     test("movwf", () {
       final InstructionRecognizer rec = InstructionRecognizer();
+      runtime = 0;
       storage.value[26] = hexToBin8("FF");
       wReg.value = hexToBin8("AA");
       expect(rec.movwf(0, hexToBin14("9A")), 1);
       expect(storage.value[26], hexToBin8("AA"));
       expect(wReg.value, hexToBin8("AA"));
+      expect(runtime, 1);
     });
 
     group('ADDWF', () {
@@ -660,11 +662,11 @@ void main() {
     final InstructionRecognizer rec = InstructionRecognizer();
     int test = 0;
     List input = [
-      // W, S, I, Wo, So
-      ["F0", "F0", "9A", "F0", "0F"], // FF --> 00 d:1 S
-      ["00", "00", "9A", "00", "FF"], // 00 --> FF d:1 S
-      ["00", "FF", "1A", "00", "FF"], // FF --> 00 d:0 W
-      ["00", "00", "1A", "FF", "00"] // 00 --> FF d:0 W
+      // W, S, I, Wo, So, Z
+      ["F0", "F0", "9A", "F0", "0F", "0"], // F0 --> 0F d:1 S
+      ["00", "00", "9A", "00", "FF", "0"], // 00 --> FF d:1 S
+      ["00", "FF", "1A", "00", "FF", "1"], // FF --> 00 d:0 W
+      ["00", "00", "1A", "FF", "00", "0"] // 00 --> FF d:0 W
     ];
 
     input.forEach((i) {
@@ -676,6 +678,7 @@ void main() {
       expect(rec.comf(0, hexToBin14(i[2])), 1);
       expect(wReg.value, hexToBin8(i[3]));
       expect(storage.value[26], hexToBin8(i[4]));
+      expect(storage.value[3][rec.statustoBit("Z")], i[5]);
       expect(runtime, 1);
     });
   });

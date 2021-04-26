@@ -15,7 +15,7 @@ class InstructionRecognizer {
 
   int changedPCL(int index, int address, String result) {
     if (address == 2 && result != storage.value[address]) {
-      return int.parse(storage.value[10] + storage.value[2], radix: 2);
+      return int.parse(storage.value[10] + storage.value[2], radix: 2) + 1;
     } else
       return ++index;
   }
@@ -690,6 +690,7 @@ class InstructionRecognizer {
     int address = catchAddress(instruction);
     index = changedPCL(index, address, wReg.value);
     storage.value[address] = wReg.value;
+    ++runtime;
     return index;
   }
 
@@ -821,6 +822,11 @@ class InstructionRecognizer {
     int zahl = int.parse(storage.value[address], radix: 2);
     int res = complement(8, zahl);
     f(address, res.toRadixString(2), instruction);
+    if (res == 0) {
+      setStatusBit("Z");
+    } else {
+      clearStatusBit("Z");
+    }
     ++runtime;
     return ++index;
   }
