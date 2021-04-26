@@ -29,6 +29,7 @@ class InstructionRecognizer {
   }
 
   int statustoBit(String ch) {
+    // Umrechnen des StatusBit-Namen in das dazugehörige Bit
     ch = ch.toUpperCase();
     switch (ch) {
       case "IRP": // Register Bank Select
@@ -53,6 +54,7 @@ class InstructionRecognizer {
   }
 
   void clearStatusBit(String ch) {
+    //setzt das Bit auf 0
     int bit = statustoBit(ch);
     if (bit < 8) {
       storage.value[3] = replaceCharAt(storage.value[3], bit, "0");
@@ -62,6 +64,7 @@ class InstructionRecognizer {
   }
 
   void setStatusBit(String ch) {
+    //setze das Bit auf 1
     int bit = statustoBit(ch);
     if (bit < 8) {
       storage.value[3] = replaceCharAt(storage.value[3], bit, "1");
@@ -71,6 +74,7 @@ class InstructionRecognizer {
   }
 
   String normalize(int stellen, int number) {
+    // transformiere ine Zahl in ein n-Stellen langen Binary-String
     String m = "";
     for (int i = 0; i <= stellen; i++) {
       m += "0";
@@ -107,6 +111,7 @@ class InstructionRecognizer {
   }
 
   int catchAddress(String instruction) {
+    //Filtere die Adresse aus der instruction und beachte die indirekte Adressierung.
     int address =
         int.parse(instruction.substring(instruction.length - 7), radix: 2);
     if (address == 0) {
@@ -118,6 +123,7 @@ class InstructionRecognizer {
   }
 
   void wf(int address, String oldwReg, String instruction) {
+    //Ergebnis steht im wReg. Speichere es im Storage wenn d-Bit = 1 und überschreibe den wReg mit dem old Wert
     if (instruction[6] == "1") {
       print("d-Bit: 1");
       storage.value[address] = wReg.value;
@@ -128,6 +134,7 @@ class InstructionRecognizer {
   }
 
   void f(int address, String res, String instruction) {
+    // Speichere das Ergebnis je nach d-Bit im wReg oder Storage.
     res = normalize(8, int.parse(res, radix: 2));
     if (instruction[6] == "0") {
       wReg.value = res;
@@ -137,8 +144,16 @@ class InstructionRecognizer {
   }
 
   int recognize(int index, String instruction) {
-    //print(instruction);
+    // Analysieren der Instruction nach Logest-Pattern-Match
     // 14-Stellen #################################################
+    // CLRWDT
+    if (instruction == "00000001100100") {
+      return clrwdt(index);
+    }
+    // RETFIE
+    if (instruction == "00000000001001") {
+      return retfie(index);
+    }
     // RETURN
     if (instruction == "00000000001000") {
       return ret(index);
@@ -195,7 +210,7 @@ class InstructionRecognizer {
     else if (instruction.startsWith("001010")) {
       return incf(index, instruction);
     }
-    // CÒMF
+    // COMF
     else if (instruction.startsWith("001001")) {
       return comf(index, instruction);
     }
@@ -222,6 +237,10 @@ class InstructionRecognizer {
     // IORWF
     else if (instruction.startsWith("000100")) {
       return iorwf(index, instruction);
+    }
+    // DECF
+    else if (instruction.startsWith("000011")) {
+      return decf(index, instruction);
     }
     // SUBWF
     else if (instruction.startsWith("000010")) {
@@ -270,12 +289,15 @@ class InstructionRecognizer {
     else if (instruction.startsWith("100")) {
       return call(index, instruction);
     }
-    print("No hit: " + instruction);
+    print("NO HIT: " +
+        instruction +
+        "   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     return 0;
     // add new instruction with else if
   }
 
   int addlw(int index, String instruction) {
+    //Addieren des Literals zum wReg. Ergebnis in wReg.
     print(index.toString() + " ADDLW");
     // convert to base 10 than back to hex and string
     var zahl1 = int.parse(instruction.substring(6), radix: 2);
@@ -303,6 +325,7 @@ class InstructionRecognizer {
   }
 
   int andlw(int index, String instruction) {
+    //Binäres & von Literal und wReg. Ergebins kommt ins wReg.
     print(index.toString() + " ANDLW");
     int sum = int.parse(instruction.substring(6), radix: 2) &
         int.parse(wReg.value, radix: 2);
@@ -321,8 +344,9 @@ class InstructionRecognizer {
   }
 
   int addwf(int index, String instruction) {
+    //Binäres & von Storage Adresse mit wReg. Ergebnis kommt je nach d-Bit in wReg oder Storage.
     print(index.toString() + " ADDWF");
-    int address = int.parse(instruction.substring(7), radix: 2);
+    int address = catchAddress(instruction);
     var zahl1 = int.parse(storage.value[address], radix: 2);
     print("Zahl 1: " + zahl1.toRadixString(2) + "   " + zahl1.toString());
     var zahl2 = int.parse(wReg.value, radix: 2);
@@ -336,20 +360,16 @@ class InstructionRecognizer {
 
     String binSum = normalize(8, sum);
     print("Ergebnis: " + binSum.toString());
-    if (instruction[6] == "0") {
-      wReg.value = binSum;
-      ++index;
-    } else {
-      index = changedPCL(index, address, binSum);
-      storage.value[address] = binSum;
-    }
+    index = changedPCL(index, address, binSum);
+    f(address, binSum, instruction);
     ++runtime;
     return index;
   }
 
   int andwf(int index, String instruction) {
+    // Binäres-& Inhalt Register an Adresse y mit dem Inhalt des wRegisters
     print(index.toString() + " ANDWF");
-    int address = int.parse(instruction.substring(7), radix: 2);
+    int address = catchAddress(instruction);
     int sum = int.parse(storage.value[address], radix: 2) &
         int.parse(wReg.value, radix: 2);
     if (sum == 0) {
@@ -359,20 +379,18 @@ class InstructionRecognizer {
       clearStatusBit("Z");
       print("Z-Bit: 0");
     }
-    String binSum = normalize(8, sum);
-    print("Ergebnis: " + binSum.toString());
-    if (instruction[6] == "0") {
-      wReg.value = binSum;
-      ++index;
-    } else {
-      index = changedPCL(index, address, binSum);
-      storage.value[address] = binSum;
-    }
+    String w = wReg.value;
+    wReg.value = normalize(8, sum);
+
+    print("Ergebnis: " + wReg.value);
+    index = changedPCL(index, address, wReg.value);
+    wf(address, w, instruction);
     ++runtime;
     return index;
   }
 
   int bcf(int index, String instruction) {
+    // Clear Bit x an Adresse y
     print(index.toString() + " BCF");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
@@ -385,6 +403,7 @@ class InstructionRecognizer {
   }
 
   int bsf(int index, String instruction) {
+    // Setze Bit x an Adresse y
     print(index.toString() + " BSF");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
@@ -397,6 +416,7 @@ class InstructionRecognizer {
   }
 
   int btfsc(int index, String instruction) {
+    // Überspringt nächsten Befehl wenn bestimmtes Bit in Adresse nicht gesetzt ist
     print(index.toString() + " BTFSC");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
@@ -411,6 +431,7 @@ class InstructionRecognizer {
   }
 
   int btfss(int index, String instruction) {
+    // Überspringt nächsten Befehl wenn bestimmtes Bit in Adresse gesetzt ist
     print(index.toString() + " BTFSS");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
     int address = int.parse(instruction.substring(7), radix: 2);
@@ -427,6 +448,7 @@ class InstructionRecognizer {
   }
 
   int call(int index, String instruction) {
+    // Springen zu neuem Untergrogramm an Stelle PCL + Adresse, aktl. Adresse auf Stack
     print(index.toString() + " CALL");
 
     stack[stackPointer] = index + 1; //index+1 auf Stack (return address)
@@ -441,6 +463,7 @@ class InstructionRecognizer {
   }
 
   int ret(int index) {
+    // Aus unterprogramm zurück Springen zu Adresse auf Stack
     print(index.toString() + " RETURN");
     --stackPointer;
     if (stackPointer < 0) stackPointer = 7;
@@ -453,6 +476,7 @@ class InstructionRecognizer {
   }
 
   int goto(int index, String instruction) {
+    // Springe zu Befehl x (inkl. PCLath)
     print(index.toString() + " GOTO");
     String pclath = storage.value[10];
     int address = int.parse((pclath.substring(3, 5) + instruction.substring(3)),
@@ -462,12 +486,14 @@ class InstructionRecognizer {
   }
 
   int nop(int index) {
+    // Mache nix außer die Runtime weiterzählen
     print(index.toString() + " NOP");
     ++runtime;
     return (++index);
   }
 
   int movlw(int index, String instruction) {
+    //verschiebe das Literal aus der Instruction in das WRegister
     print(index.toString() + " MOVLW");
     wReg.value = instruction.substring(6);
     ++runtime;
@@ -475,13 +501,18 @@ class InstructionRecognizer {
   }
 
   int retlw(int index, String instruction) {
+    // Führe ein Movlw und ein Return aus
     print(index.toString() + " RETLW");
-    wReg.value = instruction.substring(6);
+    movlw(index, instruction);
+    --runtime;
+    //wReg.value = instruction.substring(6);
     index = ret(index);
+    //Runtime 2 Cycles
     return index;
   }
 
   int sublw(int index, String instruction) {
+    // Subtrahiere Zahl2 von Zahl1 durch das 2er Komplement Ergebnis kommt ins wReg
     print(index.toString() + " SUBLW");
     var zahl1 =
         int.parse(instruction.substring(instruction.length - 8), radix: 2);
@@ -511,6 +542,7 @@ class InstructionRecognizer {
   }
 
   int iorlw(int index, String instruction) {
+    // Binäres Oder zwischen dem wReg und dem Literal aus der Instruction Ergebnis kommt ins wReg
     print(index.toString() + " IORLW");
     int ins =
         int.parse(instruction.substring(instruction.length - 8), radix: 2);
@@ -536,6 +568,7 @@ class InstructionRecognizer {
   }
 
   int xorlw(int index, String instruction) {
+    // Binäres Xor zwischen dem wReg und dem Literal aus der Instruction Ergebnis kommt ins wReg
     print(index.toString() + " XORLW");
     int ins =
         int.parse(instruction.substring(instruction.length - 8), radix: 2);
@@ -560,6 +593,7 @@ class InstructionRecognizer {
   }
 
   int rlf(int index, String instruction) {
+    //Binäre-Rotation nach links zwischen C-Bit & Reg an der Address x
     print(index.toString() + " RLF");
     int address = catchAddress(instruction);
     String reg = storage.value[address];
@@ -584,6 +618,7 @@ class InstructionRecognizer {
   }
 
   int clrw(int index, String instruction) {
+    //setze wReg auf 0
     print(index.toString() + " CLRW");
     wReg.value = "00000000"; //clear
     setStatusBit("Z");
@@ -592,6 +627,7 @@ class InstructionRecognizer {
   }
 
   int clrf(int index, String instruction) {
+    //seze Reg an Adresse x auf 0
     print(index.toString() + " CLRF");
     int address = catchAddress(instruction);
     storage.value[address] = "00000000"; //clear
@@ -601,6 +637,7 @@ class InstructionRecognizer {
   }
 
   int incf(int index, String instruction) {
+    //inkrementiere den Inhalt des Registers an Adresse x. Ergebnis in Register oder wReg
     print(index.toString() + " INCF");
     int address = catchAddress(instruction);
     int reg = int.parse(storage.value[address], radix: 2);
@@ -633,6 +670,8 @@ class InstructionRecognizer {
   }
 
   int incfsz(int index, String instruction) {
+    //inkrementiere den Inhalt des Registers an Adresse x. Ergebnis in Register oder wReg.
+    //Wenn Ergebnis 0 Überspringe nächsten Befehl.
     print(index.toString() + " INCFSZ");
     index = incf(index, instruction); // Cycle 1
 
@@ -646,6 +685,7 @@ class InstructionRecognizer {
   }
 
   int movwf(int index, String instruction) {
+    //kopiere Inhalt wReg in Register der Adresse x
     print(index.toString() + " MOVWF");
     int address = catchAddress(instruction);
     index = changedPCL(index, address, wReg.value);
@@ -654,6 +694,7 @@ class InstructionRecognizer {
   }
 
   int rrf(int index, String instruction) {
+    //Binäre-Rotation nach rechts zwischen C-Bit & Reg an der Adresse x
     print(index.toString() + " RRF");
     int address = catchAddress(instruction);
     String reg = storage.value[address];
@@ -680,19 +721,14 @@ class InstructionRecognizer {
   }
 
   int movf(int index, String instruction) {
+    //kopiere Inhalt Register r mit Adresse x aus Instruction nach wReg oder in Register r.
     print(index.toString() + " MOVF");
     int address = catchAddress(instruction);
     String reg = storage.value[address];
     int res = int.parse(reg, radix: 2);
     print("Register[" + address.toString() + "]: " + res.toRadixString(16));
-    // destination Bit
-    if (instruction[6] == "0") {
-      wReg.value = reg;
-      ++index;
-    } else {
-      index = changedPCL(index, address, reg);
-      storage.value[address] = reg;
-    }
+    index = changedPCL(index, address, reg);
+    f(address, res.toRadixString(2), instruction); // destination Bit
     // prüfe Z-Bit
     if (res == 0) {
       setStatusBit("Z");
@@ -704,6 +740,7 @@ class InstructionRecognizer {
   }
 
   int decf(int index, String instruction) {
+    // Decrementiere Inhalt Register mit Adresse x. Ergebnis kommt in wReg oder Register
     print(index.toString() + " DECF");
     int address = int.parse(instruction.substring(7), radix: 2);
     int res = int.parse(storage.value[address], radix: 2);
@@ -719,7 +756,6 @@ class InstructionRecognizer {
       String resBin = normalize(8, res);
       index = changedPCL(index, address, resBin);
       storage.value[address] = resBin;
-      
     }
     // prüfe Z-Bit
     if (res == 0) {
@@ -732,6 +768,8 @@ class InstructionRecognizer {
   }
 
   int decfsz(int index, String instruction) {
+    // Decrementiere Inhalt Register mit Adresse x. Ergebnis kommt in wReg oder Register
+    // Überspringt nächten Befehl wenn Ergebnis 0.
     print(index.toString() + " DECFSZ");
     index = decf(index, instruction); // Cycle 1
     // Ergebnis auf 0 prüfen
@@ -744,8 +782,9 @@ class InstructionRecognizer {
   }
 
   int subwf(int index, String instruction) {
+    // Subtrahiere Zahl2 von Zahl1 Ergebnis kommt in Storage Adress oder wReg.
     print(index.toString() + " SUBWF");
-    int address = int.parse(instruction.substring(7), radix: 2);
+    int address = catchAddress(instruction);
     String w = wReg.value;
     String zahl = normalize(14, int.parse(storage.value[address], radix: 2));
     index = sublw(index, zahl);
@@ -754,8 +793,9 @@ class InstructionRecognizer {
   }
 
   int iorwf(int index, String instruction) {
+    //IOR Ergebnis kommt ins wReg oder in Storage Adress.
     print(index.toString() + " IORWF");
-    int address = int.parse(instruction.substring(7), radix: 2);
+    int address = catchAddress(instruction);
     String w = wReg.value;
     String zahl = normalize(14, int.parse(storage.value[address], radix: 2));
     index = iorlw(index, zahl);
@@ -764,8 +804,9 @@ class InstructionRecognizer {
   }
 
   int xorwf(int index, String instruction) {
+    //XOR Ergebnis kommt ins wReg oder in Storage Adress.
     print(index.toString() + " XORWF");
-    int address = int.parse(instruction.substring(7), radix: 2);
+    int address = catchAddress(instruction);
     String w = wReg.value;
     String zahl = normalize(14, int.parse(storage.value[address], radix: 2));
     index = xorlw(index, zahl);
@@ -774,6 +815,7 @@ class InstructionRecognizer {
   }
 
   int comf(int index, String instruction) {
+    // Complement des Inhalts vom Register r mit Adresse x. ERgebnis kommt in wReg oder in r.
     print(index.toString() + " COMF");
     int address = int.parse(instruction.substring(7), radix: 2);
     int zahl = int.parse(storage.value[address], radix: 2);
@@ -784,6 +826,7 @@ class InstructionRecognizer {
   }
 
   int swapf(int index, String instruction) {
+    //Tauschen der oberen und unteren 4 Bit. Ergebnis in wReg oder Storage.
     print(index.toString() + " SWAPF");
     int address = int.parse(instruction.substring(7), radix: 2);
     String reg = storage.value[address];
@@ -794,6 +837,35 @@ class InstructionRecognizer {
     ++runtime;
     return ++index;
   }
+
+  int clrwdt(int index) {
+    //Clear Whatchdog Timer
+    print(index.toString() + " CLRWDT");
+    storage.value[1] = "00000000"; //TMR0Adr: 01h
+    storage.value[129] =
+        replaceCharAt(storage.value[129], 4, "0"); //Reset PSA Adr: 81h4
+
+    setStatusBit("TO");
+    setStatusBit("PD");
+    ++runtime;
+    return ++index;
+  }
+
+  int retfie(int index) {
+    // Return from Interrupt
+    print(index.toString() + " RETFIE");
+    index = ret(index);
+    int i = 0;
+    if (storage.value[3][statustoBit("RP0")] == "0") {
+      // Unterschiedliche Plätze bei Bank 0 und 1
+      i = 11;
+    } else {
+      i = 139;
+    }
+    storage.value[i] = replaceCharAt(storage.value[i], 0,
+        "1"); //GIE - Global Interrupt Freigabe Bit Adresse: 8Bh.0
+    return index;
+  }
 }
-//Testprog 3: comf, decf, subwf, swapf
+//Testprog 3:
 //Testprog 4:

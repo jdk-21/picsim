@@ -10,17 +10,24 @@ class InstructionCycler {
 
   void timer0() {
     int timerValue = int.parse(storage.value[1], radix: 2);
+    int i = 0;
     // if Timer is altered, add another cycle
     if (oldTimer0 != timerValue) runtime++;
     if (storage.value[129][2] == "0" && storage.value[129][4] == "1") {
       oldTimer0 = timerValue + 1;
       storage.value[1] = recognizer.normalize(8, timerValue + 1);
-      if (storage.value[1] == "00000000")
-        storage.value[11] = storage.value[11].substring(0, 2) +
+      if (storage.value[1] == "00000000") {
+        if (storage.value[3][recognizer.statustoBit("RP0")] == "0") {
+          i = 11;
+        } else {
+          i = 139;
+        }
+        storage.value[i] = storage.value[i].substring(0, 2) +
             "1" +
-            storage.value[11].substring(3);
-    } else
-      oldTimer0 = timerValue;
+            storage.value[i].substring(3);
+      } else
+        oldTimer0 = timerValue;
+    }
   }
 
   bool interrupt() {
