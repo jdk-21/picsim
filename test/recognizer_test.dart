@@ -712,8 +712,25 @@ void main() {
     storage.value[10] = hexToBin8("0"); //PCL
     stack[0] = 15;
     expect(rec.retfie(25), 15);
+    expect(storage.value[11][0], "1"); // GIE Bit
+    expect(runtime, 2);
+
+    runtime = 0;
+    rec.stackPointer = 1;
+    storage.value[10] = hexToBin8("0"); //PCL
+    stack[0] = 15;
+    storage.value[3] =
+        rec.replaceCharAt(storage.value[3], rec.statustoBit("RP0"), "1");
+    expect(rec.retfie(25), 15);
     expect(storage.value[139][0], "1"); // GIE Bit
     expect(runtime, 2);
+
+    storage.value[3] =
+        rec.replaceCharAt(storage.value[3], rec.statustoBit("RP0"), "0"); //RP0
+    storage.value[11] =
+        rec.replaceCharAt(storage.value[11], 0, "0"); // GIE Bank 0
+    storage.value[139] =
+        rec.replaceCharAt(storage.value[139], 0, "0"); //GIE Bank 1
   });
 
   test('CLRWDT', () {
