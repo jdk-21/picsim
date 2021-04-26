@@ -367,7 +367,7 @@ class InstructionRecognizer {
   }
 
   int andwf(int index, String instruction) {
-    // Addiere Inhalt Register an Adresse y mit dem Inhalt des wRegisters
+    // Binäres-& Inhalt Register an Adresse y mit dem Inhalt des wRegisters
     print(index.toString() + " ANDWF");
     int address = catchAddress(instruction);
     int sum = int.parse(storage.value[address], radix: 2) &
@@ -383,7 +383,7 @@ class InstructionRecognizer {
     wReg.value = normalize(8, sum);
 
     print("Ergebnis: " + wReg.value);
-    index = changedPCL(index, address, binSum);
+    index = changedPCL(index, address, wReg.value);
     wf(address, w, instruction);
     ++runtime;
     return index;
@@ -649,7 +649,7 @@ class InstructionRecognizer {
         reg.toRadixString(16));
     reg = reg + 1;
     String res = normalize(8, reg);
-    // Destination Bit    
+    // Destination Bit
     if (instruction[6] == "0") {
       wReg.value = res;
       ++index;

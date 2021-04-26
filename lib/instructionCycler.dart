@@ -23,9 +23,11 @@ class InstructionCycler {
           i = 139;
         }
         storage.value[i] = storage.value[i].substring(0, 2) +
-            "1" + storage.value[i].substring(3);
-    } else
-      oldTimer0 = timerValue;
+            "1" +
+            storage.value[i].substring(3);
+      } else
+        oldTimer0 = timerValue;
+    }
   }
 
   bool interrupt() {
