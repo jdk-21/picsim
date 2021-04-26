@@ -129,6 +129,9 @@ class InstructionRecognizer {
       print("d-Bit: 1");
       storage.value[address] = wReg.value;
       wReg.value = oldwReg;
+      if (address == 2) {
+        runtime++;
+      }
     } else {
       print("d-Bit: 0");
     }
@@ -140,6 +143,9 @@ class InstructionRecognizer {
     if (instruction[6] == "0") {
       wReg.value = res;
     } else {
+      if (address == 2) {
+        runtime++;
+      }
       storage.value[address] = res;
     }
   }
@@ -691,6 +697,7 @@ class InstructionRecognizer {
     int address = catchAddress(instruction);
     index = changedPCL(index, address, wReg.value);
     storage.value[address] = wReg.value;
+    runtime++;
     return index;
   }
 

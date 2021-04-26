@@ -8,7 +8,7 @@ class InstructionCycler {
   int programCounter = 0;
   List programStorage = [];
   bool run = false;
-  int oldTimer0 = 0;
+  //int oldTimer0 = 0;
   int psaCounter = 0;
   int oldPSA = 1;
 
@@ -27,10 +27,10 @@ class InstructionCycler {
     int timerValue = int.parse(storage.value[1], radix: 2);
     int i = 0;
     // if Timer is altered, add another cycle
-    if (oldTimer0 != timerValue) runtime++;
+    //if (oldTimer0 != timerValue) runtime++;
     if (storage.value[129][2] == "0") {
       if (calculatePSA() <= psaCounter) {
-        oldTimer0 = timerValue + 1;
+        //oldTimer0 = timerValue + 1;
         storage.value[1] = recognizer.normalize(8, timerValue + 1);
         psaCounter = 1;
       } else {
@@ -47,7 +47,7 @@ class InstructionCycler {
             "1" +
             storage.value[i].substring(3);
       } else {
-        oldTimer0 = timerValue;
+        //oldTimer0 = timerValue;
       }
     }
   }
@@ -87,7 +87,7 @@ class InstructionCycler {
       });
     }
     recognizer.stackPointer = 0;
-    oldTimer0 = int.parse(storage.value[1], radix: 2);
+    //oldTimer0 = int.parse(storage.value[1], radix: 2);
     programCounter = 0;
   }
 
