@@ -18,7 +18,7 @@ class _SimScreenState extends State<SimScreen> {
         // line highlighting
         // c counts index
         var c = 0;
-        var index = int.parse(storage.value[10] + storage.value[2], radix: 2);
+        var index = cycler.programCounter;
         for (var element in program) {
           if (element['index'] == index) {
             program[lastIndex]['isSelected'] = false;

@@ -63,10 +63,19 @@ class InstructionCycler {
 
   void programm() {
     if (!interrupt()) {
+      /*if (oldPCL == int.parse(storage.value[2], radix: 2)) {
+        programCounter = int.parse(oldPCLATH + storage.value[2], radix: 2);
+        oldPCL = int.parse(storage.value[2], radix: 2) + 1;
+      } else {
+        programCounter =
+            int.parse((storage.value[10] + storage.value[2]), radix: 2);
+        oldPCL = int.parse(storage.value[2], radix: 2);
+        oldPCLATH = storage.value[10];
+      }*/
+
       programCounter =
-          int.parse((storage.value[10] + storage.value[2]), radix: 2);
-      storage.value[2] = recognizer.normalize(8,
-          recognizer.recognize(programCounter, programStorage[programCounter]));
+          recognizer.recognize(programCounter, programStorage[programCounter]);
+      storage.value[2] = recognizer.normalize(8, programCounter);
       print("wReg: " +
           wReg.value.toString() +
           " Hex: " +
