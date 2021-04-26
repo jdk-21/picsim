@@ -106,33 +106,33 @@ class InstructionRecognizer {
     return out;
   }
 
-  int catchAdresse(String instruction) {
-    int adresse =
+  int catchAddress(String instruction) {
+    int address =
         int.parse(instruction.substring(instruction.length - 7), radix: 2);
-    if (adresse == 0) {
+    if (address == 0) {
       // FSR Register verwenden
       return int.parse(storage.value[4], radix: 2);
     } else {
-      return adresse;
+      return address;
     }
   }
 
-  void wf(int adresse, String oldwReg, String instruction) {
+  void wf(int address, String oldwReg, String instruction) {
     if (instruction[6] == "1") {
       print("d-Bit: 1");
-      storage.value[adresse] = wReg.value;
+      storage.value[address] = wReg.value;
       wReg.value = oldwReg;
     } else {
       print("d-Bit: 0");
     }
   }
 
-  void f(int adresse, String res, String instruction) {
+  void f(int address, String res, String instruction) {
     res = normalize(8, int.parse(res, radix: 2));
     if (instruction[6] == "0") {
       wReg.value = res;
     } else {
-      storage.value[adresse] = res;
+      storage.value[address] = res;
     }
   }
 
@@ -429,7 +429,7 @@ class InstructionRecognizer {
   int call(int index, String instruction) {
     print(index.toString() + " CALL");
 
-    stack[stackPointer] = index + 1; //index+1 auf Stack (return adresse)
+    stack[stackPointer] = index + 1; //index+1 auf Stack (return address)
     stackPointer++;
     if (stackPointer > 7) stackPointer = 0;
 
@@ -561,8 +561,8 @@ class InstructionRecognizer {
 
   int rlf(int index, String instruction) {
     print(index.toString() + " RLF");
-    int adresse = catchAdresse(instruction);
-    String reg = storage.value[adresse];
+    int address = catchAddress(instruction);
+    String reg = storage.value[address];
     String cBit = storage.value[3][statustoBit("C")];
     print("Register: " + binToHex(reg) + "h C-Bit: " + cBit);
     reg = reg + cBit; // C-Bit anhängen
@@ -593,8 +593,8 @@ class InstructionRecognizer {
 
   int clrf(int index, String instruction) {
     print(index.toString() + " CLRF");
-    int adresse = catchAdresse(instruction);
-    storage.value[adresse] = "00000000"; //clear
+    int address = catchAddress(instruction);
+    storage.value[address] = "00000000"; //clear
     setStatusBit("Z");
     ++runtime;
     return changedPCL(index, address, "00000000");
@@ -602,8 +602,8 @@ class InstructionRecognizer {
 
   int incf(int index, String instruction) {
     print(index.toString() + " INCF");
-    int adresse = catchAdresse(instruction);
-    int reg = int.parse(storage.value[adresse], radix: 2);
+    int address = catchAddress(instruction);
+    int reg = int.parse(storage.value[address], radix: 2);
     print("Register: " +
         reg.toRadixString(2) +
         " Int: " +
@@ -647,16 +647,16 @@ class InstructionRecognizer {
 
   int movwf(int index, String instruction) {
     print(index.toString() + " MOVWF");
-    int adresse = catchAdresse(instruction);
+    int address = catchAddress(instruction);
     index = changedPCL(index, address, wReg.value);
-    storage.value[adresse] = wReg.value;
+    storage.value[address] = wReg.value;
     return index;
   }
 
   int rrf(int index, String instruction) {
     print(index.toString() + " RRF");
-    int adresse = catchAdresse(instruction);
-    String reg = storage.value[adresse];
+    int address = catchAddress(instruction);
+    String reg = storage.value[address];
     String cBit = storage.value[3][statustoBit("C")];
     print("Register: " + binToHex(reg) + "h C-Bit: " + cBit);
     reg = cBit + reg; // C-Bit voranstellen
@@ -681,8 +681,8 @@ class InstructionRecognizer {
 
   int movf(int index, String instruction) {
     print(index.toString() + " MOVF");
-    int adresse = catchAdresse(instruction);
-    String reg = storage.value[adresse];
+    int address = catchAddress(instruction);
+    String reg = storage.value[address];
     int res = int.parse(reg, radix: 2);
     print("Register[" + address.toString() + "]: " + res.toRadixString(16));
     // destination Bit
@@ -745,52 +745,52 @@ class InstructionRecognizer {
 
   int subwf(int index, String instruction) {
     print(index.toString() + " SUBWF");
-    int adresse = int.parse(instruction.substring(7), radix: 2);
+    int address = int.parse(instruction.substring(7), radix: 2);
     String w = wReg.value;
-    String zahl = normalize(14, int.parse(storage.value[adresse], radix: 2));
+    String zahl = normalize(14, int.parse(storage.value[address], radix: 2));
     index = sublw(index, zahl);
-    wf(adresse, w, instruction);
+    wf(address, w, instruction);
     return index;
   }
 
   int iorwf(int index, String instruction) {
     print(index.toString() + " IORWF");
-    int adresse = int.parse(instruction.substring(7), radix: 2);
+    int address = int.parse(instruction.substring(7), radix: 2);
     String w = wReg.value;
-    String zahl = normalize(14, int.parse(storage.value[adresse], radix: 2));
+    String zahl = normalize(14, int.parse(storage.value[address], radix: 2));
     index = iorlw(index, zahl);
-    wf(adresse, w, instruction);
+    wf(address, w, instruction);
     return index;
   }
 
   int xorwf(int index, String instruction) {
     print(index.toString() + " XORWF");
-    int adresse = int.parse(instruction.substring(7), radix: 2);
+    int address = int.parse(instruction.substring(7), radix: 2);
     String w = wReg.value;
-    String zahl = normalize(14, int.parse(storage.value[adresse], radix: 2));
+    String zahl = normalize(14, int.parse(storage.value[address], radix: 2));
     index = xorlw(index, zahl);
-    wf(adresse, w, instruction);
+    wf(address, w, instruction);
     return index;
   }
 
   int comf(int index, String instruction) {
     print(index.toString() + " COMF");
-    int adresse = int.parse(instruction.substring(7), radix: 2);
-    int zahl = int.parse(storage.value[adresse], radix: 2);
+    int address = int.parse(instruction.substring(7), radix: 2);
+    int zahl = int.parse(storage.value[address], radix: 2);
     int res = complement(8, zahl);
-    f(adresse, res.toRadixString(2), instruction);
+    f(address, res.toRadixString(2), instruction);
     ++runtime;
     return ++index;
   }
 
   int swapf(int index, String instruction) {
     print(index.toString() + " SWAPF");
-    int adresse = int.parse(instruction.substring(7), radix: 2);
-    String reg = storage.value[adresse];
+    int address = int.parse(instruction.substring(7), radix: 2);
+    String reg = storage.value[address];
     String oh = reg.substring(0, 4);
     String uh = reg.substring(4, 8);
     reg = uh + oh;
-    f(adresse, reg, instruction);
+    f(address, reg, instruction);
     ++runtime;
     return ++index;
   }
