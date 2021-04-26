@@ -348,7 +348,9 @@ class _SimScreenState extends State<SimScreen> {
                 Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Container(
-                    decoration: BoxDecoration(border: Border.all(width: 0.5), borderRadius: BorderRadius.circular(7.5)),
+                    decoration: BoxDecoration(
+                        border: Border.all(width: 0.5),
+                        borderRadius: BorderRadius.circular(7.5)),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -377,7 +379,8 @@ class _SimScreenState extends State<SimScreen> {
                                         child: Text("FSR: " +
                                             storage.value[4] +
                                             " (" +
-                                            int.parse(storage.value[4], radix: 2)
+                                            int.parse(storage.value[4],
+                                                    radix: 2)
                                                 .toRadixString(16) +
                                             ")")),
                                     InkWell(
@@ -386,7 +389,8 @@ class _SimScreenState extends State<SimScreen> {
                                         child: Text("PCL: " +
                                             storage.value[2] +
                                             " (" +
-                                            int.parse(storage.value[2], radix: 2)
+                                            int.parse(storage.value[2],
+                                                    radix: 2)
                                                 .toRadixString(16) +
                                             ")")),
                                     InkWell(
@@ -395,7 +399,8 @@ class _SimScreenState extends State<SimScreen> {
                                         child: Text("PCLATCH: " +
                                             storage.value[10] +
                                             " (" +
-                                            int.parse(storage.value[10], radix: 2)
+                                            int.parse(storage.value[10],
+                                                    radix: 2)
                                                 .toRadixString(16) +
                                             ")")),
                                     InkWell(
@@ -404,7 +409,8 @@ class _SimScreenState extends State<SimScreen> {
                                         child: Text("Status: " +
                                             storage.value[3] +
                                             " (" +
-                                            int.parse(storage.value[3], radix: 2)
+                                            int.parse(storage.value[3],
+                                                    radix: 2)
                                                 .toRadixString(16) +
                                             ")")),
                                     Padding(
@@ -416,7 +422,8 @@ class _SimScreenState extends State<SimScreen> {
                                           "Quartz: " +
                                               quartzFrequency +
                                               " MHz (" +
-                                              cycleDuration.toStringAsPrecision(4) +
+                                              cycleDuration
+                                                  .toStringAsPrecision(4) +
                                               " µs)",
                                         ),
                                       ),
@@ -524,7 +531,9 @@ class _SimScreenState extends State<SimScreen> {
                 Padding(
                   padding: const EdgeInsets.all(15.0),
                   child: Container(
-                    decoration: BoxDecoration(border: Border.all(width: 0.5), borderRadius: BorderRadius.circular(7.5)),
+                    decoration: BoxDecoration(
+                        border: Border.all(width: 0.5),
+                        borderRadius: BorderRadius.circular(7.5)),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -532,14 +541,46 @@ class _SimScreenState extends State<SimScreen> {
                           Text("Stack",
                               style: TextStyle(fontWeight: FontWeight.bold)),
                           // stack[] can be null, thats why we have to check for null and escape it with a "0" instead
-                          Text("0: " + int.parse(stack[0].toString() == "null" ? "0":stack[0].toString()).toRadixString(16)),
-                          Text("1: " + int.parse(stack[1].toString() == "null" ? "0":stack[1].toString()).toRadixString(16)),
-                          Text("2: " + int.parse(stack[2].toString() == "null" ? "0":stack[2].toString()).toRadixString(16)),
-                          Text("3: " + int.parse(stack[3].toString() == "null" ? "0":stack[3].toString()).toRadixString(16)),
-                          Text("4: " + int.parse(stack[4].toString() == "null" ? "0":stack[4].toString()).toRadixString(16)),
-                          Text("5: " + int.parse(stack[5].toString() == "null" ? "0":stack[5].toString()).toRadixString(16)),
-                          Text("6: " + int.parse(stack[6].toString() == "null" ? "0":stack[6].toString()).toRadixString(16)),
-                          Text("7: " + int.parse(stack[7].toString() == "null" ? "0":stack[7].toString()).toRadixString(16)),
+                          Text("0: " +
+                              int.parse(stack[0].toString() == "null"
+                                      ? "0"
+                                      : stack[0].toString())
+                                  .toRadixString(16)),
+                          Text("1: " +
+                              int.parse(stack[1].toString() == "null"
+                                      ? "0"
+                                      : stack[1].toString())
+                                  .toRadixString(16)),
+                          Text("2: " +
+                              int.parse(stack[2].toString() == "null"
+                                      ? "0"
+                                      : stack[2].toString())
+                                  .toRadixString(16)),
+                          Text("3: " +
+                              int.parse(stack[3].toString() == "null"
+                                      ? "0"
+                                      : stack[3].toString())
+                                  .toRadixString(16)),
+                          Text("4: " +
+                              int.parse(stack[4].toString() == "null"
+                                      ? "0"
+                                      : stack[4].toString())
+                                  .toRadixString(16)),
+                          Text("5: " +
+                              int.parse(stack[5].toString() == "null"
+                                      ? "0"
+                                      : stack[5].toString())
+                                  .toRadixString(16)),
+                          Text("6: " +
+                              int.parse(stack[6].toString() == "null"
+                                      ? "0"
+                                      : stack[6].toString())
+                                  .toRadixString(16)),
+                          Text("7: " +
+                              int.parse(stack[7].toString() == "null"
+                                      ? "0"
+                                      : stack[7].toString())
+                                  .toRadixString(16)),
                         ],
                       ),
                     ),

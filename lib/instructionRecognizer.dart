@@ -833,8 +833,15 @@ class InstructionRecognizer {
     // Return from Interrupt
     print(index.toString() + " RETFIE");
     index = ret(index);
-    storage.value[139] = replaceCharAt(storage.value[139], 0,
-        "1"); //GIE - Global Interrupt Freigabe Bit Adresse: 8B
+    int i = 0;
+    if (storage.value[3][statustoBit("RP0")] == "0") {
+      // Unterschiedliche Plätze bei Bank 0 und 1
+      i = 11;
+    } else {
+      i = 139;
+    }
+    storage.value[i] = replaceCharAt(storage.value[i], 0,
+        "1"); //GIE - Global Interrupt Freigabe Bit Adresse: 8Bh.0
     return index;
   }
 }
