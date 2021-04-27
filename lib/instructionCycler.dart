@@ -29,13 +29,15 @@ class InstructionCycler {
     // if Timer is altered, add another cycle
     //if (oldTimer0 != timerValue) runtime++;
     if (storage.value[129][2] == "0") {
-      if (calculatePSA() <= psaCounter) {
+      var psa = calculatePSA();
+      if (psa <= psaCounter) {
         //oldTimer0 = timerValue + 1;
-        storage.value[1] = recognizer.normalize(8, timerValue + 1);
-        psaCounter = 1;
+        storage.value[1] = recognizer.normalize(8, timerValue + (psaCounter ~/ psa));
+        psaCounter = psaCounter - (psa - 1);
       } else {
         psaCounter++;
       }
+      print(psaCounter);
       // check for timer0 overflow
       if (storage.value[1] == "00000000") {
         if (storage.value[3][recognizer.statustoBit("RP0")] == "0") {
@@ -128,7 +130,7 @@ class InstructionCycler {
 
       // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
       storage.notifyListeners();
-      await Future.delayed(const Duration(milliseconds: 200));
+      await Future.delayed(const Duration(milliseconds: 100));
     }
   }
 

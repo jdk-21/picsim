@@ -116,8 +116,10 @@ class InstructionRecognizer {
     //Filtere die Adresse aus der instruction und beachte die indirekte Adressierung.
     int address =
         int.parse(instruction.substring(instruction.length - 7), radix: 2);
-    if (storage.value[3][statustoBit("RP0")] == "1") {
+    if (storage.value[3][statustoBit("RP0")] == "1" && address != 3) {
       address = address + 128; //Umschalten auf Bank 1
+      // sync option register
+      storage.value[131] = storage.value[3];
     }
     if (address == 0) {
       // FSR Register verwenden
@@ -135,6 +137,7 @@ class InstructionRecognizer {
       wReg.value = oldwReg;
       if (address == 1) {
         runtime++;
+        cycler.psaCounter=1;
       }
     } else {
       print("d-Bit: 0");
@@ -149,6 +152,7 @@ class InstructionRecognizer {
     } else {
       if (address == 1) {
         runtime++;
+        cycler.psaCounter = 1;
       }
       storage.value[address] = res;
     }
@@ -476,6 +480,7 @@ class InstructionRecognizer {
     int address = int.parse((pclath.substring(3, 5) + instruction.substring(3)),
         radix: 2);
     runtime += 2;
+    cycler.psaCounter++;
     return address;
   }
 
@@ -499,6 +504,7 @@ class InstructionRecognizer {
     int address = int.parse((pclath.substring(3, 5) + instruction.substring(3)),
         radix: 2);
     runtime += 2;
+    cycler.psaCounter++;
     return address;
   }
 
