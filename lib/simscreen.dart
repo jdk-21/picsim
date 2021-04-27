@@ -30,8 +30,6 @@ class _SimScreenState extends State<SimScreen> {
           }
           c++;
         }
-        // shows updated runtime; a bit hacky
-        //runtimeDisplay = runtime;
         stack = stack;
       });
       await Future.delayed(const Duration(milliseconds: 100));

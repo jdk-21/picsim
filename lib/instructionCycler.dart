@@ -26,13 +26,11 @@ class InstructionCycler {
   void timer0() {
     int timerValue = int.parse(storage.value[1], radix: 2);
     int i = 0;
-    // if Timer is altered, add another cycle
-    //if (oldTimer0 != timerValue) runtime++;
     if (storage.value[129][2] == "0") {
       var psa = calculatePSA();
       if (psa <= psaCounter) {
-        //oldTimer0 = timerValue + 1;
-        storage.value[1] = recognizer.normalize(8, timerValue + (psaCounter ~/ psa));
+        storage.value[1] =
+            recognizer.normalize(8, timerValue + (psaCounter ~/ psa));
         psaCounter = psaCounter - (psa - 1);
       } else {
         psaCounter++;
@@ -48,8 +46,6 @@ class InstructionCycler {
         storage.value[i] = storage.value[i].substring(0, 2) +
             "1" +
             storage.value[i].substring(3);
-      } else {
-        //oldTimer0 = timerValue;
       }
     }
   }
@@ -95,16 +91,6 @@ class InstructionCycler {
 
   void programm() {
     if (!interrupt()) {
-      /*if (oldPCL == int.parse(storage.value[2], radix: 2)) {
-        programCounter = int.parse(oldPCLATH + storage.value[2], radix: 2);
-        oldPCL = int.parse(storage.value[2], radix: 2) + 1;
-      } else {
-        programCounter =
-            int.parse((storage.value[10] + storage.value[2]), radix: 2);
-        oldPCL = int.parse(storage.value[2], radix: 2);
-        oldPCLATH = storage.value[10];
-      }*/
-
       programCounter =
           recognizer.recognize(programCounter, programStorage[programCounter]);
       storage.value[2] = recognizer.normalize(8, programCounter);
