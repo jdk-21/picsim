@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:picsim/pickFileiOSAndroid.dart';
 import 'package:picsim/pickFileWindows.dart';
+//import 'pickFileWeb.dart';
 import 'package:picsim/instructionCycler.dart';
 import 'package:picsim/simscreen.dart';
 
@@ -84,7 +85,9 @@ class _MyHomePageState extends State<MyHomePage> {
             } else {
               throw "Unsupported Platform";
             }
-
+            // web support
+            //result = await pickFile();
+            
             var data = await result.readAsLines();
 
             print(data.toString());

@@ -6,6 +6,7 @@ Future<File> pickFileMobile() async {
     type: FileType.custom,
     allowedExtensions: ['lst'],
   );
+  print(result?.files.first.name);
   if (result != null) {
     File file = File(result.files.single.path!);
     return file;
