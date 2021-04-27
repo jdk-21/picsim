@@ -1,0 +1,8 @@
+include: package:pedantic/analysis_options.1.8.0.yaml
+
+analyzer:
+  #strong-mode: true
+  exclude:
+    - test/**
+    - lib/generated_library/**
+    - lib/generated_plugin_registrant.dart
