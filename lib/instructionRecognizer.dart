@@ -641,7 +641,7 @@ class InstructionRecognizer {
     //seze Reg an Adresse x auf 0
     print(index.toString() + " CLRF");
     int address = catchAddress(instruction);
-    f(address, "00000000", instruction) //clear Register
+    f(address, "00000000", instruction); //clear Register
     setStatusBit("Z");
     ++runtime;
     return changedPCL(index, address, "00000000");
