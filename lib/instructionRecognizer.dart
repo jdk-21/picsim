@@ -863,5 +863,3 @@ class InstructionRecognizer {
     return index;
   }
 }
-//Testprog 3:
-//Testprog 4:
