@@ -623,6 +623,7 @@ class InstructionRecognizer {
     cBit = storage.value[3][statustoBit("C")];
     print("New Reister: " + binToHex(reg) + "h New C-Bit: " + cBit);
     //speichern
+    index = changedPCL(index, address, reg);
     f(address, reg, instruction);
     ++runtime;
     return index;
