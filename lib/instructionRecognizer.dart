@@ -14,6 +14,7 @@ class InstructionRecognizer {
   }
 
   int changedPCL(int index, int address, String result) {
+    result = normalize(8, int.parse(result, radix: 2));
     if (address == 2 && result != storage.value[address]) {
       return int.parse(storage.value[10] + storage.value[2], radix: 2) + 1;
     } else
@@ -613,13 +614,7 @@ class InstructionRecognizer {
     cBit = storage.value[3][statustoBit("C")];
     print("New Reister: " + binToHex(reg) + "h New C-Bit: " + cBit);
     //speichern
-    if (instruction[instruction.length - 8] == "0") {
-      wReg.value = reg;
-      ++index;
-    } else {
-      index = changedPCL(index, address, reg);
-      storage.value[address] = reg;
-    }
+    f(address, reg, instruction);
     ++runtime;
     return index;
   }
@@ -637,7 +632,7 @@ class InstructionRecognizer {
     //seze Reg an Adresse x auf 0
     print(index.toString() + " CLRF");
     int address = catchAddress(instruction);
-    storage.value[address] = "00000000"; //clear
+    f(address, "00000000", instruction) //clear Register
     setStatusBit("Z");
     ++runtime;
     return changedPCL(index, address, "00000000");
@@ -657,13 +652,9 @@ class InstructionRecognizer {
     reg = reg + 1;
     String res = normalize(8, reg);
     // Destination Bit
-    if (instruction[6] == "0") {
-      wReg.value = res;
-      ++index;
-    } else {
-      index = changedPCL(index, address, res);
-      storage.value[address] = res;
-    }
+    index = changedPCL(index, address, res);
+    f(address, res, instruction);
+
     // Z-Bit setzen
     if (reg == 256 || reg == 0) {
       setStatusBit("Z");
@@ -718,13 +709,8 @@ class InstructionRecognizer {
     cBit = storage.value[3][statustoBit("C")];
     print("New Reister: " + binToHex(reg) + "h New C-Bit: " + cBit);
     //speichern
-    if (instruction[instruction.length - 8] == "0") {
-      wReg.value = reg;
-      ++index;
-    } else {
-      index = changedPCL(index, address, reg);
-      storage.value[address] = reg;
-    }
+    index = changedPCL(index, address, reg);
+    f(address, reg, instruction);
     ++runtime;
     return index;
   }
@@ -758,14 +744,9 @@ class InstructionRecognizer {
       res = 255;
     } // Fallbehandlung DECF 0
     // destination Bit
-    if (instruction[6] == "0") {
-      wReg.value = normalize(8, res);
-      ++index;
-    } else {
-      String resBin = normalize(8, res);
-      index = changedPCL(index, address, resBin);
-      storage.value[address] = resBin;
-    }
+    index = changedPCL(index, address, res.toRadixString(2));
+    f(address, res.toRadixString(2), instruction);
+
     // prüfe Z-Bit
     if (res == 0) {
       setStatusBit("Z");
@@ -830,6 +811,7 @@ class InstructionRecognizer {
     int zahl = int.parse(storage.value[address], radix: 2);
     int res = complement(8, zahl);
     f(address, res.toRadixString(2), instruction);
+    // Z-Bit prüfen
     if (res == 0) {
       setStatusBit("Z");
     } else {
