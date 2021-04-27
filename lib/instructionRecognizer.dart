@@ -17,8 +17,9 @@ class InstructionRecognizer {
     result = normalize(8, int.parse(result, radix: 2));
     if (address == 2 && result != storage.value[address]) {
       return int.parse(storage.value[10] + storage.value[2], radix: 2) + 1;
-    } else
+    } else {
       return ++index;
+    }
   }
 
   int complement(int stellen, int number) {
@@ -132,6 +133,9 @@ class InstructionRecognizer {
       print("d-Bit: 1");
       storage.value[address] = wReg.value;
       wReg.value = oldwReg;
+      if (address == 1) {
+        runtime++;
+      }
     } else {
       print("d-Bit: 0");
     }
@@ -143,6 +147,9 @@ class InstructionRecognizer {
     if (instruction[6] == "0") {
       wReg.value = res;
     } else {
+      if (address == 1) {
+        runtime++;
+      }
       storage.value[address] = res;
     }
   }
@@ -402,6 +409,7 @@ class InstructionRecognizer {
     String data = storage.value[address];
     index = changedPCL(index, address, data);
     storage.value[address] = replaceCharAt(data, bit, "0");
+    if (address == 1) ++runtime;
     print("Ergebnis: " + storage.value[address].toString());
     ++runtime;
     return index;
@@ -416,6 +424,7 @@ class InstructionRecognizer {
     String data = storage.value[address];
     index = changedPCL(index, address, data);
     storage.value[address] = replaceCharAt(data, bit, "1");
+    if (address == 1) ++runtime;
     print("Ergebnis: " + storage.value[address].toString());
     ++runtime;
     return index;

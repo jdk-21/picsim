@@ -58,9 +58,10 @@ class _MyHomePageState extends State<MyHomePage> {
           'isSelected': false,
           'isBreakpoint': false
         });
-      } else
+      } else {
         program
             .add({'content': part, 'isSelected': false, 'isBreakpoint': false});
+      }
     });
     print(cycler.programStorage);
   }
@@ -80,8 +81,9 @@ class _MyHomePageState extends State<MyHomePage> {
               result = await pickFileMobile();
             } else if (Platform.isWindows) {
               result = pickFileWin();
-            } else
+            } else {
               throw "Unsupported Platform";
+            }
 
             var data = await result.readAsLines();
 
@@ -89,7 +91,7 @@ class _MyHomePageState extends State<MyHomePage> {
             print(result.path);
             program = [];
             readProgramCode(data);
-            Navigator.push(
+            await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => SimScreen()),
             );

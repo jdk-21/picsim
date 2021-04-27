@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:picsim/instructionRecognizer.dart';
 import 'main.dart';
 
@@ -6,16 +8,35 @@ class InstructionCycler {
   int programCounter = 0;
   List programStorage = [];
   bool run = false;
-  int oldTimer0 = 0;
+  //int oldTimer0 = 0;
+  int psaCounter = 0;
+  int oldPSA = 1;
+
+  int calculatePSA() {
+    if (storage.value[129][4] == "1") return 1;
+    num psa = int.parse(storage.value[129].substring(5), radix: 2) + 1;
+    psa = pow(2, psa);
+    if (oldPSA != psa) {
+      oldPSA = psa.toInt();
+      psaCounter = 1;
+    }
+    return psa.toInt();
+  }
 
   void timer0() {
     int timerValue = int.parse(storage.value[1], radix: 2);
     int i = 0;
     // if Timer is altered, add another cycle
-    if (oldTimer0 != timerValue) runtime++;
-    if (storage.value[129][2] == "0" && storage.value[129][4] == "1") {
-      oldTimer0 = timerValue + 1;
-      storage.value[1] = recognizer.normalize(8, timerValue + 1);
+    //if (oldTimer0 != timerValue) runtime++;
+    if (storage.value[129][2] == "0") {
+      if (calculatePSA() <= psaCounter) {
+        //oldTimer0 = timerValue + 1;
+        storage.value[1] = recognizer.normalize(8, timerValue + 1);
+        psaCounter = 1;
+      } else {
+        psaCounter++;
+      }
+      // check for timer0 overflow
       if (storage.value[1] == "00000000") {
         if (storage.value[3][recognizer.statustoBit("RP0")] == "0") {
           i = 11;
@@ -25,8 +46,9 @@ class InstructionCycler {
         storage.value[i] = storage.value[i].substring(0, 2) +
             "1" +
             storage.value[i].substring(3);
-      } else
-        oldTimer0 = timerValue;
+      } else {
+        //oldTimer0 = timerValue;
+      }
     }
   }
 
@@ -65,7 +87,8 @@ class InstructionCycler {
       });
     }
     recognizer.stackPointer = 0;
-    oldTimer0 = int.parse(storage.value[1], radix: 2);
+    //oldTimer0 = int.parse(storage.value[1], radix: 2);
+    programCounter = 0;
   }
 
   void programm() {
