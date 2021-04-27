@@ -267,8 +267,9 @@ void main() {
     final InstructionRecognizer rec = InstructionRecognizer();
     storage.value[26] = hexToBin8("FF");
     storage.value[4] = hexToBin8("1A"); // FSR Register
-    expect(rec.clrf(0, hexToBin14("00")), 1); // 0 als Adresse
+    expect(rec.clrf(0, hexToBin14("80")), 1); // 0 als Adresse
     expect(storage.value[26], hexToBin8("00"));
+    expect(storage.value[4], hexToBin8("1A"));
     expect(storage.value[3][rec.statustoBit("Z")], "1");
   });
 
@@ -483,11 +484,13 @@ void main() {
 
     test("movwf", () {
       final InstructionRecognizer rec = InstructionRecognizer();
+      runtime = 0;
       storage.value[26] = hexToBin8("FF");
       wReg.value = hexToBin8("AA");
       expect(rec.movwf(0, hexToBin14("9A")), 1);
       expect(storage.value[26], hexToBin8("AA"));
       expect(wReg.value, hexToBin8("AA"));
+      expect(runtime, 1);
     });
 
     group('ADDWF', () {
@@ -564,14 +567,14 @@ void main() {
   test('BCF', () {
     final InstructionRecognizer rec = InstructionRecognizer();
     List input = [
-      ["80", "1a"],
-      ["40", "9a"],
-      ["20", "11a"],
-      ["10", "19a"],
-      ["8", "21a"],
-      ["4", "29a"],
-      ["2", "31a"],
-      ["1", "39a"],
+      ["1", "1a"],
+      ["2", "9a"],
+      ["4", "11a"],
+      ["8", "19a"],
+      ["10", "21a"],
+      ["20", "29a"],
+      ["40", "31a"],
+      ["80", "39a"],
     ];
 
     input.forEach((i) {
@@ -584,14 +587,14 @@ void main() {
   test('BSF', () {
     final InstructionRecognizer rec = InstructionRecognizer();
     List input = [
-      ["7f", "1a"],
-      ["bf", "9a"],
-      ["df", "11a"],
-      ["ef", "19a"],
-      ["f7", "21a"],
-      ["fb", "29a"],
-      ["fd", "31a"],
-      ["fe", "39a"],
+      ["fe", "1a"],
+      ["fd", "9a"],
+      ["fb", "11a"],
+      ["f7", "19a"],
+      ["ef", "21a"],
+      ["df", "29a"],
+      ["bf", "31a"],
+      ["7f", "39a"],
     ];
 
     input.forEach((i) {
@@ -660,11 +663,11 @@ void main() {
     final InstructionRecognizer rec = InstructionRecognizer();
     int test = 0;
     List input = [
-      // W, S, I, Wo, So
-      ["F0", "F0", "9A", "F0", "0F"], // FF --> 00 d:1 S
-      ["00", "00", "9A", "00", "FF"], // 00 --> FF d:1 S
-      ["00", "FF", "1A", "00", "FF"], // FF --> 00 d:0 W
-      ["00", "00", "1A", "FF", "00"] // 00 --> FF d:0 W
+      // W, S, I, Wo, So, Z
+      ["F0", "F0", "9A", "F0", "0F", "0"], // F0 --> 0F d:1 S
+      ["00", "00", "9A", "00", "FF", "0"], // 00 --> FF d:1 S
+      ["00", "FF", "1A", "00", "FF", "1"], // FF --> 00 d:0 W
+      ["00", "00", "1A", "FF", "00", "0"] // 00 --> FF d:0 W
     ];
 
     input.forEach((i) {
@@ -676,6 +679,7 @@ void main() {
       expect(rec.comf(0, hexToBin14(i[2])), 1);
       expect(wReg.value, hexToBin8(i[3]));
       expect(storage.value[26], hexToBin8(i[4]));
+      expect(storage.value[3][rec.statustoBit("Z")], i[5]);
       expect(runtime, 1);
     });
   });

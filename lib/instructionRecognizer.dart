@@ -14,6 +14,7 @@ class InstructionRecognizer {
   }
 
   int changedPCL(int index, int address, String result) {
+    result = normalize(8, int.parse(result, radix: 2));
     if (address == 2 && result != storage.value[address]) {
       return int.parse(storage.value[10] + storage.value[2], radix: 2) + 1;
     } else {
@@ -115,6 +116,9 @@ class InstructionRecognizer {
     //Filtere die Adresse aus der instruction und beachte die indirekte Adressierung.
     int address =
         int.parse(instruction.substring(instruction.length - 7), radix: 2);
+    if (storage.value[3][statustoBit("RP0")] == "1") {
+      address = address + 128; //Umschalten auf Bank 1
+    }
     if (address == 0) {
       // FSR Register verwenden
       return int.parse(storage.value[4], radix: 2);
@@ -400,7 +404,8 @@ class InstructionRecognizer {
     // Clear Bit x an Adresse y
     print(index.toString() + " BCF");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
-    int address = int.parse(instruction.substring(7), radix: 2);
+    bit = 7 - bit;
+    int address = catchAddress(instruction);
     String data = storage.value[address];
     index = changedPCL(index, address, data);
     storage.value[address] = replaceCharAt(data, bit, "0");
@@ -414,7 +419,8 @@ class InstructionRecognizer {
     // Setze Bit x an Adresse y
     print(index.toString() + " BSF");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
-    int address = int.parse(instruction.substring(7), radix: 2);
+    bit = 7 - bit;
+    int address = catchAddress(instruction);
     String data = storage.value[address];
     index = changedPCL(index, address, data);
     storage.value[address] = replaceCharAt(data, bit, "1");
@@ -428,7 +434,8 @@ class InstructionRecognizer {
     // Überspringt nächsten Befehl wenn bestimmtes Bit in Adresse nicht gesetzt ist
     print(index.toString() + " BTFSC");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
-    int address = int.parse(instruction.substring(7), radix: 2);
+    bit = 7 - bit;
+    int address = catchAddress(instruction);
     if (storage.value[address][bit] == "1") {
       //next instruction if bit b at register f is 1
       ++runtime;
@@ -443,7 +450,8 @@ class InstructionRecognizer {
     // Überspringt nächsten Befehl wenn bestimmtes Bit in Adresse gesetzt ist
     print(index.toString() + " BTFSS");
     int bit = int.parse(instruction.substring(4, 7), radix: 2);
-    int address = int.parse(instruction.substring(7), radix: 2);
+    bit = 7 - bit;
+    int address = catchAddress(instruction);
     if (storage.value[address][bit] == "0") {
       //next instruction if bit b at register f is 0
       print(index + 1);
@@ -615,13 +623,8 @@ class InstructionRecognizer {
     cBit = storage.value[3][statustoBit("C")];
     print("New Reister: " + binToHex(reg) + "h New C-Bit: " + cBit);
     //speichern
-    if (instruction[instruction.length - 8] == "0") {
-      wReg.value = reg;
-      ++index;
-    } else {
-      index = changedPCL(index, address, reg);
-      storage.value[address] = reg;
-    }
+    index = changedPCL(index, address, reg);
+    f(address, reg, instruction);
     ++runtime;
     return index;
   }
@@ -639,7 +642,7 @@ class InstructionRecognizer {
     //seze Reg an Adresse x auf 0
     print(index.toString() + " CLRF");
     int address = catchAddress(instruction);
-    storage.value[address] = "00000000"; //clear
+    f(address, "00000000", instruction); //clear Register
     setStatusBit("Z");
     ++runtime;
     return changedPCL(index, address, "00000000");
@@ -659,13 +662,9 @@ class InstructionRecognizer {
     reg = reg + 1;
     String res = normalize(8, reg);
     // Destination Bit
-    if (instruction[6] == "0") {
-      wReg.value = res;
-      ++index;
-    } else {
-      index = changedPCL(index, address, res);
-      storage.value[address] = res;
-    }
+    index = changedPCL(index, address, res);
+    f(address, res, instruction);
+
     // Z-Bit setzen
     if (reg == 256 || reg == 0) {
       setStatusBit("Z");
@@ -698,8 +697,9 @@ class InstructionRecognizer {
     print(index.toString() + " MOVWF");
     int address = catchAddress(instruction);
     index = changedPCL(index, address, wReg.value);
-    storage.value[address] = wReg.value;
-    runtime++;
+    String w = wReg.value;
+    wf(address, w, instruction);
+    ++runtime;
     return index;
   }
 
@@ -719,13 +719,8 @@ class InstructionRecognizer {
     cBit = storage.value[3][statustoBit("C")];
     print("New Reister: " + binToHex(reg) + "h New C-Bit: " + cBit);
     //speichern
-    if (instruction[instruction.length - 8] == "0") {
-      wReg.value = reg;
-      ++index;
-    } else {
-      index = changedPCL(index, address, reg);
-      storage.value[address] = reg;
-    }
+    index = changedPCL(index, address, reg);
+    f(address, reg, instruction);
     ++runtime;
     return index;
   }
@@ -752,21 +747,16 @@ class InstructionRecognizer {
   int decf(int index, String instruction) {
     // Decrementiere Inhalt Register mit Adresse x. Ergebnis kommt in wReg oder Register
     print(index.toString() + " DECF");
-    int address = int.parse(instruction.substring(7), radix: 2);
+    int address = catchAddress(instruction);
     int res = int.parse(storage.value[address], radix: 2);
     res = res - 1;
     if (res < 0) {
       res = 255;
     } // Fallbehandlung DECF 0
     // destination Bit
-    if (instruction[6] == "0") {
-      wReg.value = normalize(8, res);
-      ++index;
-    } else {
-      String resBin = normalize(8, res);
-      index = changedPCL(index, address, resBin);
-      storage.value[address] = resBin;
-    }
+    index = changedPCL(index, address, res.toRadixString(2));
+    f(address, res.toRadixString(2), instruction);
+
     // prüfe Z-Bit
     if (res == 0) {
       setStatusBit("Z");
@@ -827,10 +817,16 @@ class InstructionRecognizer {
   int comf(int index, String instruction) {
     // Complement des Inhalts vom Register r mit Adresse x. ERgebnis kommt in wReg oder in r.
     print(index.toString() + " COMF");
-    int address = int.parse(instruction.substring(7), radix: 2);
+    int address = catchAddress(instruction);
     int zahl = int.parse(storage.value[address], radix: 2);
     int res = complement(8, zahl);
     f(address, res.toRadixString(2), instruction);
+    // Z-Bit prüfen
+    if (res == 0) {
+      setStatusBit("Z");
+    } else {
+      clearStatusBit("Z");
+    }
     ++runtime;
     return ++index;
   }
@@ -838,7 +834,7 @@ class InstructionRecognizer {
   int swapf(int index, String instruction) {
     //Tauschen der oberen und unteren 4 Bit. Ergebnis in wReg oder Storage.
     print(index.toString() + " SWAPF");
-    int address = int.parse(instruction.substring(7), radix: 2);
+    int address = catchAddress(instruction);
     String reg = storage.value[address];
     String oh = reg.substring(0, 4);
     String uh = reg.substring(4, 8);
@@ -877,5 +873,3 @@ class InstructionRecognizer {
     return index;
   }
 }
-//Testprog 3:
-//Testprog 4:
