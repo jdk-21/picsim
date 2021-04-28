@@ -1,5 +1,7 @@
 # picsim
 
+[![codecov](https://codecov.io/gh/jdk-21/picsim/branch/master/graph/badge.svg)](https://codecov.io/gh/jdk-21/picsim)
+
 A new Flutter project.
 
 ## Getting Started
