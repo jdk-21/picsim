@@ -494,6 +494,7 @@ class InstructionRecognizer {
 
     stack[stackPointer] = null;
     runtime += 2;
+    cycler.psaCounter++;
     return index;
   }
 
