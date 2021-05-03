@@ -16,7 +16,7 @@ class InstructionRecognizer {
   int changedPCL(int index, int address, String result) {
     result = normalize(8, int.parse(result, radix: 2));
     if (address == 2 && result != storage.value[address]) {
-      return int.parse(storage.value[10] + storage.value[2], radix: 2) + 1;
+      return int.parse(storage.value[10] + result, radix: 2) + 1;
     } else {
       return ++index;
     }
