@@ -9,8 +9,8 @@ Die Dokumentation für dieses Projekt befindet sich [hier](https://github.com/jd
 
 ## Download
 Der aktuellste Build kann hier heruntergeladen werden:
-  - [Android (.apk)](https://github.com/jdk-21/picsim/releases/download/v0.1.1/apk-v_0_1_1.zip)
-  - [Windows (.exe)](https://github.com/jdk-21/picsim/releases/download/v0.1.1/Win-v0_1_1.zip)
+  - [Android (.apk)](https://github.com/jdk-21/picsim/releases/download/v0.1.2/apk-v0_1_2.zip)
+  - [Windows (.exe)](https://github.com/jdk-21/picsim/releases/download/v0.1.2/win-v0_1_2.zip)
  
 ## Compiling
 Um den Quellcode kompilieren zu können, muss [Flutter](https://flutter.dev/docs/get-started/install) installiert sein.
